@@ -13,25 +13,38 @@
     <section id="startOverlay" class="overlay" aria-hidden="false">
       <div class="panel start-panel">
         <header>
-          <div>
-            <h1>Monster Loot Tavern</h1>
-            <p>Choose your adventurer.</p>
-          </div>
+          <div class="start-crest" aria-hidden="true"></div>
+          <h1><span>Monster Loot</span><strong>Tavern</strong></h1>
+          <p>Choose your adventurer</p>
         </header>
 
         <div id="classGrid" class="class-grid">
           <button id="warriorButton" class="class-card" type="button">
-            <span class="class-sprite warrior-sprite" aria-hidden="true"></span>
+            <span class="class-badge" aria-hidden="true"></span>
+            <span class="class-portrait">
+              <span class="class-sprite warrior-sprite" aria-hidden="true"></span>
+            </span>
             <strong>Warrior</strong>
             <small>Sword fighter with sturdy health and close-range attacks.</small>
-            <span class="class-stats">100 HP | 12 DMG | Melee</span>
+            <span class="class-stats">
+              <span>Heart 100 HP</span>
+              <span>Sword 12 DMG</span>
+              <span>Blades Melee</span>
+            </span>
           </button>
 
           <button id="rangerButton" class="class-card" type="button">
-            <span class="class-sprite ranger-sprite" aria-hidden="true"></span>
+            <span class="class-badge" aria-hidden="true"></span>
+            <span class="class-portrait">
+              <span class="class-sprite ranger-sprite" aria-hidden="true"></span>
+            </span>
             <strong>Ranger</strong>
             <small>Fast bow specialist with lower health and ranged attacks.</small>
-            <span class="class-stats">80 HP | 8 DMG | Ranged</span>
+            <span class="class-stats">
+              <span>Heart 80 HP</span>
+              <span>Bow 8 DMG</span>
+              <span>Bow Ranged</span>
+            </span>
           </button>
         </div>
         <button id="startRunButton" class="primary-button start-run-button" type="button">Start as Warrior</button>

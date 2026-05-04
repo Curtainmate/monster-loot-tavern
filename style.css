@@ -201,63 +201,192 @@ canvas {
   border-bottom: 2px solid rgba(255, 236, 181, 0.18);
 }
 
+#startOverlay {
+  overflow: hidden;
+  padding: 0;
+  background: transparent;
+}
+
+.start-panel {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  max-height: none;
+  padding: 18px 76px 24px;
+  border: 0;
+  overflow: visible;
+  background:
+    radial-gradient(circle at 18% 92%, rgba(197, 111, 32, 0.42), transparent 24%),
+    radial-gradient(circle at 82% 88%, rgba(199, 124, 37, 0.3), transparent 22%),
+    linear-gradient(90deg, rgba(10, 5, 2, 0.92), rgba(35, 18, 8, 0.76) 48%, rgba(10, 5, 2, 0.92)),
+    repeating-linear-gradient(0deg, #2a1509 0 11px, #1c0e06 11px 22px);
+  box-shadow: inset 0 0 90px rgba(0, 0, 0, 0.88), 0 24px 80px rgba(0, 0, 0, 0.68);
+}
+
+.start-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(255, 174, 60, 0.16), transparent 18%, transparent 82%, rgba(255, 174, 60, 0.16)),
+    linear-gradient(0deg, rgba(0, 0, 0, 0.72), transparent 18%, transparent 72%, rgba(0, 0, 0, 0.58));
+}
+
 .start-panel header {
-  padding-bottom: 14px;
-  border-bottom: 2px solid rgba(255, 236, 181, 0.18);
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.start-crest {
+  width: 58px;
+  height: 40px;
+  border: 3px solid #d8a452;
+  background:
+    linear-gradient(90deg, transparent 0 18px, #f5d279 18px 24px, transparent 24px),
+    linear-gradient(#805227, #3e2413);
+  box-shadow: inset 0 0 0 3px #33200f, 0 0 18px rgba(255, 194, 82, 0.44);
+  transform: translateY(4px);
+}
+
+.start-panel h1 {
+  display: grid;
+  justify-items: center;
+  color: #ffd46b;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(36px, 6vw, 66px);
+  line-height: 0.82;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  text-shadow: 0 4px 0 #4b250c, 0 8px 0 #120804, 0 0 24px rgba(255, 191, 71, 0.44);
+}
+
+.start-panel h1 span {
+  color: #ffe28a;
+}
+
+.start-panel h1 strong {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 3px 30px 5px;
+  border: 3px solid #6a4a25;
+  background: #173622;
+  color: #ffe18a;
+  font-size: clamp(18px, 2.6vw, 30px);
+  box-shadow: inset 0 0 0 2px #c58c32, 0 5px 0 #241509;
+}
+
+.start-panel header p {
+  color: #f8e7b5;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  text-shadow: 0 3px 0 #160a04;
 }
 
 .class-grid {
+  position: relative;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
-  margin-top: 16px;
+  gap: 38px;
+  margin-top: 14px;
 }
 
 .class-card {
+  position: relative;
   display: grid;
-  grid-template-rows: auto auto 1fr auto;
+  grid-template-rows: auto auto auto 1fr;
   justify-items: center;
-  gap: 8px;
-  min-height: 210px;
-  padding: 16px;
-  border: 3px solid rgba(255, 236, 181, 0.2);
-  background: rgba(255, 255, 255, 0.05);
+  gap: 9px;
+  min-height: 280px;
+  padding: 24px 22px 20px;
+  border: 4px solid #5c4a2b;
+  background:
+    radial-gradient(circle at 50% 34%, rgba(236, 166, 60, 0.24), transparent 28%),
+    linear-gradient(rgba(8, 19, 13, 0.72), rgba(5, 8, 7, 0.94));
+  color: #f9ecc8;
   text-align: center;
+  box-shadow: inset 0 0 0 3px rgba(16, 8, 3, 0.76), inset 0 0 52px rgba(0, 0, 0, 0.62), 0 10px 0 rgba(0, 0, 0, 0.38);
+}
+
+.class-card::before,
+.class-card::after {
+  content: "";
+  position: absolute;
+  width: 42px;
+  height: 42px;
+  border: 3px solid rgba(216, 164, 82, 0.78);
+  pointer-events: none;
+}
+
+.class-card::before {
+  top: 10px;
+  left: 10px;
+  border-right: 0;
+  border-bottom: 0;
+}
+
+.class-card::after {
+  top: 10px;
+  right: 10px;
+  border-left: 0;
+  border-bottom: 0;
+}
+
+.class-badge {
+  position: absolute;
+  top: -22px;
+  left: 50%;
+  width: 54px;
+  height: 54px;
+  border: 4px solid #211408;
+  background: linear-gradient(135deg, #946329, #1e3c26);
+  box-shadow: inset 0 0 0 3px #c8953c, 0 0 0 2px rgba(255, 230, 161, 0.24);
+  transform: translateX(-50%) rotate(45deg);
+}
+
+.class-badge::before {
+  content: "";
+  position: absolute;
+  inset: 17px 8px;
+  background: #f5d279;
 }
 
 .class-card:hover:not(:disabled),
 .class-card.selected {
   border-color: #ffd46b;
-  background: rgba(255, 212, 107, 0.12);
+  background:
+    radial-gradient(circle at 50% 34%, rgba(255, 176, 48, 0.38), transparent 29%),
+    linear-gradient(rgba(54, 25, 8, 0.66), rgba(10, 7, 4, 0.95));
+  box-shadow: inset 0 0 0 3px #7a481c, inset 0 0 58px rgba(255, 170, 48, 0.2), 0 0 26px rgba(255, 188, 63, 0.48), 0 10px 0 rgba(0, 0, 0, 0.42);
 }
 
-.class-card strong {
-  font-size: 20px;
+.class-card.selected .class-badge {
+  background: linear-gradient(135deg, #ffca62, #9a5b18);
+  box-shadow: inset 0 0 0 3px #fff0a6, 0 0 22px rgba(255, 194, 82, 0.8);
 }
 
-.class-card small {
-  color: var(--muted);
-  line-height: 1.35;
-}
-
-.class-stats {
-  color: #ffd46b;
-  font-size: 13px;
-}
-
-.start-run-button {
-  margin-top: 16px;
-}
-
-.class-card.locked {
-  filter: grayscale(0.85);
+.class-portrait {
+  display: grid;
+  place-items: center;
+  width: min(100%, 360px);
+  height: 104px;
+  margin-top: 6px;
+  border-bottom: 2px solid rgba(216, 164, 82, 0.72);
+  background:
+    radial-gradient(ellipse at 50% 72%, rgba(244, 177, 68, 0.42), transparent 31%),
+    radial-gradient(ellipse at 50% 84%, rgba(117, 76, 28, 0.55), transparent 44%);
 }
 
 .class-sprite {
-  width: 80px;
-  height: 80px;
+  width: 98px;
+  height: 98px;
   background-repeat: no-repeat;
-  background-size: 640px 80px;
+  background-size: 784px 98px;
   image-rendering: pixelated;
 }
 
@@ -269,6 +398,67 @@ canvas {
 .ranger-sprite {
   background-image: url("assets/ranger.png");
   background-position: 0 0;
+}
+
+.class-card strong {
+  color: #fff0bd;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(24px, 3.3vw, 32px);
+  letter-spacing: 0;
+  text-transform: uppercase;
+  text-shadow: 0 3px 0 #2b1609;
+}
+
+.class-card small {
+  max-width: 360px;
+  color: #f3dfb7;
+  font-size: 16px;
+  line-height: 1.28;
+}
+
+.class-stats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  width: min(100%, 360px);
+  margin-top: 4px;
+  padding: 8px;
+  border: 2px solid rgba(216, 164, 82, 0.36);
+  background: rgba(0, 0, 0, 0.34);
+  color: #ffd46b;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.class-stats span {
+  white-space: nowrap;
+}
+
+.start-run-button {
+  position: relative;
+  display: block;
+  width: min(480px, 78%);
+  min-height: 56px;
+  margin: 18px auto 0;
+  border: 4px solid #5b351d;
+  background: linear-gradient(#df9b3f, #9b5520);
+  color: #fff8df;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(22px, 3.4vw, 30px);
+  letter-spacing: 0;
+  text-transform: uppercase;
+  text-shadow: 0 3px 0 #3a1c08;
+  box-shadow: inset 0 0 0 3px #ffd46b, 0 8px 0 rgba(0, 0, 0, 0.46), 0 0 22px rgba(255, 170, 48, 0.34);
+}
+
+.start-run-button:hover:not(:disabled) {
+  background: linear-gradient(#f1b14e, #b86825);
+}
+
+.class-card.locked {
+  filter: grayscale(0.85);
 }
 
 h1,
@@ -423,5 +613,74 @@ button:disabled {
   .inventory,
   .hint {
     font-size: 12px;
+  }
+}
+
+@media (max-height: 680px) {
+  .start-panel {
+    padding: 10px 58px 16px;
+  }
+
+  .start-crest {
+    width: 46px;
+    height: 30px;
+  }
+
+  .start-panel h1 {
+    font-size: clamp(34px, 5.3vw, 54px);
+  }
+
+  .start-panel h1 strong {
+    margin-top: 8px;
+    padding: 2px 26px 4px;
+    font-size: clamp(18px, 2.4vw, 25px);
+  }
+
+  .start-panel header p {
+    font-size: 14px;
+  }
+
+  .class-grid {
+    gap: 38px;
+    margin-top: 10px;
+  }
+
+  .class-card {
+    min-height: 248px;
+    padding: 20px 22px 16px;
+  }
+
+  .class-badge {
+    width: 48px;
+    height: 48px;
+    top: -19px;
+  }
+
+  .class-portrait {
+    height: 78px;
+  }
+
+  .class-sprite {
+    width: 76px;
+    height: 76px;
+    background-size: 608px 76px;
+  }
+
+  .class-card strong {
+    font-size: clamp(24px, 3vw, 30px);
+  }
+
+  .class-card small {
+    font-size: 15px;
+  }
+
+  .class-stats {
+    font-size: 13px;
+  }
+
+  .start-run-button {
+    min-height: 48px;
+    margin-top: 12px;
+    font-size: clamp(22px, 3vw, 28px);
   }
 }
