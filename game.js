@@ -218,6 +218,53 @@ const CONFIG = {
       wolf: { title: "Alpha Wolf", health: 3.6, damage: 1.5, speed: 1.08, size: 50, tint: "#e6e0c8" }
     }
   },
+  monsterVariants: {
+    eliteStartStage: 10,
+    types: {
+      slime: {
+        id: "yellow",
+        name: "Yellow Slime",
+        bossTitle: "Golden Slime King",
+        sprite: "slime_yellow",
+        color: "#f2d62d",
+        tint: "#ffdf45",
+        health: 1.38,
+        damage: 1.18,
+        speed: 1.08,
+        attackCooldown: 0.95,
+        extraLoot: [["Monster Fang", 0.24], ["Slime Gel", 0.45]],
+        bonusLootChance: 0.3
+      },
+      goblin: {
+        id: "red",
+        name: "Red Goblin",
+        bossTitle: "Red Goblin Warlord",
+        sprite: "goblin_red",
+        color: "#c94828",
+        tint: "#ff6b42",
+        health: 1.32,
+        damage: 1.28,
+        speed: 1.12,
+        attackCooldown: 0.92,
+        extraLoot: [["Monster Fang", 0.28], ["Rusty Dagger", 0.28]],
+        bonusLootChance: 0.35
+      },
+      wolf: {
+        id: "black",
+        name: "Black Wolf",
+        bossTitle: "Black Alpha Wolf",
+        sprite: "wolf_black",
+        color: "#30313c",
+        tint: "#73758d",
+        health: 1.26,
+        damage: 1.18,
+        speed: 1.18,
+        attackCooldown: 0.85,
+        extraLoot: [["Monster Fang", 0.32], ["Wolf Pelt", 0.36]],
+        bonusLootChance: 0.34
+      }
+    }
+  },
   quests: [
     { goal: "Hunt 4 monsters, then return to the tavern.", kills: 4, reward: 12 },
     { goal: "Collect 6 pieces of loot, then return to the tavern.", loot: 6, reward: 18 },
@@ -429,7 +476,7 @@ class SpriteSheet {
       counter: 10,
       stump: 11
     };
-    for (const name of ["player", "ranger", "slime", "goblin", "wolf", "loot", "powerups", "tileset", "chest", "shopkeeper"]) {
+    for (const name of ["player", "ranger", "slime", "slime_yellow", "goblin", "goblin_red", "wolf", "wolf_black", "loot", "powerups", "tileset", "chest", "shopkeeper"]) {
       const image = new Image();
       image.onload = () => {
         this.loaded[name] = true;
@@ -506,7 +553,7 @@ class SpriteSheet {
     const pose = this.directionalPose({ x: monster.lastMoveX, y: monster.lastMoveY }, Math.floor(monster.walkFrame) % 2 === 1, monster.hitFlash > 0);
     const baseSize = { slime: 62, goblin: 78, wolf: 72 }[monster.type] || 74;
     const drawSize = monster.isBoss ? baseSize * 1.55 : baseSize;
-    const drawn = this.drawImageFrame(monster.type, pose.frame, this.frameSize, this.frameSize, sx - drawSize / 2, sy - drawSize * 0.76, drawSize, drawSize, 0, pose.flip);
+    const drawn = this.drawImageFrame(monster.spriteName, pose.frame, this.frameSize, this.frameSize, sx - drawSize / 2, sy - drawSize * 0.76, drawSize, drawSize, 0, pose.flip);
     if (drawn) {
       if (monster.isBoss) {
         ctx.globalAlpha = 0.28;
@@ -796,23 +843,27 @@ class Player {
 }
 
 class Monster {
-  constructor(type, x, y, dangerLevel, isBoss = false) {
+  constructor(type, x, y, dangerLevel, isBoss = false, variantId = null) {
     const stats = CONFIG.monsters[type];
     const bossStats = isBoss ? CONFIG.bosses.types[type] : null;
+    const variantStats = variantId ? CONFIG.monsterVariants.types[type] : null;
     this.type = type;
+    this.variantId = variantStats ? variantStats.id : null;
+    this.variantData = variantStats;
+    this.spriteName = variantStats ? variantStats.sprite : type;
     this.isBoss = isBoss;
-    this.name = bossStats ? bossStats.title : stats.name;
+    this.name = bossStats ? (variantStats ? variantStats.bossTitle : bossStats.title) : (variantStats ? variantStats.name : stats.name);
     this.x = x;
     this.y = y;
     this.size = bossStats ? bossStats.size : stats.size;
-    this.speed = (stats.speed + dangerLevel * 4) * (bossStats ? bossStats.speed : 1);
-    this.maxHealth = Math.round(stats.health * (1 + dangerLevel * 0.12) * (bossStats ? bossStats.health : 1));
+    this.speed = (stats.speed + dangerLevel * 4) * (bossStats ? bossStats.speed : 1) * (variantStats ? variantStats.speed : 1);
+    this.maxHealth = Math.round(stats.health * (1 + dangerLevel * 0.12) * (bossStats ? bossStats.health : 1) * (variantStats ? variantStats.health : 1));
     this.health = this.maxHealth;
-    this.damage = Math.round(stats.damage * (1 + dangerLevel * 0.08) * (bossStats ? bossStats.damage : 1));
-    this.attackCooldown = stats.attackCooldown * (isBoss ? 1.12 : 1);
+    this.damage = Math.round(stats.damage * (1 + dangerLevel * 0.08) * (bossStats ? bossStats.damage : 1) * (variantStats ? variantStats.damage : 1));
+    this.attackCooldown = stats.attackCooldown * (isBoss ? 1.12 : 1) * (variantStats ? variantStats.attackCooldown : 1);
     this.attackLeft = Math.random() * 0.4;
-    this.color = stats.color;
-    this.bossTint = bossStats ? bossStats.tint : null;
+    this.color = variantStats ? variantStats.color : stats.color;
+    this.bossTint = variantStats ? variantStats.tint : (bossStats ? bossStats.tint : null);
     this.hitFlash = 0;
     this.knockback = { x: 0, y: 0 };
     this.walkFrame = Math.random() * 10;
@@ -1764,8 +1815,23 @@ class Game {
       const point = this.randomFieldPoint(CONFIG.monsters[type].size);
       const x = point.x;
       const y = point.y;
-      this.monsters.push(new Monster(type, x, y, this.dangerLevel));
+      this.monsters.push(new Monster(type, x, y, this.dangerLevel, false, this.rollMonsterVariant(type)));
     }
+  }
+
+  eliteVariantChance() {
+    if (this.dangerLevel < CONFIG.monsterVariants.eliteStartStage) return 0;
+    if (this.dangerLevel < 12) return 0.25;
+    if (this.dangerLevel < 15) return 0.5;
+    if (this.dangerLevel < 18) return 0.8;
+    return 1;
+  }
+
+  rollMonsterVariant(type, forceAtHighStage = false) {
+    const variant = CONFIG.monsterVariants.types[type];
+    if (!variant) return null;
+    if (forceAtHighStage && this.dangerLevel >= CONFIG.monsterVariants.eliteStartStage) return variant.id;
+    return Math.random() < this.eliteVariantChance() ? variant.id : null;
   }
 
   randomFieldPoint(size = 32) {
@@ -1806,7 +1872,7 @@ class Game {
     const types = Object.keys(CONFIG.bosses.types);
     const type = types[Math.floor(Math.random() * types.length)];
     const point = this.randomFieldPoint(CONFIG.bosses.types[type].size);
-    const boss = new Monster(type, point.x, point.y, this.dangerLevel, true);
+    const boss = new Monster(type, point.x, point.y, this.dangerLevel, true, this.rollMonsterVariant(type, true));
     this.monsters.push(boss);
     this.floaters.push(new FloatingText(`${boss.name} appears!`, boss.x, boss.y - 44, "#ffcf6b"));
     this.audio.play("day");
@@ -1827,6 +1893,16 @@ class Game {
     }
     if (Math.random() < 0.08 + this.dangerLevel * 0.01) {
       this.dropLoot("Monster Fang", monster.x, monster.y);
+    }
+    if (monster.variantData) {
+      for (const [lootName, chance] of monster.variantData.extraLoot) {
+        if (Math.random() < chance) {
+          this.dropLoot(lootName, monster.x + Math.random() * 30 - 15, monster.y + Math.random() * 30 - 15);
+        }
+      }
+      if (Math.random() < monster.variantData.bonusLootChance || monster.isBoss) {
+        this.dropLoot("Monster Fang", monster.x + Math.random() * 36 - 18, monster.y + Math.random() * 32 - 16);
+      }
     }
     if (monster.isBoss) {
       const bossDrops = 5 + Math.min(5, this.dangerLevel);

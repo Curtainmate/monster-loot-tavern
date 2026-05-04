@@ -121,6 +121,64 @@ function Convert-Single($sourceName, $outputName, $frameSize, $padding) {
   $source.Dispose()
 }
 
+function Clamp-Byte($value) {
+  return [Math]::Max(0, [Math]::Min(255, [Math]::Round($value)))
+}
+
+function Recolor-Sheet($sourceName, $outputName, $mode) {
+  $sourcePath = Join-Path $OutDir $sourceName
+  $source = [System.Drawing.Bitmap]::FromFile($sourcePath)
+  $target = New-Object System.Drawing.Bitmap $source.Width, $source.Height, ([System.Drawing.Imaging.PixelFormat]::Format32bppArgb)
+
+  for ($y = 0; $y -lt $source.Height; $y++) {
+    for ($x = 0; $x -lt $source.Width; $x++) {
+      $c = $source.GetPixel($x, $y)
+      if ($c.A -le 10) {
+        $target.SetPixel($x, $y, [System.Drawing.Color]::Transparent)
+        continue
+      }
+
+      $r = $c.R
+      $g = $c.G
+      $b = $c.B
+      switch ($mode) {
+        "yellowSlime" {
+          if ($g -gt $r * 1.08 -and $g -gt $b * 1.08) {
+            $r = Clamp-Byte($g * 1.28 + $r * 0.18)
+            $g = Clamp-Byte($g * 1.08 + 18)
+            $b = Clamp-Byte($b * 0.28)
+          }
+        }
+        "redGoblin" {
+          if ($g -gt $r * 0.82 -and $g -gt $b * 1.05) {
+            $r = Clamp-Byte($g * 1.18 + 38)
+            $g = Clamp-Byte($g * 0.34)
+            $b = Clamp-Byte($b * 0.28)
+          } elseif ($r -gt 45 -or $g -gt 45 -or $b -gt 45) {
+            $r = Clamp-Byte($r * 1.12 + 12)
+            $g = Clamp-Byte($g * 0.72)
+            $b = Clamp-Byte($b * 0.68)
+          }
+        }
+        "blackWolf" {
+          if ([Math]::Abs($r - $g) -lt 42 -and [Math]::Abs($g - $b) -lt 42) {
+            $lum = ($r * 0.3) + ($g * 0.59) + ($b * 0.11)
+            $r = Clamp-Byte($lum * 0.34 + 18)
+            $g = Clamp-Byte($lum * 0.34 + 18)
+            $b = Clamp-Byte($lum * 0.38 + 24)
+          }
+        }
+      }
+      $target.SetPixel($x, $y, [System.Drawing.Color]::FromArgb($c.A, $r, $g, $b))
+    }
+  }
+
+  $outputPath = Join-Path $OutDir $outputName
+  $target.Save($outputPath, [System.Drawing.Imaging.ImageFormat]::Png)
+  $target.Dispose()
+  $source.Dispose()
+}
+
 Convert-Sheet "Warrior sprites.png" "player.png" 8 144 8
 Convert-Sheet "Ranger sprites.png" "ranger.png" 8 144 8
 Convert-Sheet "Goblin sprites.png" "goblin.png" 8 144 8
@@ -129,3 +187,6 @@ Convert-Sheet "Wolf sprites.png" "wolf.png" 8 144 8
 Convert-Sheet "Powerups sprites.png" "powerups.png" 5 128 8
 Convert-Sheet "Treasure_chest_sprites.png" "chest.png" 4 160 8
 Convert-Single "Shopkeeper_sprites.png" "shopkeeper.png" 160 8
+Recolor-Sheet "slime.png" "slime_yellow.png" "yellowSlime"
+Recolor-Sheet "goblin.png" "goblin_red.png" "redGoblin"
+Recolor-Sheet "wolf.png" "wolf_black.png" "blackWolf"
