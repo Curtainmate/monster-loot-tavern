@@ -1505,6 +1505,7 @@ class Game {
     mouse.worldY = mouse.y + this.camera.y;
 
     this.player.update(dt, this);
+    if (mouse.down) this.player.attack(this);
     for (const monster of this.monsters) monster.update(dt, this);
     for (const projectile of this.projectiles) projectile.update(dt, this);
     this.projectiles = this.projectiles.filter((projectile) => !projectile.dead);
