@@ -566,7 +566,7 @@ class SpriteSheet {
   drawShopkeeper(shopkeeper, camera) {
     const sx = shopkeeper.x - camera.x;
     const sy = shopkeeper.y - camera.y;
-    return this.drawImageFrame("shopkeeper", 0, 160, 160, sx - 43, sy - 76, 86, 86);
+    return this.drawImageFrame("shopkeeper", 0, 160, 160, sx - 55, sy - 97, 110, 110);
   }
 
   directionalPose(vector, alternate = false, action = false) {
@@ -1151,12 +1151,33 @@ class Shopkeeper {
   draw(camera) {
     const sx = this.x - camera.x;
     const sy = this.y - camera.y;
-    if (gameSprites.drawShopkeeper(this, camera)) return;
-    drawRectSprite(sx, sy, this.size, this.size, "#d89b3d");
-    ctx.fillStyle = "#f1c79a";
-    ctx.fillRect(Math.floor(sx - 8), Math.floor(sy - 18), 16, 9);
-    ctx.fillStyle = "#51321e";
-    ctx.fillRect(Math.floor(sx - 11), Math.floor(sy - 23), 22, 7);
+    this.drawSign(camera);
+    if (!gameSprites.drawShopkeeper(this, camera)) {
+      drawRectSprite(sx, sy, this.size, this.size, "#d89b3d");
+      ctx.fillStyle = "#f1c79a";
+      ctx.fillRect(Math.floor(sx - 8), Math.floor(sy - 18), 16, 9);
+      ctx.fillStyle = "#51321e";
+      ctx.fillRect(Math.floor(sx - 11), Math.floor(sy - 23), 22, 7);
+    }
+  }
+
+  drawSign(camera) {
+    const sx = this.x - camera.x;
+    const sy = this.y - camera.y - 116;
+    ctx.save();
+    ctx.fillStyle = "#3c2518";
+    ctx.fillRect(Math.floor(sx - 38), Math.floor(sy - 18), 76, 30);
+    ctx.strokeStyle = "#d8a452";
+    ctx.lineWidth = 3;
+    ctx.strokeRect(Math.floor(sx - 38), Math.floor(sy - 18), 76, 30);
+    ctx.fillStyle = "#1f130b";
+    ctx.fillRect(Math.floor(sx - 30), Math.floor(sy + 13), 60, 5);
+    ctx.font = "700 16px Trebuchet MS, Verdana, sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = "#ffe18a";
+    ctx.fillText("SHOP", Math.floor(sx), Math.floor(sy - 2));
+    ctx.restore();
   }
 }
 
