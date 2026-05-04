@@ -254,10 +254,10 @@ canvas {
 }
 
 .class-sprite {
-  width: 64px;
-  height: 64px;
+  width: 80px;
+  height: 80px;
   background-repeat: no-repeat;
-  background-size: 512px 64px;
+  background-size: 640px 80px;
   image-rendering: pixelated;
 }
 

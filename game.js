@@ -391,7 +391,9 @@ class SpriteSheet {
   constructor() {
     this.images = {};
     this.loaded = {};
-    this.frameSize = 32;
+    this.frameSize = 144;
+    this.chestFrameSize = 160;
+    this.powerupFrameSize = 128;
     this.lootSize = 16;
     this.tileSize = 32;
     this.lootFrames = {
@@ -474,13 +476,14 @@ class SpriteSheet {
     const sy = player.y - camera.y;
     const flash = player.invulnerableLeft > 0 && Math.floor(player.invulnerableLeft * 16) % 2 === 0;
     const attacking = player.cooldownLeft > player.attackCooldown - 0.18;
-    const frame = attacking ? 4 + Math.floor((player.attackCooldown - player.cooldownLeft) / 0.06) % 3 : Math.floor(player.walkFrame) % 4;
-    const drawn = this.drawImageFrame(player.spriteName, frame, 32, 32, sx - 32, sy - 40, 64, 64, 0, player.facing.x < -0.15);
+    const pose = this.directionalPose(player.facing, Math.floor(player.walkFrame) % 2 === 1, attacking);
+    const drawSize = 84;
+    const drawn = this.drawImageFrame(player.spriteName, pose.frame, this.frameSize, this.frameSize, sx - drawSize / 2, sy - drawSize * 0.76, drawSize, drawSize, 0, pose.flip);
     if (drawn) {
       if (flash) {
         ctx.globalAlpha = 0.34;
         ctx.fillStyle = "#fff6cc";
-        ctx.fillRect(Math.floor(sx - 25), Math.floor(sy - 34), 50, 52);
+        ctx.fillRect(Math.floor(sx - 31), Math.floor(sy - 49), 62, 66);
         ctx.globalAlpha = 1;
       }
       return;
@@ -495,20 +498,24 @@ class SpriteSheet {
   drawMonster(monster, camera) {
     const sx = monster.x - camera.x;
     const sy = monster.y - camera.y;
-    const movingFrame = Math.floor(monster.walkFrame) % 4;
-    const hurtFrame = monster.hitFlash > 0 ? 6 : movingFrame;
-    const frame = monster.health <= 0 ? 7 : hurtFrame;
-    const scale = monster.isBoss ? 2.5 : 2;
-    const drawSize = 32 * scale;
-    const drawn = this.drawImageFrame(monster.type, frame, 32, 32, sx - drawSize / 2, sy - drawSize * 0.61, drawSize, drawSize, 0, monster.lastMoveX < -0.05);
+    const pose = this.directionalPose({ x: monster.lastMoveX, y: monster.lastMoveY }, Math.floor(monster.walkFrame) % 2 === 1, monster.hitFlash > 0);
+    const baseSize = { slime: 62, goblin: 78, wolf: 72 }[monster.type] || 74;
+    const drawSize = monster.isBoss ? baseSize * 1.55 : baseSize;
+    const drawn = this.drawImageFrame(monster.type, pose.frame, this.frameSize, this.frameSize, sx - drawSize / 2, sy - drawSize * 0.76, drawSize, drawSize, 0, pose.flip);
     if (drawn) {
       if (monster.isBoss) {
         ctx.globalAlpha = 0.28;
         ctx.fillStyle = monster.bossTint;
-        ctx.fillRect(Math.floor(sx - drawSize / 2), Math.floor(sy - drawSize * 0.61), drawSize, drawSize);
+        ctx.fillRect(Math.floor(sx - drawSize / 2), Math.floor(sy - drawSize * 0.76), drawSize, drawSize);
         ctx.globalAlpha = 1;
         ctx.fillStyle = "#ffe18a";
         ctx.fillRect(Math.floor(sx - 18), Math.floor(sy - monster.size / 2 - 18), 36, 4);
+      }
+      if (monster.hitFlash > 0) {
+        ctx.globalAlpha = 0.32;
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(Math.floor(sx - drawSize / 2), Math.floor(sy - drawSize * 0.76), drawSize, drawSize);
+        ctx.globalAlpha = 1;
       }
       return;
     }
@@ -541,14 +548,24 @@ class SpriteSheet {
     const frame = this.powerupFrames[powerup.type] || 0;
     const sx = powerup.x - camera.x;
     const sy = powerup.y - camera.y + Math.sin(powerup.life * 5.4) * 2;
-    return this.drawImageFrame("powerups", frame, 16, 16, sx - 16, sy - 16, 32, 32);
+    return this.drawImageFrame("powerups", frame, this.powerupFrameSize, this.powerupFrameSize, sx - 19, sy - 19, 38, 38);
   }
 
   drawChest(chest, camera) {
     const frame = chest.opened ? 3 : Math.floor(chest.life * 3) % 3;
     const sx = chest.x - camera.x;
     const sy = chest.y - camera.y + Math.sin(chest.life * 2.4) * 1.5;
-    return this.drawImageFrame("chest", frame, 32, 32, sx - 28, sy - 34, 56, 56);
+    return this.drawImageFrame("chest", frame, this.chestFrameSize, this.chestFrameSize, sx - 39, sy - 58, 78, 78);
+  }
+
+  directionalPose(vector, alternate = false, action = false) {
+    if (vector.y < -0.55 && Math.abs(vector.y) > Math.abs(vector.x)) {
+      return { frame: alternate || action ? 5 : 1, flip: false };
+    }
+    if (Math.abs(vector.x) > 0.35) {
+      return { frame: action ? 7 : (alternate ? 6 : 2), flip: vector.x < 0 };
+    }
+    return { frame: alternate || action ? 4 : 0, flip: false };
   }
 
   drawTile(frameName, x, y, size = 32) {
@@ -786,6 +803,7 @@ class Monster {
     this.knockback = { x: 0, y: 0 };
     this.walkFrame = Math.random() * 10;
     this.lastMoveX = 1;
+    this.lastMoveY = 0;
   }
 
   update(dt, game) {
@@ -804,6 +822,7 @@ class Monster {
       const move = normalize(player.x - this.x, player.y - this.y);
       game.moveEntity(this, move.x * this.speed * dt, move.y * this.speed * dt, CONFIG.field);
       this.lastMoveX = move.x;
+      this.lastMoveY = move.y;
     }
 
     this.x = clamp(this.x, CONFIG.field.x + this.size / 2, CONFIG.field.x + CONFIG.field.width - this.size / 2);
