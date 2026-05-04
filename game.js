@@ -4,13 +4,14 @@ const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
 const CONFIG = {
-  world: { width: 1600, height: 1000 },
+  world: { width: 1900, height: 1100 },
   tavern: { x: 160, y: 150, width: 520, height: 360 },
   door: { x: 672, y: 300, width: 44, height: 80 },
-  field: { x: 720, y: 80, width: 800, height: 820 },
+  transition: { x: 650, y: 280, width: 96, height: 122 },
+  field: { x: 720, y: 80, width: 1100, height: 900 },
   scenery: {
-    rocks: [[890, 180], [1220, 315], [1000, 700], [1420, 760]],
-    trees: [[80, 120], [100, 610], [710, 65], [1510, 85], [1535, 900], [740, 910], [1320, 40]]
+    rocks: [[890, 180], [1220, 315], [1000, 700], [1420, 760], [1665, 255], [1700, 830]],
+    trees: [[80, 120], [100, 610], [710, 65], [1510, 85], [1535, 900], [740, 910], [1320, 40], [1815, 130], [1810, 940]]
   },
   blockers: [
     { x: 145, y: 132, width: 550, height: 22 },
@@ -24,13 +25,17 @@ const CONFIG = {
     { x: 1220, y: 315, width: 32, height: 22 },
     { x: 1000, y: 700, width: 32, height: 22 },
     { x: 1420, y: 760, width: 32, height: 22 },
+    { x: 1665, y: 255, width: 32, height: 22 },
+    { x: 1700, y: 830, width: 32, height: 22 },
     { x: 92, y: 150, width: 20, height: 38 },
     { x: 112, y: 640, width: 20, height: 30 },
     { x: 722, y: 95, width: 20, height: 30 },
     { x: 1522, y: 115, width: 20, height: 30 },
     { x: 1547, y: 930, width: 20, height: 30 },
     { x: 752, y: 940, width: 20, height: 30 },
-    { x: 1332, y: 70, width: 20, height: 30 }
+    { x: 1332, y: 70, width: 20, height: 30 },
+    { x: 1827, y: 160, width: 20, height: 30 },
+    { x: 1822, y: 970, width: 20, height: 30 }
   ],
   player: {
     x: 380,
@@ -1559,6 +1564,12 @@ class Game {
     return rectContains(CONFIG.tavern, this.player.x, this.player.y);
   }
 
+  pointInPlayableArea(x, y) {
+    return rectContains(CONFIG.tavern, x, y)
+      || rectContains(CONFIG.transition, x, y)
+      || rectContains(CONFIG.field, x, y);
+  }
+
   randomRange(min, max) {
     return min + Math.random() * (max - min);
   }
@@ -1657,6 +1668,9 @@ class Game {
   collides(entity, x, y) {
     const rect = entityRect(entity, x, y);
     if (rect.x < 0 || rect.y < 0 || rect.x + rect.width > CONFIG.world.width || rect.y + rect.height > CONFIG.world.height) {
+      return true;
+    }
+    if (entity === this.player && !this.pointInPlayableArea(x, y)) {
       return true;
     }
     return CONFIG.blockers.some((blocker) => rectsOverlap(rect, blocker));
