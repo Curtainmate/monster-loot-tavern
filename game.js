@@ -1002,13 +1002,34 @@ class TreasureChest {
     game.audio.play("loot");
   }
 
-  draw(camera) {
-    if (gameSprites.drawChest(this, camera)) return;
+  draw(camera, showPrompt = false) {
     const sx = this.x - camera.x;
-    const sy = this.y - camera.y + Math.sin(this.life * 2.4) * 1.5;
-    drawRectSprite(sx, sy, this.size, this.size - 8, "#b8793f");
-    ctx.fillStyle = "#f3d270";
-    ctx.fillRect(Math.floor(sx - 4), Math.floor(sy - 3), 8, 7);
+    if (!gameSprites.drawChest(this, camera)) {
+      const sy = this.y - camera.y + Math.sin(this.life * 2.4) * 1.5;
+      drawRectSprite(sx, sy, this.size, this.size - 8, "#b8793f");
+      ctx.fillStyle = "#f3d270";
+      ctx.fillRect(Math.floor(sx - 4), Math.floor(sy - 3), 8, 7);
+    }
+    if (showPrompt) this.drawPrompt(camera);
+  }
+
+  drawPrompt(camera) {
+    const sx = this.x - camera.x;
+    const sy = this.y - camera.y - 72 + Math.sin(this.life * 5) * 2;
+    ctx.save();
+    ctx.font = "700 13px Trebuchet MS, Verdana, sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    const text = "Press E";
+    const width = ctx.measureText(text).width + 22;
+    ctx.fillStyle = "rgba(25, 14, 7, 0.88)";
+    ctx.fillRect(Math.floor(sx - width / 2), Math.floor(sy - 14), width, 28);
+    ctx.strokeStyle = "#ffd46b";
+    ctx.lineWidth = 2;
+    ctx.strokeRect(Math.floor(sx - width / 2), Math.floor(sy - 14), width, 28);
+    ctx.fillStyle = "#fff0a6";
+    ctx.fillText(text, Math.floor(sx), Math.floor(sy + 1));
+    ctx.restore();
   }
 }
 
@@ -1849,7 +1870,8 @@ class Game {
     this.drawWorld();
     for (const item of this.loot) item.draw(this.camera);
     for (const powerup of this.powerups) powerup.draw(this.camera);
-    for (const chest of this.chests) chest.draw(this.camera);
+    const promptedChest = this.nearbyChest();
+    for (const chest of this.chests) chest.draw(this.camera, chest === promptedChest);
     for (const projectile of this.projectiles) projectile.draw(this.camera);
     for (const monster of this.monsters) monster.draw(this.camera);
     this.shopkeeper.draw(this.camera);
