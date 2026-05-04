@@ -563,7 +563,10 @@ class SpriteSheet {
       return { frame: alternate || action ? 5 : 1, flip: false };
     }
     if (Math.abs(vector.x) > 0.35) {
-      return { frame: action ? 7 : (alternate ? 6 : 2), flip: vector.x < 0 };
+      if (vector.x < 0) {
+        return { frame: alternate || action ? 6 : 2, flip: false };
+      }
+      return { frame: alternate || action ? 7 : 3, flip: false };
     }
     return { frame: alternate || action ? 4 : 0, flip: false };
   }
