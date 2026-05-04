@@ -1,0 +1,427 @@
+:root {
+  --ink: #f8f0d4;
+  --muted: #cbbf9a;
+  --panel: rgba(28, 22, 18, 0.94);
+  --panel-edge: #8a5a2f;
+  --button: #a65f2d;
+  --button-hover: #cf7d3d;
+  --danger: #e4564d;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  background: #15120f;
+  color: var(--ink);
+  font-family: "Trebuchet MS", Verdana, sans-serif;
+}
+
+.game-shell {
+  position: relative;
+  width: min(100vw, 1280px);
+  height: min(100vh, 720px);
+  image-rendering: pixelated;
+}
+
+canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: #193b24;
+  border: 4px solid #422a1c;
+  box-shadow: 0 18px 70px rgba(0, 0, 0, 0.45);
+  image-rendering: pixelated;
+}
+
+.hud {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  pointer-events: none;
+  text-shadow: 2px 2px 0 #1b120d;
+}
+
+.hud-top {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.hud-card,
+.quest,
+.inventory,
+.buffs,
+.hint {
+  padding: 7px 9px;
+  border: 2px solid rgba(255, 236, 181, 0.25);
+  background: rgba(22, 15, 10, 0.72);
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+.hud-card {
+  min-width: 86px;
+}
+
+.health-card,
+.danger-card {
+  width: 170px;
+}
+
+.hud-label {
+  margin-bottom: 4px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.hud-card strong {
+  display: block;
+  font-size: 18px;
+}
+
+.bar {
+  height: 10px;
+  border: 2px solid rgba(255, 236, 181, 0.25);
+  background: rgba(0, 0, 0, 0.34);
+}
+
+.bar span {
+  display: block;
+  height: 100%;
+  width: 100%;
+  background: #d84f45;
+}
+
+.danger-progress span {
+  background: #d19a3f;
+}
+
+.inventory {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-width: min(720px, calc(100vw - 24px));
+  margin-top: 8px;
+}
+
+.buffs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-width: min(720px, calc(100vw - 24px));
+  margin-top: 8px;
+}
+
+.buffs:empty {
+  display: none;
+}
+
+.loot-chip,
+.buff-chip {
+  display: inline-flex;
+  gap: 5px;
+  align-items: center;
+}
+
+.buff-chip {
+  color: #fff0a6;
+}
+
+.loot-icon,
+.powerup-icon {
+  width: 24px;
+  height: 24px;
+  image-rendering: pixelated;
+}
+
+.loot-icon {
+  background-image: url("assets/loot.png");
+  background-size: 120px 24px;
+}
+
+.powerup-icon {
+  background-image: url("assets/powerups.png");
+  background-size: 120px 24px;
+}
+
+.quest {
+  display: inline-block;
+  max-width: min(780px, calc(100vw - 24px));
+  margin-top: 8px;
+  color: #b8efb4;
+}
+
+.hint {
+  display: inline-block;
+  margin-top: 8px;
+  color: #ffe18a;
+}
+
+.hint:empty {
+  display: none;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(10, 8, 6, 0.55);
+}
+
+.hidden {
+  display: none;
+}
+
+.panel {
+  width: min(980px, 100%);
+  max-height: 92%;
+  overflow: auto;
+  padding: 18px;
+  border: 4px solid var(--panel-edge);
+  background: var(--panel);
+  box-shadow: 0 10px 0 rgba(0, 0, 0, 0.32);
+}
+
+.shop-panel header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid rgba(255, 236, 181, 0.18);
+}
+
+.start-panel header {
+  padding-bottom: 14px;
+  border-bottom: 2px solid rgba(255, 236, 181, 0.18);
+}
+
+.class-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.class-card {
+  display: grid;
+  grid-template-rows: auto auto 1fr auto;
+  justify-items: center;
+  gap: 8px;
+  min-height: 210px;
+  padding: 16px;
+  border: 3px solid rgba(255, 236, 181, 0.2);
+  background: rgba(255, 255, 255, 0.05);
+  text-align: center;
+}
+
+.class-card:hover:not(:disabled),
+.class-card.selected {
+  border-color: #ffd46b;
+  background: rgba(255, 212, 107, 0.12);
+}
+
+.class-card strong {
+  font-size: 20px;
+}
+
+.class-card small {
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+.class-stats {
+  color: #ffd46b;
+  font-size: 13px;
+}
+
+.start-run-button {
+  margin-top: 16px;
+}
+
+.class-card.locked {
+  filter: grayscale(0.85);
+}
+
+.class-sprite {
+  width: 64px;
+  height: 64px;
+  background-repeat: no-repeat;
+  background-size: 512px 64px;
+  image-rendering: pixelated;
+}
+
+.warrior-sprite {
+  background-image: url("assets/player.png");
+  background-position: 0 0;
+}
+
+.ranger-sprite {
+  background-image: url("assets/ranger.png");
+  background-position: 0 0;
+}
+
+h1,
+h2,
+p {
+  margin: 0;
+}
+
+h1 {
+  font-size: 26px;
+}
+
+h2 {
+  margin: 16px 0 10px;
+  font-size: 18px;
+  color: #ffd46b;
+}
+
+p {
+  color: var(--muted);
+}
+
+.shop-tabs {
+  display: flex;
+  gap: 8px;
+  margin: 14px 0;
+}
+
+.shop-tabs button {
+  min-width: 100px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 2px solid rgba(255, 236, 181, 0.16);
+}
+
+.shop-tabs button.active {
+  background: #d19a3f;
+  color: #21140e;
+}
+
+.shop-page {
+  min-height: 330px;
+}
+
+.shop-list {
+  display: grid;
+  gap: 8px;
+}
+
+.shop-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: center;
+  min-height: 54px;
+  padding: 10px;
+  border: 2px solid rgba(255, 236, 181, 0.16);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.shop-row strong {
+  display: block;
+  margin-bottom: 3px;
+}
+
+.shop-row small {
+  color: var(--muted);
+}
+
+.danger-list {
+  grid-template-columns: repeat(auto-fit, minmax(58px, 1fr));
+}
+
+.danger-list .shop-row {
+  display: block;
+  min-height: 0;
+  padding: 0;
+  background: transparent;
+  border: 0;
+}
+
+.danger-list button {
+  width: 100%;
+}
+
+.danger-list button.active {
+  background: #d19a3f;
+  color: #21140e;
+}
+
+.danger-note {
+  grid-column: 1 / -1;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.25;
+}
+
+button {
+  min-height: 36px;
+  border: 0;
+  color: #fff8df;
+  background: var(--button);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+button:hover:not(:disabled) {
+  background: var(--button-hover);
+}
+
+button:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+
+.primary-button {
+  width: 100%;
+  margin-top: 10px;
+  padding: 8px 12px;
+}
+
+.icon-button {
+  width: 36px;
+  min-width: 36px;
+}
+
+.compact-panel {
+  width: min(460px, 100%);
+  text-align: center;
+}
+
+.compact-panel p {
+  margin: 10px 0 16px;
+}
+
+@media (max-width: 720px) {
+  .game-shell {
+    width: 100vw;
+    height: 100vh;
+  }
+
+  .shop-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .class-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hud-card,
+  .quest,
+  .inventory,
+  .hint {
+    font-size: 12px;
+  }
+}

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Monster Loot Tavern</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="game-shell">
+    <canvas id="gameCanvas" width="1280" height="720" aria-label="Monster Loot Tavern game canvas"></canvas>
+
+    <section id="startOverlay" class="overlay" aria-hidden="false">
+      <div class="panel start-panel">
+        <header>
+          <div>
+            <h1>Monster Loot Tavern</h1>
+            <p>Choose your adventurer.</p>
+          </div>
+        </header>
+
+        <div id="classGrid" class="class-grid">
+          <button id="warriorButton" class="class-card" type="button">
+            <span class="class-sprite warrior-sprite" aria-hidden="true"></span>
+            <strong>Warrior</strong>
+            <small>Sword fighter with sturdy health and close-range attacks.</small>
+            <span class="class-stats">100 HP | 12 DMG | Melee</span>
+          </button>
+
+          <button id="rangerButton" class="class-card" type="button">
+            <span class="class-sprite ranger-sprite" aria-hidden="true"></span>
+            <strong>Ranger</strong>
+            <small>Fast bow specialist with lower health and ranged attacks.</small>
+            <span class="class-stats">80 HP | 8 DMG | Ranged</span>
+          </button>
+        </div>
+        <button id="startRunButton" class="primary-button start-run-button" type="button">Start as Warrior</button>
+      </div>
+    </section>
+
+    <section id="hud" class="hud" aria-live="polite">
+      <div class="hud-top">
+        <div class="hud-card health-card">
+          <div id="healthText" class="hud-label">Health</div>
+          <div class="bar"><span id="healthBar"></span></div>
+        </div>
+        <div class="hud-card">
+          <div class="hud-label">Gold</div>
+          <strong id="goldText">0</strong>
+        </div>
+        <div class="hud-card">
+          <div class="hud-label">Damage</div>
+          <strong id="damageText">0</strong>
+        </div>
+        <div class="hud-card danger-card">
+          <div id="dangerText" class="hud-label">Stage</div>
+          <div class="bar danger-progress"><span id="dangerBar"></span></div>
+        </div>
+        <div class="hud-card">
+          <div class="hud-label">Day</div>
+          <strong id="dayText">1</strong>
+        </div>
+      </div>
+      <div id="questText" class="quest"></div>
+      <div id="buffText" class="buffs"></div>
+      <div id="inventoryText" class="inventory"></div>
+      <div id="hintText" class="hint"></div>
+    </section>
+
+    <section id="shopOverlay" class="overlay hidden" aria-hidden="true">
+      <div class="panel shop-panel">
+        <header>
+          <div>
+            <h1>Monster Loot Tavern</h1>
+            <p>Trade trophies for stronger runs.</p>
+          </div>
+          <button id="closeShopButton" class="icon-button" type="button" title="Close shop">X</button>
+        </header>
+
+        <div class="shop-tabs" role="tablist" aria-label="Shop sections">
+          <button id="shopTabSell" class="active" type="button">Sell</button>
+          <button id="shopTabBuy" type="button">Buy</button>
+          <button id="shopTabMastery" type="button">Mastery</button>
+          <button id="shopTabDanger" type="button">Stage</button>
+        </div>
+
+        <div class="shop-pages">
+          <div id="sellPage" class="shop-page">
+            <h2>Sell Loot</h2>
+            <div id="sellList" class="shop-list"></div>
+            <button id="sellAllButton" class="primary-button" type="button">Sell All Loot</button>
+          </div>
+
+          <div id="buyPage" class="shop-page hidden">
+            <h2>Buy Items</h2>
+            <div id="buyList" class="shop-list"></div>
+          </div>
+
+          <div id="masteryPage" class="shop-page hidden">
+            <h2>Mastery</h2>
+            <div id="masteryList" class="shop-list"></div>
+          </div>
+
+          <div id="dangerPage" class="shop-page hidden">
+            <h2>Stage Select</h2>
+            <div id="dangerList" class="shop-list danger-list"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="pauseOverlay" class="overlay hidden" aria-hidden="true">
+      <div class="panel compact-panel">
+        <h1>Paused</h1>
+        <p>Press Escape to return to the field.</p>
+      </div>
+    </section>
+
+    <section id="gameOverOverlay" class="overlay hidden" aria-hidden="true">
+      <div class="panel compact-panel">
+        <h1>You were carried back to the tavern</h1>
+        <p id="gameOverStats"></p>
+        <button id="restartButton" class="primary-button" type="button">Restart Run</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="game.js"></script>
+</body>
+</html>
