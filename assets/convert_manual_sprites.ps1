@@ -96,6 +96,31 @@ function Convert-Sheet($sourceName, $outputName, $expectedFrames, $frameSize, $p
   $source.Dispose()
 }
 
+function Convert-Single($sourceName, $outputName, $frameSize, $padding) {
+  $sourcePath = Join-Path $ManualDir $sourceName
+  $source = [System.Drawing.Bitmap]::FromFile($sourcePath)
+  $segment = [pscustomobject]@{ Start = 0; End = $source.Width - 1 }
+  $bounds = Find-Bounds $source $segment
+
+  $sheet = New-Bitmap $frameSize $frameSize
+  $outBitmap = $sheet[0]
+  $graphics = $sheet[1]
+  $scale = [Math]::Min(($frameSize - ($padding * 2)) / $bounds.Width, ($frameSize - ($padding * 2)) / $bounds.Height)
+  $drawWidth = [Math]::Max(1, [Math]::Round($bounds.Width * $scale))
+  $drawHeight = [Math]::Max(1, [Math]::Round($bounds.Height * $scale))
+  $drawX = [Math]::Floor(($frameSize - $drawWidth) / 2)
+  $drawY = [Math]::Floor(($frameSize - $drawHeight) / 2)
+  $sourceRect = New-Object System.Drawing.Rectangle $bounds.X, $bounds.Y, $bounds.Width, $bounds.Height
+  $targetRect = New-Object System.Drawing.Rectangle $drawX, $drawY, $drawWidth, $drawHeight
+  $graphics.DrawImage($source, $targetRect, $sourceRect, [System.Drawing.GraphicsUnit]::Pixel)
+
+  $outputPath = Join-Path $OutDir $outputName
+  $graphics.Dispose()
+  $outBitmap.Save($outputPath, [System.Drawing.Imaging.ImageFormat]::Png)
+  $outBitmap.Dispose()
+  $source.Dispose()
+}
+
 Convert-Sheet "Warrior sprites.png" "player.png" 8 144 8
 Convert-Sheet "Ranger sprites.png" "ranger.png" 8 144 8
 Convert-Sheet "Goblin sprites.png" "goblin.png" 8 144 8
@@ -103,3 +128,4 @@ Convert-Sheet "Slime sprites.png" "slime.png" 8 144 8
 Convert-Sheet "Wolf sprites.png" "wolf.png" 8 144 8
 Convert-Sheet "Powerups sprites.png" "powerups.png" 5 128 8
 Convert-Sheet "Treasure_chest_sprites.png" "chest.png" 4 160 8
+Convert-Single "Shopkeeper_sprites.png" "shopkeeper.png" 160 8

@@ -429,7 +429,7 @@ class SpriteSheet {
       counter: 10,
       stump: 11
     };
-    for (const name of ["player", "ranger", "slime", "goblin", "wolf", "loot", "powerups", "tileset", "chest"]) {
+    for (const name of ["player", "ranger", "slime", "goblin", "wolf", "loot", "powerups", "tileset", "chest", "shopkeeper"]) {
       const image = new Image();
       image.onload = () => {
         this.loaded[name] = true;
@@ -561,6 +561,12 @@ class SpriteSheet {
     const sx = chest.x - camera.x;
     const sy = chest.y - camera.y + Math.sin(chest.life * 2.4) * 1.5;
     return this.drawImageFrame("chest", frame, this.chestFrameSize, this.chestFrameSize, sx - 39, sy - 58, 78, 78);
+  }
+
+  drawShopkeeper(shopkeeper, camera) {
+    const sx = shopkeeper.x - camera.x;
+    const sy = shopkeeper.y - camera.y;
+    return this.drawImageFrame("shopkeeper", 0, 160, 160, sx - 43, sy - 76, 86, 86);
   }
 
   directionalPose(vector, alternate = false, action = false) {
@@ -1145,6 +1151,7 @@ class Shopkeeper {
   draw(camera) {
     const sx = this.x - camera.x;
     const sy = this.y - camera.y;
+    if (gameSprites.drawShopkeeper(this, camera)) return;
     drawRectSprite(sx, sy, this.size, this.size, "#d89b3d");
     ctx.fillStyle = "#f1c79a";
     ctx.fillRect(Math.floor(sx - 8), Math.floor(sy - 18), 16, 9);
