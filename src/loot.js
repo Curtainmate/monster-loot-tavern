@@ -150,23 +150,11 @@ class TreasureChest {
   open(game) {
     if (this.opened) return;
     this.opened = true;
-    const rolls = 3 + Math.min(4, Math.floor(this.dangerLevel / 2)) + Math.floor(Math.random() * 3);
-    const table = [
-      "Slime Gel",
-      "Slime Gel",
-      "Goblin Ear",
-      "Wolf Pelt",
-      "Monster Fang",
-      "Rusty Dagger"
-    ];
-    for (let i = 0; i < rolls; i += 1) {
-      const name = table[Math.floor(Math.random() * table.length)];
-      game.dropLoot(name, this.x + Math.random() * 54 - 27, this.y + Math.random() * 42 - 21);
-    }
-    if (Math.random() < 0.3 + this.dangerLevel * 0.03) {
-      game.dropLoot("Rusty Dagger", this.x, this.y - 8);
-    }
-    game.floaters.push(new FloatingText("Treasure!", this.x, this.y - 30, "#ffe18a"));
+    const baseGold = 18 + this.dangerLevel * 4;
+    const bonusGold = Math.floor(Math.random() * (8 + this.dangerLevel * 2));
+    const totalGold = baseGold + bonusGold;
+    game.dropCoins(totalGold, this.x, this.y);
+    game.floaters.push(new FloatingText(`Treasure! +${totalGold} gold`, this.x, this.y - 30, "#ffe18a"));
     game.audio.play("loot");
   }
 
