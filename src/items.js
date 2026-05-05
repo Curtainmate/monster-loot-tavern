@@ -39,6 +39,20 @@ const ITEM_RARITY_RULES = Object.freeze({
   epic: { label: "Epic", statMultiplier: 2.1, sellMultiplier: 5 }
 });
 
+const ITEM_DROP_CHANCES = Object.freeze({
+  normalMonster: 0.15,
+  eliteMonster: 0.25,
+  boss: 1,
+  chest: 0.35
+});
+
+const ITEM_RARITY_TABLES = Object.freeze([
+  { minStage: 1, common: 0.78, uncommon: 0.18, rare: 0.04, epic: 0 },
+  { minStage: 5, common: 0.68, uncommon: 0.24, rare: 0.07, epic: 0.01 },
+  { minStage: 10, common: 0.58, uncommon: 0.29, rare: 0.11, epic: 0.02 },
+  { minStage: 15, common: 0.48, uncommon: 0.34, rare: 0.15, epic: 0.03 }
+]);
+
 const ITEM_TEMPLATES = Object.freeze({
   warrior: [
     {
@@ -49,15 +63,6 @@ const ITEM_TEMPLATES = Object.freeze({
       baseStats: { damage: 4 },
       statGrowth: { damage: 1.4 },
       baseSellValue: 8
-    },
-    {
-      id: "warrior_axe",
-      name: "Axe",
-      slot: ITEM_SLOTS.WEAPON,
-      classRestriction: "warrior",
-      baseStats: { damage: 6, attackCooldown: 0.03 },
-      statGrowth: { damage: 1.7, attackCooldown: 0.005 },
-      baseSellValue: 10
     },
     {
       id: "warrior_plate",
@@ -161,15 +166,6 @@ const ITEM_TEMPLATES = Object.freeze({
       baseSellValue: 8
     },
     {
-      id: "ranger_crossbow",
-      name: "Crossbow",
-      slot: ITEM_SLOTS.WEAPON,
-      classRestriction: "ranger",
-      baseStats: { damage: 5, arrowRange: 25 },
-      statGrowth: { damage: 1.4, arrowRange: 6 },
-      baseSellValue: 10
-    },
-    {
       id: "ranger_leathers",
       name: "Leather Tunic",
       slot: ITEM_SLOTS.ARMOR,
@@ -266,8 +262,8 @@ let nextItemId = 1;
 
 function generateItem(options = {}) {
   const classRestriction = options.classRestriction || options.classId || randomFrom(Object.keys(ITEM_TEMPLATES));
-  const itemLevel = Math.max(1, Math.floor(options.itemLevel || 1));
-  const rarity = ITEM_RARITY_RULES[options.rarity] ? options.rarity : rollRarity();
+  const itemLevel = Math.max(1, Math.floor(options.itemLevel || itemLevelForStage(options.stage || 1)));
+  const rarity = ITEM_RARITY_RULES[options.rarity] ? options.rarity : rollRarityForStage(options.stage || itemLevel);
   const templates = ITEM_TEMPLATES[classRestriction] || ITEM_TEMPLATES.warrior;
   const slotTemplates = options.slot ? templates.filter((template) => template.slot === options.slot) : templates;
   const selectedTemplates = slotTemplates.length ? slotTemplates : templates;
@@ -291,6 +287,43 @@ function generateItem(options = {}) {
   };
 }
 
+function itemLevelForStage(stage) {
+  return Math.max(1, Math.floor(stage || 1));
+}
+
+function rollItemDropChance(source, context = {}) {
+  const chance = itemDropChance(source, context);
+  return Math.random() < chance;
+}
+
+function itemDropChance(source, context = {}) {
+  if (source === "boss" || context.isBoss) return ITEM_DROP_CHANCES.boss;
+  if (source === "chest") return ITEM_DROP_CHANCES.chest;
+  if (source === "monster" && (context.isElite || context.variantData)) return ITEM_DROP_CHANCES.eliteMonster;
+  if (source === "eliteMonster") return ITEM_DROP_CHANCES.eliteMonster;
+  return ITEM_DROP_CHANCES.normalMonster;
+}
+
+function rollRarityForStage(stage) {
+  const table = rarityTableForStage(stage);
+  const roll = Math.random();
+  let cumulative = 0;
+  for (const rarity of [ITEM_RARITIES.COMMON, ITEM_RARITIES.UNCOMMON, ITEM_RARITIES.RARE, ITEM_RARITIES.EPIC]) {
+    cumulative += table[rarity] || 0;
+    if (roll <= cumulative) return rarity;
+  }
+  return ITEM_RARITIES.COMMON;
+}
+
+function rarityTableForStage(stage) {
+  const normalizedStage = Math.max(1, Math.floor(stage || 1));
+  let selected = ITEM_RARITY_TABLES[0];
+  for (const table of ITEM_RARITY_TABLES) {
+    if (normalizedStage >= table.minStage) selected = table;
+  }
+  return selected;
+}
+
 function rollItemStats(template, itemLevel, rarityMultiplier) {
   const stats = {};
   for (const [stat, baseValue] of Object.entries(template.baseStats)) {
@@ -312,14 +345,6 @@ function normalizeStatValue(stat, value) {
   return Math.max(1, Math.round(value));
 }
 
-function rollRarity() {
-  const roll = Math.random();
-  if (roll < 0.58) return ITEM_RARITIES.COMMON;
-  if (roll < 0.84) return ITEM_RARITIES.UNCOMMON;
-  if (roll < 0.96) return ITEM_RARITIES.RARE;
-  return ITEM_RARITIES.EPIC;
-}
-
 function randomFrom(items) {
   return items[Math.floor(Math.random() * items.length)];
 }
@@ -330,8 +355,15 @@ const ItemSystem = Object.freeze({
   ITEM_SLOT_LABELS,
   ITEM_RARITIES,
   ITEM_RARITY_RULES,
+  ITEM_DROP_CHANCES,
+  ITEM_RARITY_TABLES,
   ITEM_TEMPLATES,
-  generateItem
+  generateItem,
+  itemLevelForStage,
+  rollItemDropChance,
+  itemDropChance,
+  rollRarityForStage,
+  rarityTableForStage
 });
 
 globalThis.ItemSystem = ItemSystem;

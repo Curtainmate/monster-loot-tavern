@@ -265,7 +265,7 @@
         classRestriction: this.classId,
         slot,
         itemLevel: 1,
-        rarity: slot === ITEM_SLOTS.WEAPON ? ITEM_RARITIES.UNCOMMON : ITEM_RARITIES.COMMON
+        rarity: ITEM_RARITIES.COMMON
       }));
     }
   }
