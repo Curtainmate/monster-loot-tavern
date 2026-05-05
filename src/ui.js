@@ -23,6 +23,7 @@
     this.dangerList = document.getElementById("dangerList");
     this.equipmentSlots = document.getElementById("equipmentSlots");
     this.itemList = document.getElementById("itemList");
+    this.itemListTitle = document.getElementById("itemListTitle");
     this.warriorButton = document.getElementById("warriorButton");
     this.rangerButton = document.getElementById("rangerButton");
     this.startRunButton = document.getElementById("startRunButton");
@@ -121,7 +122,7 @@
     }
 
     const equippedCount = Object.values(p.equipment).filter(Boolean).length;
-    this.inventoryText.textContent = `Inventory ${p.items.length} items | ${equippedCount}/6 equipped | Tab`;
+    this.inventoryText.textContent = `Inventory ${p.items.length}/${CONFIG.inventory.capacity} items | ${equippedCount}/6 equipped | Tab`;
 
     if (!this.game.started) {
       this.hintText.textContent = "";
@@ -199,6 +200,7 @@
 
   renderInventory() {
     const p = this.game.player;
+    this.itemListTitle.textContent = `Items ${p.items.length}/${CONFIG.inventory.capacity}`;
     this.equipmentSlots.innerHTML = "";
     for (const slot of ITEM_SLOT_ORDER) {
       const item = p.equipment[slot];
@@ -223,10 +225,12 @@
       const equipped = equippedIds.has(item.uniqueId);
       const row = document.createElement("div");
       row.className = `item-row rarity-${item.rarity} ${equipped ? "equipped" : ""}`;
+      const comparison = this.itemComparisonText(item, p.equipment[item.slot]);
       row.innerHTML = `
         <div>
           <strong>${item.name}</strong>
           <small>${ITEM_SLOT_LABELS[item.slot]} | Level ${item.itemLevel} | ${this.itemStatsText(item)} | Sell ${item.sellValue}g</small>
+          ${comparison}
         </div>
       `;
       const button = document.createElement("button");
@@ -254,6 +258,30 @@
     return Object.entries(item.stats)
       .map(([stat, value]) => `${this.statLabel(stat)} +${value}`)
       .join(", ");
+  }
+
+  itemComparisonText(item, equippedItem) {
+    if (equippedItem && equippedItem.uniqueId === item.uniqueId) {
+      return `<div class="item-compare neutral">Currently equipped</div>`;
+    }
+    if (!equippedItem) {
+      return `<div class="item-compare positive">No ${ITEM_SLOT_LABELS[item.slot].toLowerCase()} equipped</div>`;
+    }
+    const statNames = new Set([...Object.keys(item.stats), ...Object.keys(equippedItem.stats)]);
+    const parts = [];
+    for (const stat of statNames) {
+      const diff = (item.stats[stat] || 0) - (equippedItem.stats[stat] || 0);
+      if (Math.abs(diff) < 0.001) continue;
+      const className = diff > 0 ? "positive" : "negative";
+      const sign = diff > 0 ? "+" : "";
+      parts.push(`<span class="${className}">${this.statLabel(stat)} ${sign}${this.formatStatValue(diff)}</span>`);
+    }
+    if (!parts.length) return `<div class="item-compare neutral">Same stats as equipped</div>`;
+    return `<div class="item-compare">Vs equipped: ${parts.join(" ")}</div>`;
+  }
+
+  formatStatValue(value) {
+    return Number.isInteger(value) ? `${value}` : `${Math.round(value * 100) / 100}`;
   }
 
   statLabel(stat) {

@@ -251,7 +251,9 @@
   }
 
   addItem(item) {
+    if (this.items.length >= CONFIG.inventory.capacity) return false;
     this.items.push(item);
+    return true;
   }
 
   removeItem(uniqueId) {

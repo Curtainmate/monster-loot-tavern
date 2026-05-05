@@ -387,7 +387,13 @@
   collectNearbyItemDrops() {
     for (const itemDrop of [...this.itemDrops]) {
       if (distance(this.player, itemDrop) < 34) {
-        this.player.addItem(itemDrop.item);
+        if (!this.player.addItem(itemDrop.item)) {
+          if (itemDrop.noticeCooldown <= 0) {
+            this.floaters.push(new FloatingText("Inventory full", this.player.x, this.player.y - 36, "#ffb36b"));
+            itemDrop.noticeCooldown = 1.1;
+          }
+          continue;
+        }
         this.questProgress.loot += 1;
         this.audio.play("loot");
         this.itemDrops = this.itemDrops.filter((candidate) => candidate !== itemDrop);

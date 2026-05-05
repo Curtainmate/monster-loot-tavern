@@ -329,6 +329,29 @@ canvas {
   opacity: 0.72;
 }
 
+.item-compare {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.25;
+}
+
+.item-compare .positive,
+.item-compare.positive {
+  color: #8ee58e;
+}
+
+.item-compare .negative {
+  color: #ff9c7f;
+}
+
+.item-compare.neutral {
+  color: var(--muted);
+}
+
 .rarity-common {
   border-color: rgba(255, 236, 181, 0.18);
 }

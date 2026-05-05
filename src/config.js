@@ -42,6 +42,9 @@
     cooldown: 0.34,
     invulnerableTime: 0.85
   },
+  inventory: {
+    capacity: 10
+  },
   spawns: {
     monsterMinPlayerDistance: 260,
     bossMinPlayerDistance: 340

@@ -81,6 +81,7 @@ class ItemDrop {
     this.y = y;
     this.size = 22;
     this.life = 0;
+    this.noticeCooldown = 0;
     this.color = {
       common: "#f5e6bd",
       uncommon: "#7fe08a",
@@ -91,6 +92,7 @@ class ItemDrop {
 
   update(dt) {
     this.life += dt;
+    this.noticeCooldown = Math.max(0, this.noticeCooldown - dt);
   }
 
   draw(camera) {
