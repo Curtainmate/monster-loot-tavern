@@ -47,6 +47,10 @@ const CONFIG = {
     cooldown: 0.34,
     invulnerableTime: 0.85
   },
+  spawns: {
+    monsterMinPlayerDistance: 260,
+    bossMinPlayerDistance: 340
+  },
   classes: {
     warrior: {
       name: "Warrior",
@@ -1824,7 +1828,7 @@ class Game {
     for (let i = 0; i < count; i += 1) {
       const roll = Math.random();
       const type = roll < 0.52 ? "slime" : roll < 0.78 ? "goblin" : "wolf";
-      const point = this.randomFieldPoint(CONFIG.monsters[type].size);
+      const point = this.randomFieldPoint(CONFIG.monsters[type].size, CONFIG.spawns.monsterMinPlayerDistance);
       const x = point.x;
       const y = point.y;
       this.monsters.push(new Monster(type, x, y, this.dangerLevel, false, this.rollMonsterVariant(type)));
@@ -1846,15 +1850,21 @@ class Game {
     return Math.random() < this.eliteVariantChance() ? variant.id : null;
   }
 
-  randomFieldPoint(size = 32) {
+  randomFieldPoint(size = 32, minPlayerDistance = 0) {
     let x = CONFIG.field.x + 60 + Math.random() * (CONFIG.field.width - 120);
     let y = CONFIG.field.y + 60 + Math.random() * (CONFIG.field.height - 120);
     const probe = { x, y, size };
-    for (let attempt = 0; attempt < 16 && this.collides(probe, x, y); attempt += 1) {
+    for (let attempt = 0; attempt < 32 && (this.collides(probe, x, y) || this.tooCloseToPlayer(x, y, minPlayerDistance)); attempt += 1) {
       x = CONFIG.field.x + 60 + Math.random() * (CONFIG.field.width - 120);
       y = CONFIG.field.y + 60 + Math.random() * (CONFIG.field.height - 120);
+      probe.x = x;
+      probe.y = y;
     }
     return { x, y };
+  }
+
+  tooCloseToPlayer(x, y, minDistance) {
+    return minDistance > 0 && Math.hypot(this.player.x - x, this.player.y - y) < minDistance;
   }
 
   spawnChest() {
@@ -1883,7 +1893,7 @@ class Game {
     if (this.monsters.filter((monster) => monster.isBoss).length >= CONFIG.bosses.maxActive) return;
     const types = Object.keys(CONFIG.bosses.types);
     const type = types[Math.floor(Math.random() * types.length)];
-    const point = this.randomFieldPoint(CONFIG.bosses.types[type].size);
+    const point = this.randomFieldPoint(CONFIG.bosses.types[type].size, CONFIG.spawns.bossMinPlayerDistance);
     const boss = new Monster(type, point.x, point.y, this.dangerLevel, true, this.rollMonsterVariant(type, true));
     this.monsters.push(boss);
     this.floaters.push(new FloatingText(`${boss.name} appears!`, boss.x, boss.y - 44, "#ffcf6b"));
