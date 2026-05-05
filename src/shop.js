@@ -26,19 +26,17 @@
     const sx = this.x - camera.x;
     const sy = this.y - camera.y - 116;
     ctx.save();
-    gameSprites.drawTile("sign", sx - 36, sy - 48, 72);
-    ctx.fillStyle = "#3c2518";
-    ctx.fillRect(Math.floor(sx - 38), Math.floor(sy - 18), 76, 30);
-    ctx.strokeStyle = "#d8a452";
-    ctx.lineWidth = 3;
-    ctx.strokeRect(Math.floor(sx - 38), Math.floor(sy - 18), 76, 30);
-    ctx.fillStyle = "#1f130b";
-    ctx.fillRect(Math.floor(sx - 30), Math.floor(sy + 13), 60, 5);
-    ctx.font = "700 16px Trebuchet MS, Verdana, sans-serif";
+    if (!gameSprites.drawImage("sign", sx - 45, sy - 50, 90, 90)) {
+      gameSprites.drawTile("sign", sx - 36, sy - 48, 72);
+    }
+    ctx.font = "800 15px Trebuchet MS, Verdana, sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillStyle = "#ffe18a";
-    ctx.fillText("SHOP", Math.floor(sx), Math.floor(sy - 2));
+    ctx.strokeStyle = "#2b1609";
+    ctx.lineWidth = 3;
+    ctx.strokeText("SHOP", Math.floor(sx), Math.floor(sy - 15));
+    ctx.fillText("SHOP", Math.floor(sx), Math.floor(sy - 15));
     ctx.restore();
   }
 }

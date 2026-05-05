@@ -36,7 +36,7 @@
       counter: 10,
       sign: 11
     };
-    for (const name of ["player", "ranger", "slime", "slime_yellow", "goblin", "goblin_red", "wolf", "wolf_black", "loot", "powerups", "tileset", "chest", "shopkeeper"]) {
+    for (const name of ["player", "ranger", "slime", "slime_yellow", "goblin", "goblin_red", "wolf", "wolf_black", "loot", "powerups", "tileset", "chest", "shopkeeper", "tree", "bush", "table", "sign"]) {
       const image = new Image();
       image.onload = () => {
         this.loaded[name] = true;
@@ -79,6 +79,16 @@
     } else {
       ctx.drawImage(image, frame * frameWidth, row * frameHeight, frameWidth, frameHeight, Math.floor(x), Math.floor(y), drawWidth, drawHeight);
     }
+    ctx.restore();
+    return true;
+  }
+
+  drawImage(name, x, y, drawWidth, drawHeight) {
+    const image = this.images[name];
+    if (!this.loaded[name] || !image) return false;
+    ctx.save();
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(image, Math.floor(x), Math.floor(y), drawWidth, drawHeight);
     ctx.restore();
     return true;
   }
