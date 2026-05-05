@@ -41,18 +41,30 @@ canvas {
 
 .hud {
   position: absolute;
-  top: 12px;
-  left: 12px;
-  right: 12px;
+  inset: 10px;
   pointer-events: none;
   text-shadow: 2px 2px 0 #1b120d;
 }
 
-.hud-top {
+.hud-zone {
+  position: absolute;
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  align-items: stretch;
+  gap: 6px;
+  align-items: flex-start;
+}
+
+.hud-left {
+  top: 0;
+  left: 0;
+  max-width: min(420px, 48vw);
+}
+
+.hud-right {
+  top: 0;
+  right: 0;
+  justify-content: flex-end;
+  max-width: min(610px, 48vw);
 }
 
 .hud-card,
@@ -60,35 +72,35 @@ canvas {
 .inventory,
 .buffs,
 .hint {
-  padding: 7px 9px;
+  padding: 6px 8px;
   border: 2px solid rgba(255, 236, 181, 0.25);
   background: rgba(22, 15, 10, 0.72);
-  font-size: 14px;
+  font-size: 13px;
   line-height: 1.2;
 }
 
 .hud-card {
-  min-width: 86px;
+  min-width: 70px;
+  min-height: 34px;
 }
 
-.health-card,
-.danger-card {
-  width: 170px;
+.health-card {
+  width: 190px;
 }
 
 .hud-label {
-  margin-bottom: 4px;
+  margin-bottom: 3px;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 11px;
 }
 
 .hud-card strong {
-  display: block;
-  font-size: 18px;
+  display: inline;
+  font-size: 16px;
 }
 
 .bar {
-  height: 10px;
+  height: 9px;
   border: 2px solid rgba(255, 236, 181, 0.25);
   background: rgba(0, 0, 0, 0.34);
 }
@@ -104,20 +116,53 @@ canvas {
   background: #d19a3f;
 }
 
+.stat-card {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  justify-content: center;
+}
+
+.stat-card span {
+  color: var(--muted);
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.stage-card {
+  width: 168px;
+}
+
 .inventory {
+  position: absolute;
+  right: 0;
+  bottom: 0;
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  max-width: min(720px, calc(100vw - 24px));
-  margin-top: 8px;
+  justify-content: flex-end;
+  max-width: min(470px, 46vw);
+}
+
+.inventory.expanded {
+  max-width: min(560px, 52vw);
+}
+
+.loot-chip {
+  padding: 3px 5px;
+  border: 1px solid rgba(255, 236, 181, 0.16);
+  background: rgba(0, 0, 0, 0.18);
+  font-size: 12px;
 }
 
 .buffs {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  max-width: min(720px, calc(100vw - 24px));
-  margin-top: 8px;
+  max-width: min(340px, 36vw);
+  padding: 0;
+  border: 0;
+  background: transparent;
 }
 
 .buffs:empty {
@@ -133,35 +178,42 @@ canvas {
 
 .buff-chip {
   color: #fff0a6;
+  padding: 4px 6px;
+  border: 2px solid rgba(255, 236, 181, 0.2);
+  background: rgba(22, 15, 10, 0.72);
+  font-size: 12px;
 }
 
 .loot-icon,
 .powerup-icon {
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   image-rendering: pixelated;
 }
 
 .loot-icon {
   background-image: url("assets/loot.png");
-  background-size: 120px 24px;
+  background-size: 100px 20px;
 }
 
 .powerup-icon {
   background-image: url("assets/powerups.png");
-  background-size: 120px 24px;
+  background-size: 100px 20px;
 }
 
 .quest {
-  display: inline-block;
-  max-width: min(780px, calc(100vw - 24px));
-  margin-top: 8px;
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  max-width: min(620px, 48vw);
   color: #b8efb4;
 }
 
 .hint {
-  display: inline-block;
-  margin-top: 8px;
+  position: absolute;
+  left: 50%;
+  bottom: 10px;
+  transform: translateX(-50%);
   color: #ffe18a;
 }
 
@@ -611,8 +663,35 @@ button:disabled {
   .hud-card,
   .quest,
   .inventory,
+  .buffs,
   .hint {
     font-size: 12px;
+  }
+
+  .hud {
+    inset: 8px;
+  }
+
+  .health-card {
+    width: 150px;
+  }
+
+  .stage-card {
+    width: 142px;
+  }
+
+  .hud-left,
+  .hud-right,
+  .quest,
+  .inventory {
+    max-width: calc(100vw - 16px);
+  }
+
+  .hud-right {
+    top: 48px;
+    left: 0;
+    right: auto;
+    justify-content: flex-start;
   }
 }
 

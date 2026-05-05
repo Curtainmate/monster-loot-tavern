@@ -52,32 +52,25 @@
     </section>
 
     <section id="hud" class="hud" aria-live="polite">
-      <div class="hud-top">
+      <div class="hud-zone hud-left">
         <div class="hud-card health-card">
-          <div id="healthText" class="hud-label">Health</div>
+          <div id="healthText" class="hud-label">HP</div>
           <div class="bar"><span id="healthBar"></span></div>
         </div>
-        <div class="hud-card">
-          <div class="hud-label">Gold</div>
-          <strong id="goldText">0</strong>
-        </div>
-        <div class="hud-card">
-          <div class="hud-label">Damage</div>
-          <strong id="damageText">0</strong>
-        </div>
-        <div class="hud-card danger-card">
+        <div id="buffText" class="buffs"></div>
+      </div>
+      <div class="hud-zone hud-right">
+        <div class="hud-card stat-card"><span>Gold</span><strong id="goldText">0</strong></div>
+        <div class="hud-card stat-card"><span>DMG</span><strong id="damageText">0</strong></div>
+        <div class="hud-card stage-card">
           <div id="dangerText" class="hud-label">Stage</div>
           <div class="bar danger-progress"><span id="dangerBar"></span></div>
         </div>
-        <div class="hud-card">
-          <div class="hud-label">Day</div>
-          <strong id="dayText">1</strong>
-        </div>
+        <div class="hud-card stat-card"><span>Day</span><strong id="dayText">1</strong></div>
       </div>
-      <div id="questText" class="quest"></div>
-      <div id="buffText" class="buffs"></div>
-      <div id="inventoryText" class="inventory"></div>
-      <div id="hintText" class="hint"></div>
+      <div id="questText" class="quest hud-quest"></div>
+      <div id="inventoryText" class="inventory hud-inventory"></div>
+      <div id="hintText" class="hint hud-hint"></div>
     </section>
 
     <section id="shopOverlay" class="overlay hidden" aria-hidden="true">

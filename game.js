@@ -1273,6 +1273,7 @@ class UI {
     };
     this.activeShopTab = "sell";
     this.selectedClassId = "warrior";
+    this.inventoryExpanded = false;
 
     document.getElementById("closeShopButton").addEventListener("click", () => game.closeShop());
     document.getElementById("sellAllButton").addEventListener("click", () => game.shop.sellAll());
@@ -1301,14 +1302,19 @@ class UI {
     }
   }
 
+  toggleInventory() {
+    this.inventoryExpanded = !this.inventoryExpanded;
+    this.update();
+  }
+
   update() {
     const p = this.game.player;
-    this.healthText.textContent = `Health ${Math.ceil(p.health)}/${p.maxHealth}`;
+    this.healthText.textContent = `HP ${Math.ceil(p.health)}/${p.maxHealth}`;
     this.healthBar.style.width = `${clamp((p.health / p.maxHealth) * 100, 0, 100)}%`;
     this.goldText.textContent = p.gold;
     this.damageText.textContent = p.damage;
     this.dangerText.textContent = this.game.canEarnDangerProgress()
-      ? `Stage ${this.game.dangerLevel} (${this.game.dangerProgress}/${this.game.dangerProgressGoal()})`
+      ? `Stage ${this.game.dangerLevel} ${this.game.dangerProgress}/${this.game.dangerProgressGoal()}`
       : `Stage ${this.game.dangerLevel} / Cap ${this.game.maxDangerUnlocked}`;
     this.dangerBar.style.width = this.game.canEarnDangerProgress()
       ? `${clamp((this.game.dangerProgress / this.game.dangerProgressGoal()) * 100, 0, 100)}%`
@@ -1320,7 +1326,7 @@ class UI {
       this.buffText.innerHTML = activeBuffs.map(([type, time]) => {
         const data = CONFIG.powerups.types[type];
         const index = gameSprites.powerupFrames[type] || 0;
-        return `<span class="buff-chip"><span class="powerup-icon" style="background-position:-${index * 24}px 0"></span>${data.shortName} ${Math.ceil(time)}s</span>`;
+        return `<span class="buff-chip"><span class="powerup-icon" style="background-position:-${index * 20}px 0"></span>${data.shortName} ${Math.ceil(time)}s</span>`;
       }).join("");
     } else {
       this.buffText.textContent = "";
@@ -1328,13 +1334,19 @@ class UI {
 
     const inventory = Object.entries(p.inventory).filter(([, qty]) => qty > 0);
     if (inventory.length) {
-      this.inventoryText.innerHTML = inventory.map(([name, qty]) => {
-        const index = gameSprites.lootFrames[name] || 0;
-        return `<span class="loot-chip"><span class="loot-icon" style="background-position:-${index * 24}px 0"></span>${name} x${qty}</span>`;
-      }).join("");
+      const itemCount = inventory.reduce((total, [, qty]) => total + qty, 0);
+      if (this.inventoryExpanded) {
+        this.inventoryText.innerHTML = inventory.map(([name, qty]) => {
+          const index = gameSprites.lootFrames[name] || 0;
+          return `<span class="loot-chip"><span class="loot-icon" style="background-position:-${index * 20}px 0"></span>${name} x${qty}</span>`;
+        }).join("");
+      } else {
+        this.inventoryText.textContent = `Loot ${itemCount} (${inventory.length} types) | Tab`;
+      }
     } else {
-      this.inventoryText.textContent = "Loot: empty";
+      this.inventoryText.textContent = "Loot empty | Tab";
     }
+    this.inventoryText.classList.toggle("expanded", this.inventoryExpanded);
 
     if (!this.game.started) {
       this.hintText.textContent = "";
@@ -2133,6 +2145,10 @@ window.addEventListener("keydown", (event) => {
   keys.add(key);
   if ([" ", "arrowup", "arrowdown", "arrowleft", "arrowright"].includes(key)) {
     event.preventDefault();
+  }
+  if (key === "tab") {
+    event.preventDefault();
+    if (game.started && !event.repeat) game.ui.toggleInventory();
   }
   if (key === " " && !game.shopOpen) game.player.attack(game);
   if (key === "e") game.interact();
