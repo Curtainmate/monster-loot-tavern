@@ -18,6 +18,7 @@
     this.monsters = [];
     this.loot = [];
     this.coins = [];
+    this.itemDrops = [];
     this.powerups = [];
     this.chests = [];
     this.projectiles = [];
@@ -82,6 +83,7 @@
     this.projectiles = this.projectiles.filter((projectile) => !projectile.dead);
     for (const item of this.loot) item.update(dt);
     for (const coin of this.coins) coin.update(dt);
+    for (const itemDrop of this.itemDrops) itemDrop.update(dt);
     for (const powerup of this.powerups) powerup.update(dt);
     this.powerups = this.powerups.filter((powerup) => !powerup.expired);
     for (const chest of this.chests) chest.update(dt);
@@ -370,9 +372,20 @@
     }
     this.addDangerProgress(monster.isBoss ? CONFIG.dangerProgress.bossKill : CONFIG.dangerProgress.normalKill, "stage progress");
     this.dropMonsterGold(monster);
+    this.tryDropGeneratedItem(monster.isBoss ? "boss" : "monster", monster.x, monster.y - 12, monster);
     if (monster.isBoss) {
       this.floaters.push(new FloatingText("Boss defeated!", monster.x, monster.y - 42, "#ffe18a"));
     }
+  }
+
+  tryDropGeneratedItem(source, x, y, context = {}) {
+    if (!ItemSystem.rollItemDropChance(source, context)) return null;
+    const item = ItemSystem.generateItem({
+      classRestriction: this.player.classId,
+      stage: this.dangerLevel
+    });
+    this.itemDrops.push(new ItemDrop(item, x + Math.random() * 34 - 17, y + Math.random() * 28 - 14));
+    return item;
   }
 
   dropMonsterGold(monster) {
@@ -424,6 +437,18 @@
         this.audio.play("loot");
         this.coins = this.coins.filter((candidate) => candidate !== coin);
         this.floaters.push(new FloatingText(`+${coin.value} gold`, this.player.x, this.player.y - 30, "#ffe18a"));
+      }
+    }
+  }
+
+  collectNearbyItemDrops() {
+    for (const itemDrop of [...this.itemDrops]) {
+      if (distance(this.player, itemDrop) < 34) {
+        this.player.addItem(itemDrop.item);
+        this.audio.play("loot");
+        this.itemDrops = this.itemDrops.filter((candidate) => candidate !== itemDrop);
+        this.floaters.push(new FloatingText(itemDrop.item.name, this.player.x, this.player.y - 34, itemDrop.color));
+        if (this.inventoryOpen) this.ui.renderInventory();
       }
     }
   }
@@ -483,6 +508,7 @@
     this.drawWorld();
     for (const item of this.loot) item.draw(this.camera);
     for (const coin of this.coins) coin.draw(this.camera);
+    for (const itemDrop of this.itemDrops) itemDrop.draw(this.camera);
     for (const powerup of this.powerups) powerup.draw(this.camera);
     const promptedChest = this.nearbyChest();
     for (const chest of this.chests) chest.draw(this.camera, chest === promptedChest);

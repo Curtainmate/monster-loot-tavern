@@ -154,6 +154,7 @@
 
     game.collectNearbyLoot();
     game.collectNearbyCoins();
+    game.collectNearbyItemDrops();
     game.collectNearbyPowerups();
   }
 

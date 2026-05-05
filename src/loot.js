@@ -73,6 +73,45 @@ class CoinDrop {
   }
 }
 
+class ItemDrop {
+  constructor(item, x, y) {
+    this.item = item;
+    this.name = item.name;
+    this.x = x;
+    this.y = y;
+    this.size = 22;
+    this.life = 0;
+    this.color = {
+      common: "#f5e6bd",
+      uncommon: "#7fe08a",
+      rare: "#6fa8ff",
+      epic: "#c981ff"
+    }[item.rarity] || "#f5e6bd";
+  }
+
+  update(dt) {
+    this.life += dt;
+  }
+
+  draw(camera) {
+    const sx = this.x - camera.x;
+    const sy = this.y - camera.y + Math.sin(this.life * 4.8) * 2;
+    ctx.save();
+    ctx.globalAlpha = 0.28 + Math.sin(this.life * 6) * 0.08;
+    ctx.fillStyle = this.color;
+    ctx.fillRect(Math.floor(sx - 16), Math.floor(sy - 16), 32, 32);
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = "#21140e";
+    ctx.fillRect(Math.floor(sx - 10), Math.floor(sy - 12), 20, 24);
+    ctx.fillStyle = this.color;
+    ctx.fillRect(Math.floor(sx - 8), Math.floor(sy - 10), 16, 20);
+    ctx.fillStyle = "#fff8d9";
+    ctx.fillRect(Math.floor(sx - 4), Math.floor(sy - 6), 8, 2);
+    ctx.fillRect(Math.floor(sx - 5), Math.floor(sy - 1), 10, 2);
+    ctx.restore();
+  }
+}
+
 class PowerUp {
   constructor(type, x, y) {
     this.type = type;
@@ -154,6 +193,7 @@ class TreasureChest {
     const bonusGold = Math.floor(Math.random() * (8 + this.dangerLevel * 2));
     const totalGold = baseGold + bonusGold;
     game.dropCoins(totalGold, this.x, this.y);
+    game.tryDropGeneratedItem("chest", this.x, this.y - 10);
     game.floaters.push(new FloatingText(`Treasure! +${totalGold} gold`, this.x, this.y - 30, "#ffe18a"));
     game.audio.play("loot");
   }
