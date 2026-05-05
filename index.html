@@ -103,33 +103,21 @@
         <header>
           <div>
             <h1>Monster Loot Tavern</h1>
-            <p>Trade trophies for stronger runs.</p>
+            <p>Sell spare equipment and choose your stage.</p>
           </div>
           <button id="closeShopButton" class="icon-button" type="button" title="Close shop">X</button>
         </header>
 
         <div class="shop-tabs" role="tablist" aria-label="Shop sections">
-          <button id="shopTabSell" class="active" type="button">Sell</button>
-          <button id="shopTabBuy" type="button">Buy</button>
-          <button id="shopTabMastery" type="button">Mastery</button>
+          <button id="shopTabSell" class="active" type="button">Sell Items</button>
           <button id="shopTabDanger" type="button">Stage</button>
         </div>
 
         <div class="shop-pages">
           <div id="sellPage" class="shop-page">
-            <h2>Sell Loot</h2>
+            <h2>Sell Equipment</h2>
             <div id="sellList" class="shop-list"></div>
-            <button id="sellAllButton" class="primary-button" type="button">Sell All Loot</button>
-          </div>
-
-          <div id="buyPage" class="shop-page hidden">
-            <h2>Buy Items</h2>
-            <div id="buyList" class="shop-list"></div>
-          </div>
-
-          <div id="masteryPage" class="shop-page hidden">
-            <h2>Mastery</h2>
-            <div id="masteryList" class="shop-list"></div>
+            <button id="sellAllButton" class="primary-button" type="button">Sell All Unequipped</button>
           </div>
 
           <div id="dangerPage" class="shop-page hidden">

@@ -37,17 +37,7 @@
     this.items = [];
     this.equipment = Object.fromEntries(ITEM_SLOT_ORDER.map((slot) => [slot, null]));
     this.itemStats = {};
-    this.upgrades = new Set();
-    this.upgradeLevels = {};
-    this.masteryLevels = {};
     this.buffs = {};
-    for (const chain of Object.keys(CONFIG.upgradeChains[classId] || CONFIG.upgradeChains.warrior)) {
-      this.upgradeLevels[chain] = 0;
-    }
-    for (const chain of Object.keys(CONFIG.masteryChains[classId] || CONFIG.masteryChains.warrior)) {
-      this.masteryLevels[chain] = 0;
-    }
-    this.addStarterItems();
   }
 
   get damage() {
@@ -260,19 +250,16 @@
     this.inventory[name] = (this.inventory[name] || 0) + 1;
   }
 
-  addStarterItems() {
-    for (const slot of ITEM_SLOT_ORDER) {
-      this.addItem(ItemSystem.generateItem({
-        classRestriction: this.classId,
-        slot,
-        itemLevel: 1,
-        rarity: ITEM_RARITIES.COMMON
-      }));
-    }
-  }
-
   addItem(item) {
     this.items.push(item);
+  }
+
+  removeItem(uniqueId) {
+    this.items = this.items.filter((item) => item.uniqueId !== uniqueId);
+  }
+
+  isItemEquipped(uniqueId) {
+    return Object.values(this.equipment).some((item) => item && item.uniqueId === uniqueId);
   }
 
   canEquipItem(item) {

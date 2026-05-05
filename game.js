@@ -168,63 +168,6 @@
     this.ui.renderShop();
   }
 
-  availableShopItems() {
-    const items = [];
-    for (const [chain, tiers] of Object.entries(this.currentUpgradeChains())) {
-      const level = this.player.upgradeLevels[chain] || 0;
-      const next = tiers[level];
-      if (next) {
-        items.push({
-          ...next,
-          id: `${chain}${level + 1}`,
-          type: "upgrade",
-          chain,
-          level: level + 1,
-          name: `${next.name} (${level + 1}/3)`
-        });
-      } else {
-        items.push({
-          id: `${chain}Max`,
-          type: "upgrade",
-          chain,
-          level: tiers.length + 1,
-          name: `${chain[0].toUpperCase()}${chain.slice(1)} fully upgraded`,
-          price: 0,
-          description: "Maximum tier reached"
-        });
-      }
-    }
-    return [...items, ...CONFIG.consumables];
-  }
-
-  availableMasteryItems() {
-    const items = [];
-    for (const [chain, data] of Object.entries(this.currentMasteryChains())) {
-      const level = this.player.masteryLevels[chain] || 0;
-      const next = data.tiers[level];
-      if (!next) continue;
-      items.push({
-        ...next,
-        id: `${chain}${level + 1}`,
-        type: "mastery",
-        chain,
-        chainName: data.name,
-        currentLevel: level,
-        level: level + 1,
-        price: CONFIG.masteryPrices[level]
-      });
-    }
-    return items;
-  }
-
-  currentUpgradeChains() {
-    return CONFIG.upgradeChains[this.player.classId] || CONFIG.upgradeChains.warrior;
-  }
-
-  currentMasteryChains() {
-    return CONFIG.masteryChains[this.player.classId] || CONFIG.masteryChains.warrior;
-  }
-
   openShop() {
     if (!this.shopkeeper.nearby(this.player) || !this.playerInTavern()) return;
     this.closeInventory();
@@ -445,6 +388,7 @@
     for (const itemDrop of [...this.itemDrops]) {
       if (distance(this.player, itemDrop) < 34) {
         this.player.addItem(itemDrop.item);
+        this.questProgress.loot += 1;
         this.audio.play("loot");
         this.itemDrops = this.itemDrops.filter((candidate) => candidate !== itemDrop);
         this.floaters.push(new FloatingText(itemDrop.item.name, this.player.x, this.player.y - 34, itemDrop.color));

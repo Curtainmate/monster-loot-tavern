@@ -81,110 +81,6 @@
     silver: { name: "Silver Coin", value: 5 },
     gold: { name: "Gold Coin", value: 20 }
   },
-  upgradeChains: {
-    warrior: {
-      sword: [
-        { name: "Iron Sword", price: 45, damage: 10, description: "+10 weapon damage" },
-        { name: "Steel Sword", price: 95, damage: 10, description: "+10 more weapon damage" },
-        { name: "Mythril Sword", price: 170, damage: 14, description: "+14 more weapon damage" }
-      ],
-      armor: [
-        { name: "Leather Armor", price: 40, health: 35, description: "+35 max health and heal" },
-        { name: "Chainmail", price: 90, health: 45, description: "+45 max health and heal" },
-        { name: "Knight Plate", price: 165, health: 60, description: "+60 max health and heal" }
-      ],
-      boots: [
-        { name: "Hunter Boots", price: 35, speed: 35, description: "+35 movement speed" },
-        { name: "Wind Boots", price: 80, speed: 30, description: "+30 more movement speed" },
-        { name: "Storm Boots", price: 150, speed: 35, description: "+35 more movement speed" }
-      ],
-      amulet: [
-        { name: "Fire Amulet", price: 70, bonusDamage: 8, description: "+8 bonus attack damage" },
-        { name: "Ember Amulet", price: 130, bonusDamage: 10, description: "+10 more bonus attack damage" },
-        { name: "Phoenix Amulet", price: 220, bonusDamage: 14, description: "+14 more bonus attack damage" }
-      ]
-    },
-    ranger: {
-      bow: [
-        { name: "Hunter Bow", price: 45, damage: 7, description: "+7 arrow damage" },
-        { name: "Longbow", price: 95, damage: 8, description: "+8 more arrow damage" },
-        { name: "Runewood Bow", price: 170, damage: 11, description: "+11 more arrow damage" }
-      ],
-      armor: [
-        { name: "Padded Vest", price: 40, health: 25, description: "+25 max health and heal" },
-        { name: "Scout Mail", price: 90, health: 35, description: "+35 max health and heal" },
-        { name: "Dragonhide Coat", price: 165, health: 45, description: "+45 max health and heal" }
-      ],
-      boots: [
-        { name: "Trail Boots", price: 35, speed: 30, description: "+30 movement speed" },
-        { name: "Falcon Boots", price: 80, speed: 30, description: "+30 more movement speed" },
-        { name: "Windstep Boots", price: 150, speed: 35, description: "+35 more movement speed" }
-      ],
-      charm: [
-        { name: "Hawk Charm", price: 70, arrowSpeed: 120, arrowRange: 80, description: "+arrow speed and range" },
-        { name: "Eagle Charm", price: 130, cooldownReduction: 0.08, description: "Faster bow attacks" },
-        { name: "Storm Charm", price: 220, arrowPierce: 1, bonusDamage: 4, description: "Arrows pierce once and deal +4 damage" }
-      ]
-    }
-  },
-  consumables: [
-    { id: "healingPotion", name: "Healing Potion", price: 12, type: "consumable", description: "Restore 35 health" }
-  ],
-  masteryPrices: [350, 750, 1400],
-  masteryChains: {
-    warrior: {
-      multiSwing: {
-        name: "Multi-Swing",
-        tiers: [
-          { name: "Sweeping Technique", extraSwings: 1, description: "+1 swing direction" },
-          { name: "Whirlwind Form", extraSwings: 1, description: "+2 total swing directions" },
-          { name: "Storm of Steel", extraSwings: 1, description: "+3 total swing directions" }
-        ]
-      },
-      momentum: {
-        name: "Battle Momentum",
-        tiers: [
-          { name: "Battle Rhythm", momentumReduction: 0.08, momentumDuration: 2, description: "Kills briefly speed up attacks" },
-          { name: "Blood Rush", momentumReduction: 0.12, momentumDuration: 3, description: "Kills speed up attacks longer" },
-          { name: "War Trance", momentumReduction: 0.16, momentumDuration: 4, description: "Kills trigger a strong attack-speed burst" }
-        ]
-      },
-      guardBreaker: {
-        name: "Guard Breaker",
-        tiers: [
-          { name: "Cracking Blows", bossDamageBonus: 0.1, description: "+10% damage to bosses" },
-          { name: "Armor Splitter", bossDamageBonus: 0.1, description: "+20% total damage to bosses" },
-          { name: "Titan Breaker", bossDamageBonus: 0.1, description: "+30% total damage to bosses" }
-        ]
-      }
-    },
-    ranger: {
-      multiShot: {
-        name: "Multi-Shot",
-        tiers: [
-          { name: "Twin Shot", extraArrows: 1, description: "+1 arrow per attack" },
-          { name: "Triple Shot", extraArrows: 1, description: "+2 total arrows per attack" },
-          { name: "Arrow Storm", extraArrows: 1, description: "+3 total arrows per attack" }
-        ]
-      },
-      piercingShot: {
-        name: "Piercing Shot",
-        tiers: [
-          { name: "Barbed Arrows", arrowPierce: 1, description: "+1 arrow pierce" },
-          { name: "Bodkin Arrows", arrowPierce: 1, description: "+2 total arrow pierce" },
-          { name: "Phantom Arrows", arrowPierce: 1, description: "+3 total arrow pierce" }
-        ]
-      },
-      predatorFocus: {
-        name: "Predator Focus",
-        tiers: [
-          { name: "Keen Eye", longRangeBonus: 0.1, description: "+10% damage at long range" },
-          { name: "Patient Hunter", longRangeBonus: 0.1, description: "+20% total damage at long range" },
-          { name: "Apex Focus", longRangeBonus: 0.1, description: "+30% total damage at long range" }
-        ]
-      }
-    }
-  },
   chests: {
     minDelay: 24,
     maxDelay: 42,
@@ -271,8 +167,8 @@
   },
   quests: [
     { goal: "Hunt 4 monsters, then return to the tavern.", kills: 4, reward: 12 },
-    { goal: "Collect 6 pieces of loot, then return to the tavern.", loot: 6, reward: 18 },
-    { goal: "Earn 40 gold from selling loot, then return to the tavern.", gold: 40, reward: 25 },
+    { goal: "Collect 6 pieces of equipment, then return to the tavern.", loot: 6, reward: 18 },
+    { goal: "Earn 40 gold from selling equipment, then return to the tavern.", gold: 40, reward: 25 },
     { goal: "Hunt 10 monsters in one day, then return to the tavern.", kills: 10, reward: 40 }
   ],
   monsters: {

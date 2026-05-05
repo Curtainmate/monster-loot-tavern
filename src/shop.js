@@ -46,71 +46,24 @@ class Shop {
     this.game = game;
   }
 
-  sellItem(name) {
+  sellItem(uniqueId) {
     const p = this.game.player;
-    if (!p.inventory[name]) return;
-    p.inventory[name] -= 1;
-    p.gold += CONFIG.lootValues[name];
-    this.game.totalGoldEarned += CONFIG.lootValues[name];
-    this.game.questProgress.gold += CONFIG.lootValues[name];
-    this.game.addDangerProgress(Math.max(1, Math.floor(CONFIG.lootValues[name] / CONFIG.dangerProgress.saleGoldDivisor)), "stage progress");
+    const item = p.items.find((candidate) => candidate.uniqueId === uniqueId);
+    if (!item || p.isItemEquipped(uniqueId)) return;
+    p.removeItem(uniqueId);
+    p.gold += item.sellValue;
+    this.game.totalGoldEarned += item.sellValue;
+    this.game.questProgress.gold += item.sellValue;
+    this.game.addDangerProgress(Math.max(1, Math.floor(item.sellValue / CONFIG.dangerProgress.saleGoldDivisor)), "stage progress");
     this.game.audio.play("sell");
     this.game.ui.renderShop();
+    if (this.game.inventoryOpen) this.game.ui.renderInventory();
   }
 
   sellAll() {
-    for (const name of Object.keys(CONFIG.lootValues)) {
-      while (this.game.player.inventory[name] > 0) {
-        this.sellItem(name);
-      }
+    for (const item of [...this.game.player.items]) {
+      this.sellItem(item.uniqueId);
     }
-    this.game.ui.renderShop();
-  }
-
-  buyItem(id) {
-    const item = this.game.availableShopItems().find((candidate) => candidate.id === id);
-    const p = this.game.player;
-    if (!item || p.gold < item.price) return;
-    if (item.type === "upgrade" && p.upgradeLevels[item.chain] !== item.level - 1) return;
-
-    p.gold -= item.price;
-    if (item.type === "upgrade") {
-      if (item.damage) p.baseDamage += item.damage;
-      if (item.health) {
-        p.maxHealth += item.health;
-        p.health = p.maxHealth;
-      }
-      if (item.speed) p.speed += item.speed;
-      if (item.bonusDamage) p.bonusDamage += item.bonusDamage;
-      if (item.arrowSpeed) p.arrowSpeed += item.arrowSpeed;
-      if (item.arrowRange) p.arrowRange += item.arrowRange;
-      if (item.arrowPierce) p.arrowPierce += item.arrowPierce;
-      if (item.cooldownReduction) p.attackCooldown = Math.max(0.18, p.attackCooldown - item.cooldownReduction);
-      p.upgradeLevels[item.chain] = item.level;
-      p.upgrades.add(item.id);
-    } else if (item.id === "healingPotion") {
-      p.health = Math.min(p.maxHealth, p.health + 35);
-    }
-    this.game.audio.play("buy");
-    this.game.ui.renderShop();
-  }
-
-  buyMastery(id) {
-    const item = this.game.availableMasteryItems().find((candidate) => candidate.id === id);
-    const p = this.game.player;
-    if (!item || p.gold < item.price) return;
-    if (p.masteryLevels[item.chain] !== item.currentLevel) return;
-
-    p.gold -= item.price;
-    if (item.extraSwings) p.extraSwings += item.extraSwings;
-    if (item.extraArrows) p.extraArrows += item.extraArrows;
-    if (item.arrowPierce) p.arrowPierce += item.arrowPierce;
-    if (item.longRangeBonus) p.longRangeBonus += item.longRangeBonus;
-    if (item.bossDamageBonus) p.bossDamageBonus += item.bossDamageBonus;
-    if (item.momentumReduction) p.momentumReduction = item.momentumReduction;
-    if (item.momentumDuration) p.momentumDuration = item.momentumDuration;
-    p.masteryLevels[item.chain] = item.currentLevel + 1;
-    this.game.audio.play("buy");
     this.game.ui.renderShop();
   }
 }

@@ -687,6 +687,10 @@ p {
   color: var(--muted);
 }
 
+.shop-row.equipped {
+  opacity: 0.72;
+}
+
 .danger-list {
   grid-template-columns: repeat(auto-fit, minmax(58px, 1fr));
 }

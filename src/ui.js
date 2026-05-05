@@ -20,8 +20,6 @@
     this.gameOverOverlay = document.getElementById("gameOverOverlay");
     this.gameOverStats = document.getElementById("gameOverStats");
     this.sellList = document.getElementById("sellList");
-    this.buyList = document.getElementById("buyList");
-    this.masteryList = document.getElementById("masteryList");
     this.dangerList = document.getElementById("dangerList");
     this.equipmentSlots = document.getElementById("equipmentSlots");
     this.itemList = document.getElementById("itemList");
@@ -32,14 +30,10 @@
     this.hudMusicButton = document.getElementById("hudMusicButton");
     this.shopTabs = {
       sell: document.getElementById("shopTabSell"),
-      buy: document.getElementById("shopTabBuy"),
-      mastery: document.getElementById("shopTabMastery"),
       danger: document.getElementById("shopTabDanger")
     };
     this.shopPages = {
       sell: document.getElementById("sellPage"),
-      buy: document.getElementById("buyPage"),
-      mastery: document.getElementById("masteryPage"),
       danger: document.getElementById("dangerPage")
     };
     this.activeShopTab = "sell";
@@ -161,56 +155,25 @@
     this.setShopTab(this.activeShopTab);
     const p = this.game.player;
     this.sellList.innerHTML = "";
-    for (const [name, value] of Object.entries(CONFIG.lootValues)) {
-      const qty = p.inventory[name] || 0;
+    const equippedIds = new Set(Object.values(p.equipment).filter(Boolean).map((item) => item.uniqueId));
+    for (const item of p.items) {
+      const equipped = equippedIds.has(item.uniqueId);
       const row = document.createElement("div");
-      row.className = "shop-row";
-      row.innerHTML = `<div><strong>${name}</strong><small>${qty} owned | ${value} gold each</small></div>`;
+      row.className = `shop-row rarity-${item.rarity} ${equipped ? "equipped" : ""}`;
+      row.innerHTML = `<div><strong>${item.name}</strong><small>${ITEM_SLOT_LABELS[item.slot]} | Level ${item.itemLevel} | ${this.itemStatsText(item)} | ${item.sellValue} gold</small></div>`;
       const button = document.createElement("button");
       button.type = "button";
-      button.textContent = "Sell";
-      button.disabled = qty <= 0;
-      button.addEventListener("click", () => this.game.shop.sellItem(name));
+      button.textContent = equipped ? "Equipped" : "Sell";
+      button.disabled = equipped;
+      button.addEventListener("click", () => this.game.shop.sellItem(item.uniqueId));
       row.appendChild(button);
       this.sellList.appendChild(row);
     }
-
-    this.buyList.innerHTML = "";
-    const shopItems = this.game.availableShopItems();
-    for (const item of shopItems) {
-      const owned = item.type === "upgrade" && item.level > this.game.currentUpgradeChains()[item.chain].length;
-      const canAfford = p.gold >= item.price;
+    if (!p.items.length) {
       const row = document.createElement("div");
       row.className = "shop-row";
-      row.innerHTML = `<div><strong>${item.name}</strong><small>${item.description} | ${item.price} gold</small></div>`;
-      const button = document.createElement("button");
-      button.type = "button";
-      button.textContent = owned ? "Maxed" : "Buy";
-      button.disabled = (owned && item.type === "upgrade") || !canAfford;
-      button.addEventListener("click", () => this.game.shop.buyItem(item.id));
-      row.appendChild(button);
-      this.buyList.appendChild(row);
-    }
-
-    this.masteryList.innerHTML = "";
-    for (const item of this.game.availableMasteryItems()) {
-      const canAfford = p.gold >= item.price;
-      const row = document.createElement("div");
-      row.className = "shop-row";
-      row.innerHTML = `<div><strong>${item.chainName} ${item.currentLevel}/3</strong><small>Next: ${item.name} | ${item.description} | ${item.price} gold</small></div>`;
-      const button = document.createElement("button");
-      button.type = "button";
-      button.textContent = "Train";
-      button.disabled = !canAfford;
-      button.addEventListener("click", () => this.game.shop.buyMastery(item.id));
-      row.appendChild(button);
-      this.masteryList.appendChild(row);
-    }
-    if (!this.masteryList.children.length) {
-      const row = document.createElement("div");
-      row.className = "shop-row";
-      row.innerHTML = "<div><strong>All masteries complete</strong><small>No further mastery training is available.</small></div>";
-      this.masteryList.appendChild(row);
+      row.innerHTML = "<div><strong>No equipment to sell</strong><small>Find item drops in the field, then bring spare gear back here.</small></div>";
+      this.sellList.appendChild(row);
     }
 
     this.dangerList.innerHTML = "";
@@ -282,7 +245,7 @@
     if (!p.items.length) {
       const empty = document.createElement("div");
       empty.className = "item-row";
-      empty.innerHTML = "<div><strong>No items yet</strong><small>Item drops will be added later.</small></div>";
+      empty.innerHTML = "<div><strong>No items yet</strong><small>Find equipment drops in the field or from chests.</small></div>";
       this.itemList.appendChild(empty);
     }
   }
