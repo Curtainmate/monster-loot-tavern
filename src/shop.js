@@ -61,7 +61,7 @@ class Shop {
   }
 
   sellAll() {
-    for (const item of [...this.game.player.items]) {
+    for (const item of [...this.game.player.unequippedItems()]) {
       this.sellItem(item.uniqueId);
     }
     this.game.ui.renderShop();

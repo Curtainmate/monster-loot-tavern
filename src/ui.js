@@ -122,7 +122,7 @@
     }
 
     const equippedCount = Object.values(p.equipment).filter(Boolean).length;
-    this.inventoryText.textContent = `Inventory ${p.items.length}/${CONFIG.inventory.capacity} items | ${equippedCount}/6 equipped | Tab`;
+    this.inventoryText.textContent = `Inventory ${p.inventoryCount()}/${CONFIG.inventory.capacity} items | ${equippedCount}/6 equipped | Tab`;
 
     if (!this.game.started) {
       this.hintText.textContent = "";
@@ -156,24 +156,22 @@
     this.setShopTab(this.activeShopTab);
     const p = this.game.player;
     this.sellList.innerHTML = "";
-    const equippedIds = new Set(Object.values(p.equipment).filter(Boolean).map((item) => item.uniqueId));
-    for (const item of p.items) {
-      const equipped = equippedIds.has(item.uniqueId);
+    const sellableItems = p.unequippedItems();
+    for (const item of sellableItems) {
       const row = document.createElement("div");
-      row.className = `shop-row rarity-${item.rarity} ${equipped ? "equipped" : ""}`;
+      row.className = `shop-row rarity-${item.rarity}`;
       row.innerHTML = `<div><strong>${item.name}</strong><small>${ITEM_SLOT_LABELS[item.slot]} | Level ${item.itemLevel} | ${this.itemStatsText(item)} | ${item.sellValue} gold</small></div>`;
       const button = document.createElement("button");
       button.type = "button";
-      button.textContent = equipped ? "Equipped" : "Sell";
-      button.disabled = equipped;
+      button.textContent = "Sell";
       button.addEventListener("click", () => this.game.shop.sellItem(item.uniqueId));
       row.appendChild(button);
       this.sellList.appendChild(row);
     }
-    if (!p.items.length) {
+    if (!sellableItems.length) {
       const row = document.createElement("div");
       row.className = "shop-row";
-      row.innerHTML = "<div><strong>No equipment to sell</strong><small>Find item drops in the field, then bring spare gear back here.</small></div>";
+      row.innerHTML = "<div><strong>No spare equipment to sell</strong><small>Equipped items stay safely in their equipment slots.</small></div>";
       this.sellList.appendChild(row);
     }
 
@@ -200,16 +198,18 @@
 
   renderInventory() {
     const p = this.game.player;
-    this.itemListTitle.textContent = `Items ${p.items.length}/${CONFIG.inventory.capacity}`;
+    const backpackItems = p.unequippedItems();
+    this.itemListTitle.textContent = `Items ${p.inventoryCount()}/${CONFIG.inventory.capacity}`;
     this.equipmentSlots.innerHTML = "";
     for (const slot of ITEM_SLOT_ORDER) {
       const item = p.equipment[slot];
+      const canUnequip = p.canUnequipSlot(slot);
       const row = document.createElement("button");
       row.type = "button";
       row.className = `equipment-slot ${item ? `rarity-${item.rarity}` : ""}`;
-      row.disabled = !item;
+      row.disabled = !item || !canUnequip;
       row.innerHTML = item
-        ? `<span>${ITEM_SLOT_LABELS[slot]}</span><strong>${item.name}</strong><small>${this.itemStatsText(item)}</small>`
+        ? `<span>${ITEM_SLOT_LABELS[slot]}</span><strong>${item.name}</strong><small>${canUnequip ? this.itemStatsText(item) : "Backpack full"}</small>`
         : `<span>${ITEM_SLOT_LABELS[slot]}</span><strong>Empty</strong><small>No item equipped</small>`;
       row.addEventListener("click", () => {
         p.unequipSlot(slot);
@@ -220,11 +220,9 @@
     }
 
     this.itemList.innerHTML = "";
-    const equippedIds = new Set(Object.values(p.equipment).filter(Boolean).map((item) => item.uniqueId));
-    for (const item of p.items) {
-      const equipped = equippedIds.has(item.uniqueId);
+    for (const item of backpackItems) {
       const row = document.createElement("div");
-      row.className = `item-row rarity-${item.rarity} ${equipped ? "equipped" : ""}`;
+      row.className = `item-row rarity-${item.rarity}`;
       const comparison = this.itemComparisonText(item, p.equipment[item.slot]);
       row.innerHTML = `
         <div>
@@ -235,8 +233,8 @@
       `;
       const button = document.createElement("button");
       button.type = "button";
-      button.textContent = equipped ? "Equipped" : "Equip";
-      button.disabled = equipped || !p.canEquipItem(item);
+      button.textContent = "Equip";
+      button.disabled = !p.canEquipItem(item);
       button.addEventListener("click", () => {
         p.equipItem(item.uniqueId);
         this.renderInventory();
@@ -246,10 +244,10 @@
       this.itemList.appendChild(row);
     }
 
-    if (!p.items.length) {
+    if (!backpackItems.length) {
       const empty = document.createElement("div");
       empty.className = "item-row";
-      empty.innerHTML = "<div><strong>No items yet</strong><small>Find equipment drops in the field or from chests.</small></div>";
+      empty.innerHTML = "<div><strong>No backpack items</strong><small>Equipped gear does not use backpack slots.</small></div>";
       this.itemList.appendChild(empty);
     }
   }

@@ -267,7 +267,7 @@
   }
 
   addItem(item) {
-    if (this.items.length >= CONFIG.inventory.capacity) return false;
+    if (!this.hasInventorySpace()) return false;
     this.items.push(item);
     return true;
   }
@@ -278,6 +278,18 @@
 
   isItemEquipped(uniqueId) {
     return Object.values(this.equipment).some((item) => item && item.uniqueId === uniqueId);
+  }
+
+  unequippedItems() {
+    return this.items.filter((item) => !this.isItemEquipped(item.uniqueId));
+  }
+
+  inventoryCount() {
+    return this.unequippedItems().length;
+  }
+
+  hasInventorySpace() {
+    return this.inventoryCount() < CONFIG.inventory.capacity;
   }
 
   canEquipItem(item) {
@@ -295,10 +307,15 @@
 
   unequipSlot(slot) {
     if (!this.equipment[slot]) return false;
+    if (!this.hasInventorySpace()) return false;
     this.equipment[slot] = null;
     this.recalculateItemStats();
     this.health = Math.min(this.health, this.maxHealth);
     return true;
+  }
+
+  canUnequipSlot(slot) {
+    return Boolean(this.equipment[slot]) && this.hasInventorySpace();
   }
 
   recalculateItemStats() {
