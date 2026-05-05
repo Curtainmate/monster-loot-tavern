@@ -123,6 +123,12 @@ canvas {
   justify-content: center;
 }
 
+.music-toggle {
+  min-width: 88px;
+  color: #ffe18a;
+  font-weight: 700;
+}
+
 .stat-card span {
   color: var(--muted);
   font-size: 11px;
@@ -507,6 +513,22 @@ canvas {
 
 .start-run-button:hover:not(:disabled) {
   background: linear-gradient(#f1b14e, #b86825);
+}
+
+.music-button {
+  display: block;
+  width: min(190px, 44%);
+  min-height: 34px;
+  margin: 12px auto 0;
+  border: 2px solid rgba(255, 236, 181, 0.38);
+  background: rgba(22, 15, 10, 0.72);
+  color: #ffe18a;
+}
+
+.music-button.active,
+.music-toggle.active {
+  background: #d19a3f;
+  color: #21140e;
 }
 
 .class-card.locked {

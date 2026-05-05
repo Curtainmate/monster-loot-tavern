@@ -394,6 +394,10 @@ class AudioManager {
   constructor() {
     this.context = null;
     this.enabled = false;
+    this.music = new Audio("assets/audio/music/journey_theme.mp3");
+    this.music.loop = true;
+    this.music.volume = 0.34;
+    this.musicEnabled = false;
   }
 
   unlock() {
@@ -440,6 +444,24 @@ class AudioManager {
       gameOver: () => this.tone(70, 0.35, "sawtooth", 0.055)
     };
     if (sounds[name]) sounds[name]();
+  }
+
+  toggleMusic() {
+    this.musicEnabled = !this.musicEnabled;
+    if (this.musicEnabled) {
+      this.music.play().catch(() => {
+        this.musicEnabled = false;
+      });
+    } else {
+      this.music.pause();
+    }
+    return this.musicEnabled;
+  }
+
+  stopMusic() {
+    this.music.pause();
+    this.music.currentTime = 0;
+    this.musicEnabled = false;
   }
 }
 
@@ -1263,6 +1285,8 @@ class UI {
     this.warriorButton = document.getElementById("warriorButton");
     this.rangerButton = document.getElementById("rangerButton");
     this.startRunButton = document.getElementById("startRunButton");
+    this.startMusicButton = document.getElementById("startMusicButton");
+    this.hudMusicButton = document.getElementById("hudMusicButton");
     this.shopTabs = {
       sell: document.getElementById("shopTabSell"),
       buy: document.getElementById("shopTabBuy"),
@@ -1285,6 +1309,8 @@ class UI {
     this.warriorButton.addEventListener("click", () => this.selectClass("warrior"));
     this.rangerButton.addEventListener("click", () => this.selectClass("ranger"));
     this.startRunButton.addEventListener("click", () => game.startGame(this.selectedClassId));
+    this.startMusicButton.addEventListener("click", () => game.toggleMusic());
+    this.hudMusicButton.addEventListener("click", () => game.toggleMusic());
     for (const [tab, button] of Object.entries(this.shopTabs)) {
       button.addEventListener("click", () => this.setShopTab(tab));
     }
@@ -1309,6 +1335,14 @@ class UI {
   toggleInventory() {
     this.inventoryExpanded = !this.inventoryExpanded;
     this.update();
+  }
+
+  updateMusicButtons() {
+    const label = this.game.audio.musicEnabled ? "Music On" : "Music Off";
+    this.startMusicButton.textContent = label;
+    this.hudMusicButton.textContent = label;
+    this.startMusicButton.classList.toggle("active", this.game.audio.musicEnabled);
+    this.hudMusicButton.classList.toggle("active", this.game.audio.musicEnabled);
   }
 
   update() {
@@ -1373,6 +1407,7 @@ class UI {
     this.pauseOverlay.setAttribute("aria-hidden", String(!this.game.paused || this.game.shopOpen || this.game.gameOver || !this.game.started));
     this.gameOverOverlay.classList.toggle("hidden", !this.game.gameOver);
     this.gameOverOverlay.setAttribute("aria-hidden", String(!this.game.gameOver));
+    this.updateMusicButtons();
   }
 
   renderShop() {
@@ -1581,6 +1616,12 @@ class Game {
   startGame(classId) {
     if (!CONFIG.classes[classId]) return;
     this.restart(false, classId);
+  }
+
+  toggleMusic() {
+    this.audio.unlock();
+    this.audio.toggleMusic();
+    this.ui.updateMusicButtons();
   }
 
   loop(time) {
