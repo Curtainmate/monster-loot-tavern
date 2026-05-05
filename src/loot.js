@@ -1,0 +1,262 @@
+﻿class LootItem {
+  constructor(name, x, y) {
+    this.name = name;
+    this.x = x;
+    this.y = y;
+    this.size = 16;
+    this.life = 0;
+    this.color = {
+      "Slime Gel": "#72e782",
+      "Goblin Ear": "#b7d276",
+      "Wolf Pelt": "#d8d1bd",
+      "Rusty Dagger": "#a7aeb9",
+      "Monster Fang": "#efe2b4"
+    }[name] || "#fff";
+  }
+
+  update(dt) {
+    this.life += dt;
+  }
+
+  draw(camera) {
+    if (gameSprites.drawLoot(this, camera)) {
+      if (Math.floor(this.life * 4) % 2 === 0) {
+        ctx.fillStyle = "#fff6ba";
+        ctx.fillRect(Math.floor(this.x - camera.x + 10), Math.floor(this.y - camera.y - 14), 3, 3);
+      }
+      return;
+    }
+
+    const sx = this.x - camera.x;
+    const sy = this.y - camera.y + Math.sin(this.life * 5) * 2;
+    ctx.fillStyle = "rgba(255, 246, 180, 0.28)";
+    ctx.fillRect(Math.floor(sx - 10), Math.floor(sy - 10), 20, 20);
+    drawRectSprite(sx, sy, this.size, this.size, this.color);
+    if (Math.floor(this.life * 4) % 2 === 0) {
+      ctx.fillStyle = "#fff6ba";
+      ctx.fillRect(Math.floor(sx + 8), Math.floor(sy - 10), 3, 3);
+    }
+  }
+}
+
+class PowerUp {
+  constructor(type, x, y) {
+    this.type = type;
+    this.data = CONFIG.powerups.types[type] || CONFIG.powerups.types.heart;
+    this.name = this.data.name;
+    this.x = x;
+    this.y = y;
+    this.size = 22;
+    this.life = 0;
+    this.timeLeft = CONFIG.powerups.despawnTime;
+    this.color = this.data.color;
+  }
+
+  update(dt) {
+    this.life += dt;
+    this.timeLeft -= dt;
+  }
+
+  get expired() {
+    return this.timeLeft <= 0;
+  }
+
+  collect(game) {
+    const player = game.player;
+    if (this.type === "heart") {
+      const before = player.health;
+      player.health = Math.min(player.maxHealth, player.health + CONFIG.powerups.heartHeal);
+      const healed = Math.ceil(player.health - before);
+      game.floaters.push(new FloatingText(healed > 0 ? `+${healed} Health` : "Health full", player.x, player.y - 34, "#ff9aa5"));
+    } else {
+      player.addBuff(this.type, this.data.duration);
+      game.floaters.push(new FloatingText(this.name, player.x, player.y - 34, this.color));
+    }
+    game.audio.play("loot");
+  }
+
+  draw(camera) {
+    if (gameSprites.drawPowerup(this, camera)) {
+      const sx = this.x - camera.x;
+      const sy = this.y - camera.y;
+      ctx.globalAlpha = 0.55 + Math.sin(this.life * 8) * 0.18;
+      ctx.fillStyle = this.color;
+      ctx.fillRect(Math.floor(sx + 11), Math.floor(sy - 18), 3, 3);
+      ctx.fillRect(Math.floor(sx - 14), Math.floor(sy + 9), 2, 2);
+      ctx.globalAlpha = 1;
+      return;
+    }
+
+    const sx = this.x - camera.x;
+    const sy = this.y - camera.y + Math.sin(this.life * 5.4) * 2;
+    ctx.fillStyle = "rgba(255, 246, 180, 0.24)";
+    ctx.fillRect(Math.floor(sx - 12), Math.floor(sy - 12), 24, 24);
+    drawRectSprite(sx, sy, this.size, this.size, this.color);
+  }
+}
+
+class TreasureChest {
+  constructor(x, y, dangerLevel) {
+    this.x = x;
+    this.y = y;
+    this.size = 34;
+    this.dangerLevel = dangerLevel;
+    this.life = 0;
+    this.opened = false;
+  }
+
+  update(dt) {
+    this.life += dt;
+  }
+
+  nearby(player) {
+    return Math.hypot(player.x - this.x, player.y - this.y) < 58;
+  }
+
+  open(game) {
+    if (this.opened) return;
+    this.opened = true;
+    const rolls = 3 + Math.min(4, Math.floor(this.dangerLevel / 2)) + Math.floor(Math.random() * 3);
+    const table = [
+      "Slime Gel",
+      "Slime Gel",
+      "Goblin Ear",
+      "Wolf Pelt",
+      "Monster Fang",
+      "Rusty Dagger"
+    ];
+    for (let i = 0; i < rolls; i += 1) {
+      const name = table[Math.floor(Math.random() * table.length)];
+      game.dropLoot(name, this.x + Math.random() * 54 - 27, this.y + Math.random() * 42 - 21);
+    }
+    if (Math.random() < 0.3 + this.dangerLevel * 0.03) {
+      game.dropLoot("Rusty Dagger", this.x, this.y - 8);
+    }
+    game.floaters.push(new FloatingText("Treasure!", this.x, this.y - 30, "#ffe18a"));
+    game.audio.play("loot");
+  }
+
+  draw(camera, showPrompt = false) {
+    const sx = this.x - camera.x;
+    if (!gameSprites.drawChest(this, camera)) {
+      const sy = this.y - camera.y + Math.sin(this.life * 2.4) * 1.5;
+      drawRectSprite(sx, sy, this.size, this.size - 8, "#b8793f");
+      ctx.fillStyle = "#f3d270";
+      ctx.fillRect(Math.floor(sx - 4), Math.floor(sy - 3), 8, 7);
+    }
+    if (showPrompt) this.drawPrompt(camera);
+  }
+
+  drawPrompt(camera) {
+    const sx = this.x - camera.x;
+    const sy = this.y - camera.y - 72 + Math.sin(this.life * 5) * 2;
+    ctx.save();
+    ctx.font = "700 13px Trebuchet MS, Verdana, sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    const text = "Press E";
+    const width = ctx.measureText(text).width + 22;
+    ctx.fillStyle = "rgba(25, 14, 7, 0.88)";
+    ctx.fillRect(Math.floor(sx - width / 2), Math.floor(sy - 14), width, 28);
+    ctx.strokeStyle = "#ffd46b";
+    ctx.lineWidth = 2;
+    ctx.strokeRect(Math.floor(sx - width / 2), Math.floor(sy - 14), width, 28);
+    ctx.fillStyle = "#fff0a6";
+    ctx.fillText(text, Math.floor(sx), Math.floor(sy + 1));
+    ctx.restore();
+  }
+}
+
+class Projectile {
+  constructor(x, y, direction, damage, speed, range, pierce, longRangeBonus = 0) {
+    this.x = x;
+    this.y = y;
+    this.startX = x;
+    this.startY = y;
+    this.dir = { ...direction };
+    this.damage = damage;
+    this.speed = speed;
+    this.range = range;
+    this.pierceLeft = pierce;
+    this.longRangeBonus = longRangeBonus;
+    this.size = 10;
+    this.dead = false;
+    this.hitMonsters = new Set();
+  }
+
+  update(dt, game) {
+    this.x += this.dir.x * this.speed * dt;
+    this.y += this.dir.y * this.speed * dt;
+    if (Math.hypot(this.x - this.startX, this.y - this.startY) > this.range || this.x < 0 || this.y < 0 || this.x > CONFIG.world.width || this.y > CONFIG.world.height) {
+      this.dead = true;
+      return;
+    }
+
+    for (const monster of game.monsters) {
+      if (this.hitMonsters.has(monster)) continue;
+      if (Math.hypot(monster.x - this.x, monster.y - this.y) <= monster.size / 2 + this.size / 2) {
+        this.hitMonsters.add(monster);
+        const traveled = Math.hypot(this.x - this.startX, this.y - this.startY);
+        const damage = traveled >= this.range * 0.45 ? Math.round(this.damage * (1 + this.longRangeBonus)) : this.damage;
+        monster.takeDamage(damage, this.dir, game);
+        game.attackEffects.push({
+          x: this.x,
+          y: this.y,
+          dir: { ...this.dir },
+          life: 0.12,
+          maxLife: 0.12,
+          radius: 22,
+          type: "impact"
+        });
+        if (this.pierceLeft > 0) {
+          this.pierceLeft -= 1;
+        } else {
+          this.dead = true;
+        }
+        break;
+      }
+    }
+  }
+
+  draw(camera) {
+    const sx = this.x - camera.x;
+    const sy = this.y - camera.y;
+    const angle = Math.atan2(this.dir.y, this.dir.x);
+    ctx.save();
+    ctx.translate(sx, sy);
+    ctx.rotate(angle);
+    ctx.fillStyle = "#3b2718";
+    ctx.fillRect(-8, -2, 15, 4);
+    ctx.fillStyle = "#d9d2c1";
+    ctx.fillRect(5, -3, 5, 6);
+    ctx.fillStyle = "#f5d279";
+    ctx.fillRect(-10, -4, 4, 2);
+    ctx.fillRect(-10, 2, 4, 2);
+    ctx.restore();
+  }
+}
+
+class FloatingText {
+  constructor(text, x, y, color) {
+    this.text = text;
+    this.x = x;
+    this.y = y;
+    this.color = color;
+    this.life = 0.75;
+  }
+
+  update(dt) {
+    this.life -= dt;
+    this.y -= 34 * dt;
+  }
+
+  draw(camera) {
+    ctx.globalAlpha = clamp(this.life / 0.75, 0, 1);
+    ctx.fillStyle = this.color;
+    ctx.font = "bold 16px Trebuchet MS";
+    ctx.textAlign = "center";
+    ctx.fillText(this.text, this.x - camera.x, this.y - camera.y);
+    ctx.globalAlpha = 1;
+  }
+}
+
