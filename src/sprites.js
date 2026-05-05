@@ -36,7 +36,7 @@
       counter: 10,
       sign: 11
     };
-    for (const name of ["player", "ranger", "slime", "slime_yellow", "goblin", "goblin_red", "wolf", "wolf_black", "loot", "powerups", "tileset", "chest", "shopkeeper", "tree", "bush", "table", "sign"]) {
+    for (const name of ["player", "ranger", "slime", "slime_yellow", "goblin", "goblin_red", "wolf", "wolf_black", "loot", "powerups", "tileset", "chest", "shopkeeper", "tree", "bush", "table", "sign", "coin_bronze", "coin_silver", "coin_gold"]) {
       const image = new Image();
       image.onload = () => {
         this.loaded[name] = true;
@@ -164,6 +164,12 @@
     const sx = loot.x - camera.x;
     const sy = loot.y - camera.y + Math.sin(loot.life * 5) * 2;
     return this.drawImageFrame("loot", frame, 16, 16, sx - 16, sy - 16, 32, 32);
+  }
+
+  drawCoin(coin, camera) {
+    const sx = coin.x - camera.x;
+    const sy = coin.y - camera.y + Math.sin(coin.life * 5.8) * 2;
+    return this.drawImage(`coin_${coin.type}`, sx - 14, sy - 14, 28, 28);
   }
 
   drawPowerup(powerup, camera) {

@@ -84,6 +84,7 @@
     this.updateBuffs(dt);
 
     game.collectNearbyLoot();
+    game.collectNearbyCoins();
     game.collectNearbyPowerups();
   }
 

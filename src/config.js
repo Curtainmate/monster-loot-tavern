@@ -76,6 +76,11 @@
     "Rusty Dagger": 14,
     "Monster Fang": 11
   },
+  coins: {
+    bronze: { name: "Bronze Coin", value: 1 },
+    silver: { name: "Silver Coin", value: 5 },
+    gold: { name: "Gold Coin", value: 20 }
+  },
   upgradeChains: {
     warrior: {
       sword: [
@@ -278,6 +283,7 @@
       speed: 58,
       health: 24,
       damage: 8,
+      gold: 3,
       attackCooldown: 0.9,
       score: 1,
       loot: [["Slime Gel", 0.85], ["Monster Fang", 0.12]]
@@ -289,6 +295,7 @@
       speed: 88,
       health: 42,
       damage: 13,
+      gold: 8,
       attackCooldown: 0.8,
       score: 2,
       loot: [["Goblin Ear", 0.78], ["Rusty Dagger", 0.18], ["Monster Fang", 0.2]]
@@ -300,6 +307,7 @@
       speed: 130,
       health: 30,
       damage: 10,
+      gold: 7,
       attackCooldown: 0.7,
       score: 2,
       loot: [["Wolf Pelt", 0.72], ["Monster Fang", 0.22]]

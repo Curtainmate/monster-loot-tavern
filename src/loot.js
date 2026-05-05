@@ -39,6 +39,40 @@
   }
 }
 
+class CoinDrop {
+  constructor(type, x, y) {
+    this.type = type;
+    this.data = CONFIG.coins[type] || CONFIG.coins.bronze;
+    this.name = this.data.name;
+    this.value = this.data.value;
+    this.x = x;
+    this.y = y;
+    this.size = 16;
+    this.life = 0;
+  }
+
+  update(dt) {
+    this.life += dt;
+  }
+
+  draw(camera) {
+    if (gameSprites.drawCoin(this, camera)) {
+      const sx = this.x - camera.x;
+      const sy = this.y - camera.y;
+      ctx.globalAlpha = 0.65 + Math.sin(this.life * 8) * 0.18;
+      ctx.fillStyle = "#fff1a8";
+      ctx.fillRect(Math.floor(sx + 9), Math.floor(sy - 13), 3, 3);
+      ctx.globalAlpha = 1;
+      return;
+    }
+
+    const sx = this.x - camera.x;
+    const sy = this.y - camera.y + Math.sin(this.life * 5.8) * 2;
+    const color = this.type === "gold" ? "#f5c84d" : this.type === "silver" ? "#d8e1e8" : "#c98348";
+    drawRectSprite(sx, sy, this.size, this.size, color);
+  }
+}
+
 class PowerUp {
   constructor(type, x, y) {
     this.type = type;

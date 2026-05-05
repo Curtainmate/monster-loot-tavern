@@ -17,6 +17,7 @@
     this.player.start(showStart ? "warrior" : (classId || this.selectedClass || "warrior"));
     this.monsters = [];
     this.loot = [];
+    this.coins = [];
     this.powerups = [];
     this.chests = [];
     this.projectiles = [];
@@ -78,6 +79,7 @@
     for (const projectile of this.projectiles) projectile.update(dt, this);
     this.projectiles = this.projectiles.filter((projectile) => !projectile.dead);
     for (const item of this.loot) item.update(dt);
+    for (const coin of this.coins) coin.update(dt);
     for (const powerup of this.powerups) powerup.update(dt);
     this.powerups = this.powerups.filter((powerup) => !powerup.expired);
     for (const chest of this.chests) chest.update(dt);
@@ -343,35 +345,34 @@
       this.player.momentumLeft = this.player.momentumDuration;
     }
     this.addDangerProgress(monster.isBoss ? CONFIG.dangerProgress.bossKill : CONFIG.dangerProgress.normalKill, "stage progress");
-    for (const [lootName, chance] of CONFIG.monsters[monster.type].loot) {
-      if (Math.random() < chance) {
-        this.dropLoot(lootName, monster.x + Math.random() * 24 - 12, monster.y + Math.random() * 24 - 12);
-      }
-    }
-    if (Math.random() < 0.08 + this.dangerLevel * 0.01) {
-      this.dropLoot("Monster Fang", monster.x, monster.y);
-    }
-    if (monster.variantData) {
-      for (const [lootName, chance] of monster.variantData.extraLoot) {
-        if (Math.random() < chance) {
-          this.dropLoot(lootName, monster.x + Math.random() * 30 - 15, monster.y + Math.random() * 30 - 15);
-        }
-      }
-      if (Math.random() < monster.variantData.bonusLootChance || monster.isBoss) {
-        this.dropLoot("Monster Fang", monster.x + Math.random() * 36 - 18, monster.y + Math.random() * 32 - 16);
-      }
-    }
+    this.dropMonsterGold(monster);
     if (monster.isBoss) {
-      const bossDrops = 5 + Math.min(5, this.dangerLevel);
-      const table = {
-        slime: ["Slime Gel", "Slime Gel", "Monster Fang", "Rusty Dagger"],
-        goblin: ["Goblin Ear", "Goblin Ear", "Rusty Dagger", "Monster Fang"],
-        wolf: ["Wolf Pelt", "Wolf Pelt", "Monster Fang", "Rusty Dagger"]
-      }[monster.type];
-      for (let i = 0; i < bossDrops; i += 1) {
-        this.dropLoot(table[Math.floor(Math.random() * table.length)], monster.x + Math.random() * 70 - 35, monster.y + Math.random() * 56 - 28);
-      }
       this.floaters.push(new FloatingText("Boss defeated!", monster.x, monster.y - 42, "#ffe18a"));
+    }
+  }
+
+  dropMonsterGold(monster) {
+    const baseGold = CONFIG.monsters[monster.type].gold || 1;
+    const stageBonus = Math.floor((this.dangerLevel - 1) * 0.45);
+    const variantBonus = monster.variantData ? Math.ceil(baseGold * 0.45) : 0;
+    const bossMultiplier = monster.isBoss ? 6 : 1;
+    const bossBonus = monster.isBoss ? Math.min(20, this.dangerLevel * 2) : 0;
+    const totalGold = Math.max(1, Math.round((baseGold + stageBonus + variantBonus) * bossMultiplier + bossBonus));
+    this.dropCoins(totalGold, monster.x, monster.y);
+  }
+
+  dropCoins(totalGold, x, y) {
+    const coinOrder = [
+      ["gold", CONFIG.coins.gold.value],
+      ["silver", CONFIG.coins.silver.value],
+      ["bronze", CONFIG.coins.bronze.value]
+    ];
+    let remaining = totalGold;
+    for (const [type, value] of coinOrder) {
+      while (remaining >= value) {
+        this.coins.push(new CoinDrop(type, x + Math.random() * 42 - 21, y + Math.random() * 34 - 17));
+        remaining -= value;
+      }
     }
   }
 
@@ -387,6 +388,18 @@
         this.audio.play("loot");
         this.loot = this.loot.filter((candidate) => candidate !== item);
         this.floaters.push(new FloatingText(item.name, this.player.x, this.player.y - 30, "#ffe18a"));
+      }
+    }
+  }
+
+  collectNearbyCoins() {
+    for (const coin of [...this.coins]) {
+      if (distance(this.player, coin) < 30) {
+        this.player.gold += coin.value;
+        this.totalGoldEarned += coin.value;
+        this.audio.play("loot");
+        this.coins = this.coins.filter((candidate) => candidate !== coin);
+        this.floaters.push(new FloatingText(`+${coin.value} gold`, this.player.x, this.player.y - 30, "#ffe18a"));
       }
     }
   }
@@ -445,6 +458,7 @@
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     this.drawWorld();
     for (const item of this.loot) item.draw(this.camera);
+    for (const coin of this.coins) coin.draw(this.camera);
     for (const powerup of this.powerups) powerup.draw(this.camera);
     const promptedChest = this.nearbyChest();
     for (const chest of this.chests) chest.draw(this.camera, chest === promptedChest);
