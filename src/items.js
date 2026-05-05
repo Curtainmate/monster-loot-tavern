@@ -29,14 +29,16 @@ const ITEM_RARITIES = Object.freeze({
   COMMON: "common",
   UNCOMMON: "uncommon",
   RARE: "rare",
-  EPIC: "epic"
+  EPIC: "epic",
+  LEGENDARY: "legendary"
 });
 
 const ITEM_RARITY_RULES = Object.freeze({
-  common: { label: "Common", statMultiplier: 1, sellMultiplier: 1 },
-  uncommon: { label: "Uncommon", statMultiplier: 1.25, sellMultiplier: 1.8 },
-  rare: { label: "Rare", statMultiplier: 1.6, sellMultiplier: 3 },
-  epic: { label: "Epic", statMultiplier: 2.1, sellMultiplier: 5 }
+  common: { label: "Common", statCount: 1, statMultiplier: 1, sellMultiplier: 1 },
+  uncommon: { label: "Uncommon", statCount: 1, statMultiplier: 1.45, sellMultiplier: 1.8 },
+  rare: { label: "Rare", statCount: 2, statMultiplier: 1.25, sellMultiplier: 3 },
+  epic: { label: "Epic", statCount: 3, statMultiplier: 1.35, sellMultiplier: 5 },
+  legendary: { label: "Legendary", statCount: 4, statMultiplier: 1.5, sellMultiplier: 8 }
 });
 
 const ITEM_DROP_CHANCES = Object.freeze({
@@ -47,11 +49,30 @@ const ITEM_DROP_CHANCES = Object.freeze({
 });
 
 const ITEM_RARITY_TABLES = Object.freeze([
-  { minStage: 1, common: 0.78, uncommon: 0.18, rare: 0.04, epic: 0 },
-  { minStage: 5, common: 0.68, uncommon: 0.24, rare: 0.07, epic: 0.01 },
-  { minStage: 10, common: 0.58, uncommon: 0.29, rare: 0.11, epic: 0.02 },
-  { minStage: 15, common: 0.48, uncommon: 0.34, rare: 0.15, epic: 0.03 }
+  { minStage: 1, common: 0.78, uncommon: 0.18, rare: 0.04, epic: 0, legendary: 0 },
+  { minStage: 5, common: 0.67, uncommon: 0.24, rare: 0.08, epic: 0.01, legendary: 0 },
+  { minStage: 10, common: 0.56, uncommon: 0.29, rare: 0.12, epic: 0.028, legendary: 0.002 },
+  { minStage: 15, common: 0.46, uncommon: 0.34, rare: 0.155, epic: 0.04, legendary: 0.005 },
+  { minStage: 20, common: 0.38, uncommon: 0.35, rare: 0.19, epic: 0.07, legendary: 0.01 }
 ]);
+
+const ITEM_STAT_RULES = Object.freeze({
+  damage: { base: 2, growth: 0.85, type: "flat" },
+  maxHealth: { base: 8, growth: 3.2, type: "flat" },
+  damageReduction: { base: 0.02, growth: 0.003, type: "percent" },
+  speed: { base: 7, growth: 1.8, type: "flat" },
+  attackSpeed: { base: 0.04, growth: 0.006, type: "percent" },
+  critChance: { base: 0.04, growth: 0.004, type: "percent" },
+  critDamage: { base: 0.18, growth: 0.02, type: "percent" },
+  bossDamage: { base: 0.06, growth: 0.008, type: "percent" },
+  longRangeDamage: { base: 0.06, growth: 0.008, type: "percent" },
+  arrowSpeed: { base: 22, growth: 5, type: "flat" },
+  arrowRange: { base: 18, growth: 5, type: "flat" },
+  arrowPierce: { base: 1, growth: 0, type: "integer" },
+  pickupRange: { base: 8, growth: 2, type: "flat" },
+  goldFind: { base: 0.08, growth: 0.01, type: "percent" },
+  itemFind: { base: 0.05, growth: 0.008, type: "percent" }
+});
 
 const ITEM_TEMPLATES = Object.freeze({
   warrior: [
@@ -60,8 +81,8 @@ const ITEM_TEMPLATES = Object.freeze({
       name: "Sword",
       slot: ITEM_SLOTS.WEAPON,
       classRestriction: "warrior",
-      baseStats: { damage: 4 },
-      statGrowth: { damage: 1.4 },
+      primaryStat: "damage",
+      statPool: ["damage", "attackSpeed", "critChance", "critDamage", "bossDamage"],
       baseSellValue: 8
     },
     {
@@ -69,8 +90,8 @@ const ITEM_TEMPLATES = Object.freeze({
       name: "Plate Armor",
       slot: ITEM_SLOTS.ARMOR,
       classRestriction: "warrior",
-      baseStats: { maxHealth: 18 },
-      statGrowth: { maxHealth: 5 },
+      primaryStat: "maxHealth",
+      statPool: ["maxHealth", "damageReduction", "speed", "pickupRange", "goldFind"],
       baseSellValue: 9
     },
     {
@@ -78,8 +99,8 @@ const ITEM_TEMPLATES = Object.freeze({
       name: "Iron Helm",
       slot: ITEM_SLOTS.HELMET,
       classRestriction: "warrior",
-      baseStats: { maxHealth: 10, damageReduction: 0.02 },
-      statGrowth: { maxHealth: 3, damageReduction: 0.004 },
+      primaryStat: "maxHealth",
+      statPool: ["maxHealth", "damageReduction", "attackSpeed", "critChance", "bossDamage"],
       baseSellValue: 8
     },
     {
@@ -87,8 +108,8 @@ const ITEM_TEMPLATES = Object.freeze({
       name: "Horned Helm",
       slot: ITEM_SLOTS.HELMET,
       classRestriction: "warrior",
-      baseStats: { maxHealth: 8, damage: 2 },
-      statGrowth: { maxHealth: 2.5, damage: 0.7 },
+      primaryStat: "damage",
+      statPool: ["damage", "maxHealth", "damageReduction", "critChance", "bossDamage"],
       baseSellValue: 9
     },
     {
@@ -96,8 +117,8 @@ const ITEM_TEMPLATES = Object.freeze({
       name: "Guard Vest",
       slot: ITEM_SLOTS.ARMOR,
       classRestriction: "warrior",
-      baseStats: { maxHealth: 12, damageReduction: 0.03 },
-      statGrowth: { maxHealth: 4, damageReduction: 0.005 },
+      primaryStat: "damageReduction",
+      statPool: ["damageReduction", "maxHealth", "speed", "pickupRange", "itemFind"],
       baseSellValue: 10
     },
     {
@@ -105,8 +126,8 @@ const ITEM_TEMPLATES = Object.freeze({
       name: "Greaves",
       slot: ITEM_SLOTS.BOOTS,
       classRestriction: "warrior",
-      baseStats: { speed: 12 },
-      statGrowth: { speed: 2.5 },
+      primaryStat: "speed",
+      statPool: ["speed", "damageReduction", "attackSpeed", "pickupRange", "goldFind"],
       baseSellValue: 7
     },
     {
@@ -114,8 +135,8 @@ const ITEM_TEMPLATES = Object.freeze({
       name: "Charge Boots",
       slot: ITEM_SLOTS.BOOTS,
       classRestriction: "warrior",
-      baseStats: { speed: 8, damage: 2 },
-      statGrowth: { speed: 2, damage: 0.6 },
+      primaryStat: "speed",
+      statPool: ["speed", "damage", "attackSpeed", "pickupRange", "goldFind"],
       baseSellValue: 9
     },
     {
@@ -123,8 +144,8 @@ const ITEM_TEMPLATES = Object.freeze({
       name: "Warrior Charm",
       slot: ITEM_SLOTS.ACCESSORY,
       classRestriction: "warrior",
-      baseStats: { bonusDamage: 3 },
-      statGrowth: { bonusDamage: 1 },
+      primaryStat: "damage",
+      statPool: ["damage", "critChance", "bossDamage", "goldFind", "itemFind"],
       baseSellValue: 8
     },
     {
@@ -132,8 +153,8 @@ const ITEM_TEMPLATES = Object.freeze({
       name: "Stone Talisman",
       slot: ITEM_SLOTS.ACCESSORY,
       classRestriction: "warrior",
-      baseStats: { maxHealth: 8, bossDamageBonus: 0.04 },
-      statGrowth: { maxHealth: 2.5, bossDamageBonus: 0.006 },
+      primaryStat: "bossDamage",
+      statPool: ["bossDamage", "maxHealth", "damageReduction", "goldFind", "itemFind"],
       baseSellValue: 10
     },
     {
@@ -141,8 +162,8 @@ const ITEM_TEMPLATES = Object.freeze({
       name: "Iron Ring",
       slot: ITEM_SLOTS.RING,
       classRestriction: "warrior",
-      baseStats: { damage: 2, maxHealth: 5 },
-      statGrowth: { damage: 0.7, maxHealth: 1.8 },
+      primaryStat: "damage",
+      statPool: ["damage", "maxHealth", "critChance", "critDamage", "itemFind"],
       baseSellValue: 8
     },
     {
@@ -150,8 +171,8 @@ const ITEM_TEMPLATES = Object.freeze({
       name: "Blood Ring",
       slot: ITEM_SLOTS.RING,
       classRestriction: "warrior",
-      baseStats: { bossDamageBonus: 0.04, bonusDamage: 1 },
-      statGrowth: { bossDamageBonus: 0.006, bonusDamage: 0.4 },
+      primaryStat: "critDamage",
+      statPool: ["critDamage", "damage", "critChance", "bossDamage", "maxHealth"],
       baseSellValue: 10
     }
   ],
@@ -161,8 +182,8 @@ const ITEM_TEMPLATES = Object.freeze({
       name: "Bow",
       slot: ITEM_SLOTS.WEAPON,
       classRestriction: "ranger",
-      baseStats: { damage: 3, arrowSpeed: 30 },
-      statGrowth: { damage: 1.1, arrowSpeed: 7 },
+      primaryStat: "damage",
+      statPool: ["damage", "attackSpeed", "critChance", "critDamage", "arrowPierce", "arrowRange", "arrowSpeed"],
       baseSellValue: 8
     },
     {
@@ -170,8 +191,8 @@ const ITEM_TEMPLATES = Object.freeze({
       name: "Leather Tunic",
       slot: ITEM_SLOTS.ARMOR,
       classRestriction: "ranger",
-      baseStats: { maxHealth: 12 },
-      statGrowth: { maxHealth: 4 },
+      primaryStat: "maxHealth",
+      statPool: ["maxHealth", "damageReduction", "speed", "longRangeDamage", "itemFind"],
       baseSellValue: 8
     },
     {
@@ -179,8 +200,8 @@ const ITEM_TEMPLATES = Object.freeze({
       name: "Scout Cap",
       slot: ITEM_SLOTS.HELMET,
       classRestriction: "ranger",
-      baseStats: { maxHealth: 7, arrowRange: 16 },
-      statGrowth: { maxHealth: 2.5, arrowRange: 4 },
+      primaryStat: "arrowRange",
+      statPool: ["arrowRange", "maxHealth", "damageReduction", "critChance", "longRangeDamage"],
       baseSellValue: 8
     },
     {
@@ -188,8 +209,8 @@ const ITEM_TEMPLATES = Object.freeze({
       name: "Hunter Hood",
       slot: ITEM_SLOTS.HELMET,
       classRestriction: "ranger",
-      baseStats: { damage: 1, longRangeBonus: 0.03 },
-      statGrowth: { damage: 0.5, longRangeBonus: 0.006 },
+      primaryStat: "critChance",
+      statPool: ["critChance", "damage", "maxHealth", "arrowRange", "longRangeDamage"],
       baseSellValue: 9
     },
     {
@@ -197,8 +218,8 @@ const ITEM_TEMPLATES = Object.freeze({
       name: "Hunter Cloak",
       slot: ITEM_SLOTS.ARMOR,
       classRestriction: "ranger",
-      baseStats: { maxHealth: 8, speed: 8 },
-      statGrowth: { maxHealth: 3, speed: 1.8 },
+      primaryStat: "speed",
+      statPool: ["speed", "maxHealth", "damageReduction", "longRangeDamage", "itemFind"],
       baseSellValue: 10
     },
     {
@@ -206,8 +227,8 @@ const ITEM_TEMPLATES = Object.freeze({
       name: "Scout Boots",
       slot: ITEM_SLOTS.BOOTS,
       classRestriction: "ranger",
-      baseStats: { speed: 14 },
-      statGrowth: { speed: 3 },
+      primaryStat: "speed",
+      statPool: ["speed", "arrowRange", "attackSpeed", "pickupRange", "goldFind"],
       baseSellValue: 7
     },
     {
@@ -215,8 +236,8 @@ const ITEM_TEMPLATES = Object.freeze({
       name: "Pathfinder Boots",
       slot: ITEM_SLOTS.BOOTS,
       classRestriction: "ranger",
-      baseStats: { speed: 10, arrowRange: 18 },
-      statGrowth: { speed: 2.4, arrowRange: 5 },
+      primaryStat: "speed",
+      statPool: ["speed", "arrowRange", "attackSpeed", "pickupRange", "itemFind"],
       baseSellValue: 9
     },
     {
@@ -224,8 +245,8 @@ const ITEM_TEMPLATES = Object.freeze({
       name: "Lucky Quiver",
       slot: ITEM_SLOTS.ACCESSORY,
       classRestriction: "ranger",
-      baseStats: { arrowRange: 28, bonusDamage: 1 },
-      statGrowth: { arrowRange: 7, bonusDamage: 0.5 },
+      primaryStat: "arrowRange",
+      statPool: ["arrowRange", "damage", "arrowSpeed", "arrowPierce", "longRangeDamage", "itemFind"],
       baseSellValue: 8
     },
     {
@@ -233,8 +254,8 @@ const ITEM_TEMPLATES = Object.freeze({
       name: "Focus Charm",
       slot: ITEM_SLOTS.ACCESSORY,
       classRestriction: "ranger",
-      baseStats: { longRangeBonus: 0.04 },
-      statGrowth: { longRangeBonus: 0.008 },
+      primaryStat: "longRangeDamage",
+      statPool: ["longRangeDamage", "critChance", "critDamage", "arrowSpeed", "itemFind"],
       baseSellValue: 10
     },
     {
@@ -242,8 +263,8 @@ const ITEM_TEMPLATES = Object.freeze({
       name: "Archer Signet",
       slot: ITEM_SLOTS.RING,
       classRestriction: "ranger",
-      baseStats: { arrowSpeed: 24, damage: 1 },
-      statGrowth: { arrowSpeed: 6, damage: 0.5 },
+      primaryStat: "damage",
+      statPool: ["damage", "critChance", "critDamage", "arrowRange", "goldFind"],
       baseSellValue: 8
     },
     {
@@ -251,8 +272,8 @@ const ITEM_TEMPLATES = Object.freeze({
       name: "Moon Ring",
       slot: ITEM_SLOTS.RING,
       classRestriction: "ranger",
-      baseStats: { arrowPierce: 1, arrowRange: 12 },
-      statGrowth: { arrowRange: 4 },
+      primaryStat: "arrowPierce",
+      statPool: ["arrowPierce", "damage", "critChance", "arrowRange", "longRangeDamage"],
       baseSellValue: 10
     }
   ]
@@ -271,7 +292,7 @@ function generateItem(options = {}) {
     ? selectedTemplates.find((candidate) => candidate.id === options.templateId) || selectedTemplates[0]
     : randomFrom(selectedTemplates);
   const rarityRule = ITEM_RARITY_RULES[rarity];
-  const stats = rollItemStats(template, itemLevel, rarityRule.statMultiplier);
+  const stats = rollItemStats(template, itemLevel, rarityRule);
   const rarityName = rarityRule.label;
 
   return {
@@ -283,6 +304,7 @@ function generateItem(options = {}) {
     itemLevel,
     classRestriction: template.classRestriction,
     stats,
+    specialEffect: null,
     sellValue: calculateItemSellValue(template, itemLevel, rarityRule.sellMultiplier)
   };
 }
@@ -292,8 +314,8 @@ function itemLevelForStage(stage) {
 }
 
 function rollItemDropChance(source, context = {}) {
-  const chance = itemDropChance(source, context);
-  return Math.random() < chance;
+  const chance = itemDropChance(source, context) * (1 + (context.itemFind || 0));
+  return Math.random() < Math.min(1, chance);
 }
 
 function itemDropChance(source, context = {}) {
@@ -308,7 +330,7 @@ function rollRarityForStage(stage) {
   const table = rarityTableForStage(stage);
   const roll = Math.random();
   let cumulative = 0;
-  for (const rarity of [ITEM_RARITIES.COMMON, ITEM_RARITIES.UNCOMMON, ITEM_RARITIES.RARE, ITEM_RARITIES.EPIC]) {
+  for (const rarity of Object.values(ITEM_RARITIES)) {
     cumulative += table[rarity] || 0;
     if (roll <= cumulative) return rarity;
   }
@@ -324,14 +346,27 @@ function rarityTableForStage(stage) {
   return selected;
 }
 
-function rollItemStats(template, itemLevel, rarityMultiplier) {
+function rollItemStats(template, itemLevel, rarityRule) {
   const stats = {};
-  for (const [stat, baseValue] of Object.entries(template.baseStats)) {
-    const growth = template.statGrowth[stat] || 0;
-    const rawValue = (baseValue + growth * (itemLevel - 1)) * rarityMultiplier;
-    stats[stat] = normalizeStatValue(stat, rawValue);
+  const statCount = Math.min(rarityRule.statCount, template.statPool.length);
+  const selectedStats = [template.primaryStat];
+  const remainingStats = template.statPool.filter((stat) => stat !== template.primaryStat);
+  while (selectedStats.length < statCount && remainingStats.length) {
+    const index = Math.floor(Math.random() * remainingStats.length);
+    selectedStats.push(remainingStats.splice(index, 1)[0]);
+  }
+
+  for (const stat of selectedStats) {
+    stats[stat] = rollStatValue(stat, itemLevel, rarityRule.statMultiplier);
   }
   return stats;
+}
+
+function rollStatValue(stat, itemLevel, rarityMultiplier) {
+  const rule = ITEM_STAT_RULES[stat] || ITEM_STAT_RULES.damage;
+  const variance = 0.9 + Math.random() * 0.2;
+  const rawValue = (rule.base + rule.growth * (itemLevel - 1)) * rarityMultiplier * variance;
+  return normalizeStatValue(stat, rawValue);
 }
 
 function calculateItemSellValue(template, itemLevel, rarityMultiplier) {
@@ -339,9 +374,9 @@ function calculateItemSellValue(template, itemLevel, rarityMultiplier) {
 }
 
 function normalizeStatValue(stat, value) {
-  if (stat.includes("Bonus") || stat === "damageReduction" || stat === "attackCooldown") {
-    return Number(value.toFixed(3));
-  }
+  const rule = ITEM_STAT_RULES[stat] || ITEM_STAT_RULES.damage;
+  if (rule.type === "percent") return Number(value.toFixed(3));
+  if (rule.type === "integer") return Math.max(1, Math.round(value));
   return Math.max(1, Math.round(value));
 }
 
@@ -357,6 +392,7 @@ const ItemSystem = Object.freeze({
   ITEM_RARITY_RULES,
   ITEM_DROP_CHANCES,
   ITEM_RARITY_TABLES,
+  ITEM_STAT_RULES,
   ITEM_TEMPLATES,
   generateItem,
   itemLevelForStage,

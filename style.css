@@ -368,6 +368,10 @@ canvas {
   border-color: rgba(196, 116, 255, 0.72);
 }
 
+.rarity-legendary {
+  border-color: rgba(255, 191, 77, 0.82);
+}
+
 #startOverlay {
   overflow: hidden;
   padding: 0;

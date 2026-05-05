@@ -256,7 +256,7 @@
 
   itemStatsText(item) {
     return Object.entries(item.stats)
-      .map(([stat, value]) => `${this.statLabel(stat)} +${value}`)
+      .map(([stat, value]) => `${this.statLabel(stat)} +${this.formatStatValue(value, stat)}`)
       .join(", ");
   }
 
@@ -274,28 +274,38 @@
       if (Math.abs(diff) < 0.001) continue;
       const className = diff > 0 ? "positive" : "negative";
       const sign = diff > 0 ? "+" : "";
-      parts.push(`<span class="${className}">${this.statLabel(stat)} ${sign}${this.formatStatValue(diff)}</span>`);
+      parts.push(`<span class="${className}">${this.statLabel(stat)} ${sign}${this.formatStatValue(diff, stat)}</span>`);
     }
     if (!parts.length) return `<div class="item-compare neutral">Same stats as equipped</div>`;
     return `<div class="item-compare">Vs equipped: ${parts.join(" ")}</div>`;
   }
 
-  formatStatValue(value) {
+  formatStatValue(value, stat = "") {
+    if (this.isPercentStat(stat)) return `${Math.round(value * 100)}%`;
     return Number.isInteger(value) ? `${value}` : `${Math.round(value * 100) / 100}`;
+  }
+
+  isPercentStat(stat) {
+    return ["damageReduction", "attackSpeed", "critChance", "critDamage", "bossDamage", "longRangeDamage", "goldFind", "itemFind"].includes(stat);
   }
 
   statLabel(stat) {
     return {
       damage: "Damage",
-      bonusDamage: "Bonus damage",
       maxHealth: "Max HP",
       damageReduction: "Damage reduction",
       speed: "Speed",
+      attackSpeed: "Attack speed",
+      critChance: "Crit chance",
+      critDamage: "Crit damage",
       arrowSpeed: "Arrow speed",
       arrowRange: "Arrow range",
       arrowPierce: "Arrow pierce",
-      bossDamageBonus: "Boss damage",
-      longRangeBonus: "Long range"
+      bossDamage: "Boss damage",
+      longRangeDamage: "Long range damage",
+      pickupRange: "Pickup range",
+      goldFind: "Gold find",
+      itemFind: "Item find"
     }[stat] || stat;
   }
 

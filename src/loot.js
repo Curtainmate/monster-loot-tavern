@@ -86,7 +86,8 @@ class ItemDrop {
       common: "#f5e6bd",
       uncommon: "#7fe08a",
       rare: "#6fa8ff",
-      epic: "#c981ff"
+      epic: "#c981ff",
+      legendary: "#ffbf4d"
     }[item.rarity] || "#f5e6bd";
   }
 
@@ -193,7 +194,7 @@ class TreasureChest {
     this.opened = true;
     const baseGold = 18 + this.dangerLevel * 4;
     const bonusGold = Math.floor(Math.random() * (8 + this.dangerLevel * 2));
-    const totalGold = baseGold + bonusGold;
+    const totalGold = Math.max(1, Math.round((baseGold + bonusGold) * (1 + game.player.goldFind)));
     game.dropCoins(totalGold, this.x, this.y);
     game.tryDropGeneratedItem("chest", this.x, this.y - 10);
     game.floaters.push(new FloatingText(`Treasure! +${totalGold} gold`, this.x, this.y - 30, "#ffe18a"));
@@ -232,7 +233,7 @@ class TreasureChest {
 }
 
 class Projectile {
-  constructor(x, y, direction, damage, speed, range, pierce, longRangeBonus = 0) {
+  constructor(x, y, direction, damage, speed, range, pierce, longRangeDamage = 0, critChance = 0, critDamage = 0) {
     this.x = x;
     this.y = y;
     this.startX = x;
@@ -242,7 +243,9 @@ class Projectile {
     this.speed = speed;
     this.range = range;
     this.pierceLeft = pierce;
-    this.longRangeBonus = longRangeBonus;
+    this.longRangeDamage = longRangeDamage;
+    this.critChance = critChance;
+    this.critDamage = critDamage;
     this.size = 10;
     this.dead = false;
     this.hitMonsters = new Set();
@@ -261,7 +264,9 @@ class Projectile {
       if (Math.hypot(monster.x - this.x, monster.y - this.y) <= monster.size / 2 + this.size / 2) {
         this.hitMonsters.add(monster);
         const traveled = Math.hypot(this.x - this.startX, this.y - this.startY);
-        const damage = traveled >= this.range * 0.45 ? Math.round(this.damage * (1 + this.longRangeBonus)) : this.damage;
+        let multiplier = traveled >= this.range * 0.45 ? 1 + this.longRangeDamage : 1;
+        if (Math.random() < clamp(this.critChance, 0, 0.75)) multiplier += this.critDamage || 0.5;
+        const damage = Math.max(1, Math.round(this.damage * multiplier));
         monster.takeDamage(damage, this.dir, game);
         game.attackEffects.push({
           x: this.x,

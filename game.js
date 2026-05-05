@@ -322,7 +322,7 @@
   }
 
   tryDropGeneratedItem(source, x, y, context = {}) {
-    if (!ItemSystem.rollItemDropChance(source, context)) return null;
+    if (!ItemSystem.rollItemDropChance(source, { ...context, itemFind: this.player.itemFind })) return null;
     const item = ItemSystem.generateItem({
       classRestriction: this.player.classId,
       stage: this.dangerLevel
@@ -337,7 +337,7 @@
     const variantBonus = monster.variantData ? Math.ceil(baseGold * 0.45) : 0;
     const bossMultiplier = monster.isBoss ? 6 : 1;
     const bossBonus = monster.isBoss ? Math.min(20, this.dangerLevel * 2) : 0;
-    const totalGold = Math.max(1, Math.round((baseGold + stageBonus + variantBonus) * bossMultiplier + bossBonus));
+    const totalGold = Math.max(1, Math.round(((baseGold + stageBonus + variantBonus) * bossMultiplier + bossBonus) * (1 + this.player.goldFind)));
     this.dropCoins(totalGold, monster.x, monster.y);
   }
 
@@ -362,7 +362,7 @@
 
   collectNearbyLoot() {
     for (const item of [...this.loot]) {
-      if (distance(this.player, item) < 30) {
+      if (distance(this.player, item) < this.player.pickupRange) {
         this.player.addLoot(item.name);
         this.questProgress.loot += 1;
         this.audio.play("loot");
@@ -374,7 +374,7 @@
 
   collectNearbyCoins() {
     for (const coin of [...this.coins]) {
-      if (distance(this.player, coin) < 30) {
+      if (distance(this.player, coin) < this.player.pickupRange) {
         this.player.gold += coin.value;
         this.totalGoldEarned += coin.value;
         this.audio.play("loot");
@@ -386,7 +386,7 @@
 
   collectNearbyItemDrops() {
     for (const itemDrop of [...this.itemDrops]) {
-      if (distance(this.player, itemDrop) < 34) {
+      if (distance(this.player, itemDrop) < this.player.pickupRange + 4) {
         if (!this.player.addItem(itemDrop.item)) {
           if (itemDrop.noticeCooldown <= 0) {
             this.floaters.push(new FloatingText("Inventory full", this.player.x, this.player.y - 36, "#ffb36b"));
@@ -405,7 +405,7 @@
 
   collectNearbyPowerups() {
     for (const powerup of [...this.powerups]) {
-      if (distance(this.player, powerup) < 34) {
+      if (distance(this.player, powerup) < this.player.pickupRange + 4) {
         powerup.collect(this);
         this.powerups = this.powerups.filter((candidate) => candidate !== powerup);
       }

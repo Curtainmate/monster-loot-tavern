@@ -16,15 +16,12 @@
     this.baseMaxHealth = classStats.maxHealth;
     this.health = this.baseMaxHealth;
     this.baseDamage = classStats.damage;
-    this.baseBonusDamage = 0;
     this.attackCooldown = classStats.cooldown;
     this.baseArrowSpeed = classStats.arrowSpeed || 0;
     this.baseArrowRange = classStats.arrowRange || 0;
     this.baseArrowPierce = classStats.arrowPierce || 0;
     this.extraSwings = 0;
     this.extraArrows = 0;
-    this.baseBossDamageBonus = 0;
-    this.baseLongRangeBonus = 0;
     this.momentumReduction = 0;
     this.momentumDuration = 0;
     this.momentumLeft = 0;
@@ -41,7 +38,7 @@
   }
 
   get damage() {
-    const base = this.baseDamage + this.bonusDamage + (this.itemStats.damage || 0);
+    const base = this.baseDamage + (this.itemStats.damage || 0);
     return Math.round(base * (this.hasBuff("rage") ? CONFIG.powerups.types.rage.damageMultiplier : 1));
   }
 
@@ -59,14 +56,6 @@
 
   set maxHealth(value) {
     this.baseMaxHealth = value - (this.itemStats.maxHealth || 0);
-  }
-
-  get bonusDamage() {
-    return this.baseBonusDamage + (this.itemStats.bonusDamage || 0);
-  }
-
-  set bonusDamage(value) {
-    this.baseBonusDamage = value - (this.itemStats.bonusDamage || 0);
   }
 
   get arrowSpeed() {
@@ -93,25 +82,42 @@
     this.baseArrowPierce = value - (this.itemStats.arrowPierce || 0);
   }
 
-  get bossDamageBonus() {
-    return this.baseBossDamageBonus + (this.itemStats.bossDamageBonus || 0);
+  get attackSpeed() {
+    return this.itemStats.attackSpeed || 0;
   }
 
-  set bossDamageBonus(value) {
-    this.baseBossDamageBonus = value - (this.itemStats.bossDamageBonus || 0);
+  get critChance() {
+    return this.itemStats.critChance || 0;
   }
 
-  get longRangeBonus() {
-    return this.baseLongRangeBonus + (this.itemStats.longRangeBonus || 0);
+  get critDamage() {
+    return this.itemStats.critDamage || 0;
   }
 
-  set longRangeBonus(value) {
-    this.baseLongRangeBonus = value - (this.itemStats.longRangeBonus || 0);
+  get bossDamage() {
+    return this.itemStats.bossDamage || 0;
+  }
+
+  get longRangeDamage() {
+    return this.itemStats.longRangeDamage || 0;
+  }
+
+  get pickupRange() {
+    return 30 + (this.itemStats.pickupRange || 0);
+  }
+
+  get goldFind() {
+    return this.itemStats.goldFind || 0;
+  }
+
+  get itemFind() {
+    return this.itemStats.itemFind || 0;
   }
 
   get effectiveAttackCooldown() {
-    const itemCooldownReduction = this.itemStats.attackCooldown || 0;
-    return Math.max(0.16, this.attackCooldown - itemCooldownReduction - (this.momentumLeft > 0 ? this.momentumReduction : 0));
+    const speedMultiplier = 1 + this.attackSpeed;
+    const momentumReduction = this.momentumLeft > 0 ? this.momentumReduction : 0;
+    return Math.max(0.16, this.attackCooldown / speedMultiplier - momentumReduction);
   }
 
   update(dt, game) {
@@ -170,7 +176,9 @@
           this.arrowSpeed,
           this.arrowRange,
           this.arrowPierce + (this.hasBuff("cleave") ? 2 : 0),
-          this.longRangeBonus
+          this.longRangeDamage,
+          this.critChance,
+          this.critDamage
         ));
       }
       game.attackEffects.push({
@@ -207,7 +215,7 @@
         const inArc = angleDot > swingDot;
         const inReach = distance(this, monster) <= monster.size / 2 + swingRadius;
         if (inArc && inReach) {
-          const damage = monster.isBoss ? Math.round(this.damage * (1 + this.bossDamageBonus)) : this.damage;
+          const damage = this.rollAttackDamage(monster.isBoss);
           monster.takeDamage(damage, dir, game);
           break;
         }
@@ -227,8 +235,16 @@
 
   takeDamage(amount) {
     if (this.invulnerableLeft > 0 || this.hasBuff("shield")) return;
-    this.health -= Math.max(1, Math.round(amount * (1 - (this.itemStats.damageReduction || 0))));
+    const reduction = clamp(this.itemStats.damageReduction || 0, 0, 0.75);
+    this.health -= Math.max(1, Math.round(amount * (1 - reduction)));
     this.invulnerableLeft = CONFIG.player.invulnerableTime;
+  }
+
+  rollAttackDamage(isBoss = false, extraMultiplier = 0) {
+    let multiplier = 1 + extraMultiplier + (isBoss ? this.bossDamage : 0);
+    const didCrit = Math.random() < clamp(this.critChance, 0, 0.75);
+    if (didCrit) multiplier += this.critDamage || 0.5;
+    return Math.max(1, Math.round(this.damage * multiplier));
   }
 
   addBuff(type, duration) {
