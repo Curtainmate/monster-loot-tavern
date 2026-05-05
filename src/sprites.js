@@ -22,8 +22,8 @@
       cleave: 4
     };
     this.tileFrames = {
-      grassFlowers: 0,
-      grass: 1,
+      grass: 0,
+      grassFlowers: 1,
       dirt: 1,
       tavernFloor: 2,
       wallDark: 3,
