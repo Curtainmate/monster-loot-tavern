@@ -14,6 +14,7 @@
     this.hintText = document.getElementById("hintText");
     this.hud = document.getElementById("hud");
     this.startOverlay = document.getElementById("startOverlay");
+    this.inventoryOverlay = document.getElementById("inventoryOverlay");
     this.shopOverlay = document.getElementById("shopOverlay");
     this.pauseOverlay = document.getElementById("pauseOverlay");
     this.gameOverOverlay = document.getElementById("gameOverOverlay");
@@ -22,6 +23,8 @@
     this.buyList = document.getElementById("buyList");
     this.masteryList = document.getElementById("masteryList");
     this.dangerList = document.getElementById("dangerList");
+    this.equipmentSlots = document.getElementById("equipmentSlots");
+    this.itemList = document.getElementById("itemList");
     this.warriorButton = document.getElementById("warriorButton");
     this.rangerButton = document.getElementById("rangerButton");
     this.startRunButton = document.getElementById("startRunButton");
@@ -41,8 +44,9 @@
     };
     this.activeShopTab = "sell";
     this.selectedClassId = "warrior";
-    this.inventoryExpanded = false;
+    this.inventoryOpen = false;
 
+    document.getElementById("closeInventoryButton").addEventListener("click", () => game.closeInventory());
     document.getElementById("closeShopButton").addEventListener("click", () => game.closeShop());
     document.getElementById("sellAllButton").addEventListener("click", () => game.shop.sellAll());
     document.getElementById("restartButton").addEventListener("click", () => game.restart());
@@ -72,8 +76,20 @@
     }
   }
 
+  openInventory() {
+    this.inventoryOpen = true;
+    this.renderInventory();
+    this.update();
+  }
+
+  closeInventory() {
+    this.inventoryOpen = false;
+    this.update();
+  }
+
   toggleInventory() {
-    this.inventoryExpanded = !this.inventoryExpanded;
+    this.inventoryOpen = !this.inventoryOpen;
+    if (this.inventoryOpen) this.renderInventory();
     this.update();
   }
 
@@ -110,24 +126,13 @@
       this.buffText.textContent = "";
     }
 
-    const inventory = Object.entries(p.inventory).filter(([, qty]) => qty > 0);
-    if (inventory.length) {
-      const itemCount = inventory.reduce((total, [, qty]) => total + qty, 0);
-      if (this.inventoryExpanded) {
-        this.inventoryText.innerHTML = inventory.map(([name, qty]) => {
-          const index = gameSprites.lootFrames[name] || 0;
-          return `<span class="loot-chip"><span class="loot-icon" style="background-position:-${index * 20}px 0"></span>${name} x${qty}</span>`;
-        }).join("");
-      } else {
-        this.inventoryText.textContent = `Loot ${itemCount} (${inventory.length} types) | Tab`;
-      }
-    } else {
-      this.inventoryText.textContent = "Loot empty | Tab";
-    }
-    this.inventoryText.classList.toggle("expanded", this.inventoryExpanded);
+    const equippedCount = Object.values(p.equipment).filter(Boolean).length;
+    this.inventoryText.textContent = `Inventory ${p.items.length} items | ${equippedCount}/6 equipped | Tab`;
 
     if (!this.game.started) {
       this.hintText.textContent = "";
+    } else if (this.inventoryOpen) {
+      this.hintText.textContent = "Tab or Escape to close inventory";
     } else if (this.game.shopkeeper.nearby(p) && this.game.playerInTavern() && !this.game.shopOpen) {
       this.hintText.textContent = "Press E to trade";
     } else if (this.game.nearbyChest() && !this.game.shopOpen) {
@@ -141,10 +146,12 @@
     this.hud.classList.toggle("hidden", !this.game.started);
     this.startOverlay.classList.toggle("hidden", this.game.started);
     this.startOverlay.setAttribute("aria-hidden", String(this.game.started));
+    this.inventoryOverlay.classList.toggle("hidden", !this.inventoryOpen);
+    this.inventoryOverlay.setAttribute("aria-hidden", String(!this.inventoryOpen));
     this.shopOverlay.classList.toggle("hidden", !this.game.shopOpen);
     this.shopOverlay.setAttribute("aria-hidden", String(!this.game.shopOpen));
-    this.pauseOverlay.classList.toggle("hidden", !this.game.paused || this.game.shopOpen || this.game.gameOver || !this.game.started);
-    this.pauseOverlay.setAttribute("aria-hidden", String(!this.game.paused || this.game.shopOpen || this.game.gameOver || !this.game.started));
+    this.pauseOverlay.classList.toggle("hidden", !this.game.paused || this.inventoryOpen || this.game.shopOpen || this.game.gameOver || !this.game.started);
+    this.pauseOverlay.setAttribute("aria-hidden", String(!this.game.paused || this.inventoryOpen || this.game.shopOpen || this.game.gameOver || !this.game.started));
     this.gameOverOverlay.classList.toggle("hidden", !this.game.gameOver);
     this.gameOverOverlay.setAttribute("aria-hidden", String(!this.game.gameOver));
     this.updateMusicButtons();
@@ -225,6 +232,80 @@
       row.appendChild(button);
       this.dangerList.appendChild(row);
     }
+  }
+
+  renderInventory() {
+    const p = this.game.player;
+    this.equipmentSlots.innerHTML = "";
+    for (const slot of ITEM_SLOT_ORDER) {
+      const item = p.equipment[slot];
+      const row = document.createElement("button");
+      row.type = "button";
+      row.className = `equipment-slot ${item ? `rarity-${item.rarity}` : ""}`;
+      row.disabled = !item;
+      row.innerHTML = item
+        ? `<span>${ITEM_SLOT_LABELS[slot]}</span><strong>${item.name}</strong><small>${this.itemStatsText(item)}</small>`
+        : `<span>${ITEM_SLOT_LABELS[slot]}</span><strong>Empty</strong><small>No item equipped</small>`;
+      row.addEventListener("click", () => {
+        p.unequipSlot(slot);
+        this.renderInventory();
+        this.update();
+      });
+      this.equipmentSlots.appendChild(row);
+    }
+
+    this.itemList.innerHTML = "";
+    const equippedIds = new Set(Object.values(p.equipment).filter(Boolean).map((item) => item.uniqueId));
+    for (const item of p.items) {
+      const equipped = equippedIds.has(item.uniqueId);
+      const row = document.createElement("div");
+      row.className = `item-row rarity-${item.rarity} ${equipped ? "equipped" : ""}`;
+      row.innerHTML = `
+        <div>
+          <strong>${item.name}</strong>
+          <small>${ITEM_SLOT_LABELS[item.slot]} | Level ${item.itemLevel} | ${this.itemStatsText(item)} | Sell ${item.sellValue}g</small>
+        </div>
+      `;
+      const button = document.createElement("button");
+      button.type = "button";
+      button.textContent = equipped ? "Equipped" : "Equip";
+      button.disabled = equipped || !p.canEquipItem(item);
+      button.addEventListener("click", () => {
+        p.equipItem(item.uniqueId);
+        this.renderInventory();
+        this.update();
+      });
+      row.appendChild(button);
+      this.itemList.appendChild(row);
+    }
+
+    if (!p.items.length) {
+      const empty = document.createElement("div");
+      empty.className = "item-row";
+      empty.innerHTML = "<div><strong>No items yet</strong><small>Item drops will be added later.</small></div>";
+      this.itemList.appendChild(empty);
+    }
+  }
+
+  itemStatsText(item) {
+    return Object.entries(item.stats)
+      .map(([stat, value]) => `${this.statLabel(stat)} +${value}`)
+      .join(", ");
+  }
+
+  statLabel(stat) {
+    return {
+      damage: "Damage",
+      bonusDamage: "Bonus damage",
+      maxHealth: "Max HP",
+      damageReduction: "Damage reduction",
+      speed: "Speed",
+      arrowSpeed: "Arrow speed",
+      arrowRange: "Arrow range",
+      arrowPierce: "Arrow pierce",
+      bossDamageBonus: "Boss damage",
+      longRangeBonus: "Long range"
+    }[stat] || stat;
   }
 
   showGameOver() {

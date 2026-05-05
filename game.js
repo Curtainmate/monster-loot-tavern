@@ -41,7 +41,9 @@
     this.started = !showStart;
     this.paused = showStart;
     this.shopOpen = false;
+    this.inventoryOpen = false;
     this.gameOver = false;
+    this.ui.inventoryOpen = false;
     this.ui.update();
     this.ui.renderShop();
   }
@@ -223,6 +225,7 @@
 
   openShop() {
     if (!this.shopkeeper.nearby(this.player) || !this.playerInTavern()) return;
+    this.closeInventory();
     this.shopOpen = true;
     this.paused = true;
     this.ui.renderShop();
@@ -249,8 +252,29 @@
     this.paused = false;
   }
 
+  toggleInventory() {
+    if (!this.started || this.gameOver || this.shopOpen) return;
+    this.inventoryOpen = !this.inventoryOpen;
+    this.paused = this.inventoryOpen;
+    if (this.inventoryOpen) {
+      this.ui.openInventory();
+    } else {
+      this.ui.closeInventory();
+    }
+  }
+
+  closeInventory() {
+    this.inventoryOpen = false;
+    this.ui.closeInventory();
+    if (!this.shopOpen) this.paused = false;
+  }
+
   togglePause() {
     if (!this.started) return;
+    if (this.inventoryOpen) {
+      this.closeInventory();
+      return;
+    }
     if (this.shopOpen) {
       this.closeShop();
       return;

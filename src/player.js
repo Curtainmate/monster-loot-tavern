@@ -12,19 +12,19 @@
     this.x = CONFIG.player.x;
     this.y = CONFIG.player.y;
     this.size = CONFIG.player.size;
-    this.speed = classStats.speed;
-    this.maxHealth = classStats.maxHealth;
-    this.health = this.maxHealth;
+    this.baseSpeed = classStats.speed;
+    this.baseMaxHealth = classStats.maxHealth;
+    this.health = this.baseMaxHealth;
     this.baseDamage = classStats.damage;
-    this.bonusDamage = 0;
+    this.baseBonusDamage = 0;
     this.attackCooldown = classStats.cooldown;
-    this.arrowSpeed = classStats.arrowSpeed || 0;
-    this.arrowRange = classStats.arrowRange || 0;
-    this.arrowPierce = classStats.arrowPierce || 0;
+    this.baseArrowSpeed = classStats.arrowSpeed || 0;
+    this.baseArrowRange = classStats.arrowRange || 0;
+    this.baseArrowPierce = classStats.arrowPierce || 0;
     this.extraSwings = 0;
     this.extraArrows = 0;
-    this.bossDamageBonus = 0;
-    this.longRangeBonus = 0;
+    this.baseBossDamageBonus = 0;
+    this.baseLongRangeBonus = 0;
     this.momentumReduction = 0;
     this.momentumDuration = 0;
     this.momentumLeft = 0;
@@ -34,6 +34,9 @@
     this.walkFrame = 0;
     this.gold = 0;
     this.inventory = {};
+    this.items = [];
+    this.equipment = Object.fromEntries(ITEM_SLOT_ORDER.map((slot) => [slot, null]));
+    this.itemStats = {};
     this.upgrades = new Set();
     this.upgradeLevels = {};
     this.masteryLevels = {};
@@ -44,15 +47,81 @@
     for (const chain of Object.keys(CONFIG.masteryChains[classId] || CONFIG.masteryChains.warrior)) {
       this.masteryLevels[chain] = 0;
     }
+    this.addStarterItems();
   }
 
   get damage() {
-    const base = this.baseDamage + this.bonusDamage;
+    const base = this.baseDamage + this.bonusDamage + (this.itemStats.damage || 0);
     return Math.round(base * (this.hasBuff("rage") ? CONFIG.powerups.types.rage.damageMultiplier : 1));
   }
 
+  get speed() {
+    return this.baseSpeed + (this.itemStats.speed || 0);
+  }
+
+  set speed(value) {
+    this.baseSpeed = value - (this.itemStats.speed || 0);
+  }
+
+  get maxHealth() {
+    return this.baseMaxHealth + (this.itemStats.maxHealth || 0);
+  }
+
+  set maxHealth(value) {
+    this.baseMaxHealth = value - (this.itemStats.maxHealth || 0);
+  }
+
+  get bonusDamage() {
+    return this.baseBonusDamage + (this.itemStats.bonusDamage || 0);
+  }
+
+  set bonusDamage(value) {
+    this.baseBonusDamage = value - (this.itemStats.bonusDamage || 0);
+  }
+
+  get arrowSpeed() {
+    return this.baseArrowSpeed + (this.itemStats.arrowSpeed || 0);
+  }
+
+  set arrowSpeed(value) {
+    this.baseArrowSpeed = value - (this.itemStats.arrowSpeed || 0);
+  }
+
+  get arrowRange() {
+    return this.baseArrowRange + (this.itemStats.arrowRange || 0);
+  }
+
+  set arrowRange(value) {
+    this.baseArrowRange = value - (this.itemStats.arrowRange || 0);
+  }
+
+  get arrowPierce() {
+    return this.baseArrowPierce + (this.itemStats.arrowPierce || 0);
+  }
+
+  set arrowPierce(value) {
+    this.baseArrowPierce = value - (this.itemStats.arrowPierce || 0);
+  }
+
+  get bossDamageBonus() {
+    return this.baseBossDamageBonus + (this.itemStats.bossDamageBonus || 0);
+  }
+
+  set bossDamageBonus(value) {
+    this.baseBossDamageBonus = value - (this.itemStats.bossDamageBonus || 0);
+  }
+
+  get longRangeBonus() {
+    return this.baseLongRangeBonus + (this.itemStats.longRangeBonus || 0);
+  }
+
+  set longRangeBonus(value) {
+    this.baseLongRangeBonus = value - (this.itemStats.longRangeBonus || 0);
+  }
+
   get effectiveAttackCooldown() {
-    return Math.max(0.16, this.attackCooldown - (this.momentumLeft > 0 ? this.momentumReduction : 0));
+    const itemCooldownReduction = this.itemStats.attackCooldown || 0;
+    return Math.max(0.16, this.attackCooldown - itemCooldownReduction - (this.momentumLeft > 0 ? this.momentumReduction : 0));
   }
 
   update(dt, game) {
@@ -167,7 +236,7 @@
 
   takeDamage(amount) {
     if (this.invulnerableLeft > 0 || this.hasBuff("shield")) return;
-    this.health -= amount;
+    this.health -= Math.max(1, Math.round(amount * (1 - (this.itemStats.damageReduction || 0))));
     this.invulnerableLeft = CONFIG.player.invulnerableTime;
   }
 
@@ -188,6 +257,57 @@
 
   addLoot(name) {
     this.inventory[name] = (this.inventory[name] || 0) + 1;
+  }
+
+  addStarterItems() {
+    for (const slot of ITEM_SLOT_ORDER) {
+      this.addItem(ItemSystem.generateItem({
+        classRestriction: this.classId,
+        slot,
+        itemLevel: 1,
+        rarity: slot === ITEM_SLOTS.WEAPON ? ITEM_RARITIES.UNCOMMON : ITEM_RARITIES.COMMON
+      }));
+    }
+  }
+
+  addItem(item) {
+    this.items.push(item);
+  }
+
+  canEquipItem(item) {
+    return item && item.classRestriction === this.classId && ITEM_SLOT_ORDER.includes(item.slot);
+  }
+
+  equipItem(uniqueId) {
+    const item = this.items.find((candidate) => candidate.uniqueId === uniqueId);
+    if (!this.canEquipItem(item)) return false;
+    this.equipment[item.slot] = item;
+    this.recalculateItemStats();
+    this.health = Math.min(this.health, this.maxHealth);
+    return true;
+  }
+
+  unequipSlot(slot) {
+    if (!this.equipment[slot]) return false;
+    this.equipment[slot] = null;
+    this.recalculateItemStats();
+    this.health = Math.min(this.health, this.maxHealth);
+    return true;
+  }
+
+  recalculateItemStats() {
+    const stats = {};
+    for (const item of Object.values(this.equipment)) {
+      if (!item) continue;
+      for (const [stat, value] of Object.entries(item.stats)) {
+        stats[stat] = (stats[stat] || 0) + value;
+      }
+    }
+    this.itemStats = stats;
+  }
+
+  getEquippedStats() {
+    return { ...this.itemStats };
   }
 
   draw(camera) {

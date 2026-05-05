@@ -13,7 +13,7 @@ window.addEventListener("keydown", (event) => {
   }
   if (key === "tab") {
     event.preventDefault();
-    if (game.started && !event.repeat) game.ui.toggleInventory();
+    if (game.started && !event.repeat) game.toggleInventory();
   }
   if (key === " " && !game.shopOpen) game.player.attack(game);
   if (key === "e") game.interact();

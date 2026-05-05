@@ -1,8 +1,28 @@
 const ITEM_SLOTS = Object.freeze({
   WEAPON: "weapon",
+  HELMET: "helmet",
   ARMOR: "armor",
   BOOTS: "boots",
-  ACCESSORY: "accessory"
+  ACCESSORY: "accessory",
+  RING: "ring"
+});
+
+const ITEM_SLOT_ORDER = Object.freeze([
+  ITEM_SLOTS.WEAPON,
+  ITEM_SLOTS.HELMET,
+  ITEM_SLOTS.ARMOR,
+  ITEM_SLOTS.BOOTS,
+  ITEM_SLOTS.ACCESSORY,
+  ITEM_SLOTS.RING
+]);
+
+const ITEM_SLOT_LABELS = Object.freeze({
+  weapon: "Weapon",
+  helmet: "Helmet",
+  armor: "Armor",
+  boots: "Boots",
+  accessory: "Accessory",
+  ring: "Ring"
 });
 
 const ITEM_RARITIES = Object.freeze({
@@ -49,6 +69,24 @@ const ITEM_TEMPLATES = Object.freeze({
       baseSellValue: 9
     },
     {
+      id: "warrior_helm",
+      name: "Iron Helm",
+      slot: ITEM_SLOTS.HELMET,
+      classRestriction: "warrior",
+      baseStats: { maxHealth: 10, damageReduction: 0.02 },
+      statGrowth: { maxHealth: 3, damageReduction: 0.004 },
+      baseSellValue: 8
+    },
+    {
+      id: "warrior_horned_helm",
+      name: "Horned Helm",
+      slot: ITEM_SLOTS.HELMET,
+      classRestriction: "warrior",
+      baseStats: { maxHealth: 8, damage: 2 },
+      statGrowth: { maxHealth: 2.5, damage: 0.7 },
+      baseSellValue: 9
+    },
+    {
       id: "warrior_guard",
       name: "Guard Vest",
       slot: ITEM_SLOTS.ARMOR,
@@ -92,6 +130,24 @@ const ITEM_TEMPLATES = Object.freeze({
       baseStats: { maxHealth: 8, bossDamageBonus: 0.04 },
       statGrowth: { maxHealth: 2.5, bossDamageBonus: 0.006 },
       baseSellValue: 10
+    },
+    {
+      id: "warrior_band",
+      name: "Iron Ring",
+      slot: ITEM_SLOTS.RING,
+      classRestriction: "warrior",
+      baseStats: { damage: 2, maxHealth: 5 },
+      statGrowth: { damage: 0.7, maxHealth: 1.8 },
+      baseSellValue: 8
+    },
+    {
+      id: "warrior_blood_ring",
+      name: "Blood Ring",
+      slot: ITEM_SLOTS.RING,
+      classRestriction: "warrior",
+      baseStats: { bossDamageBonus: 0.04, bonusDamage: 1 },
+      statGrowth: { bossDamageBonus: 0.006, bonusDamage: 0.4 },
+      baseSellValue: 10
     }
   ],
   ranger: [
@@ -121,6 +177,24 @@ const ITEM_TEMPLATES = Object.freeze({
       baseStats: { maxHealth: 12 },
       statGrowth: { maxHealth: 4 },
       baseSellValue: 8
+    },
+    {
+      id: "ranger_cap",
+      name: "Scout Cap",
+      slot: ITEM_SLOTS.HELMET,
+      classRestriction: "ranger",
+      baseStats: { maxHealth: 7, arrowRange: 16 },
+      statGrowth: { maxHealth: 2.5, arrowRange: 4 },
+      baseSellValue: 8
+    },
+    {
+      id: "ranger_hood",
+      name: "Hunter Hood",
+      slot: ITEM_SLOTS.HELMET,
+      classRestriction: "ranger",
+      baseStats: { damage: 1, longRangeBonus: 0.03 },
+      statGrowth: { damage: 0.5, longRangeBonus: 0.006 },
+      baseSellValue: 9
     },
     {
       id: "ranger_cloak",
@@ -165,6 +239,24 @@ const ITEM_TEMPLATES = Object.freeze({
       classRestriction: "ranger",
       baseStats: { longRangeBonus: 0.04 },
       statGrowth: { longRangeBonus: 0.008 },
+      baseSellValue: 10
+    },
+    {
+      id: "ranger_signet",
+      name: "Archer Signet",
+      slot: ITEM_SLOTS.RING,
+      classRestriction: "ranger",
+      baseStats: { arrowSpeed: 24, damage: 1 },
+      statGrowth: { arrowSpeed: 6, damage: 0.5 },
+      baseSellValue: 8
+    },
+    {
+      id: "ranger_moon_ring",
+      name: "Moon Ring",
+      slot: ITEM_SLOTS.RING,
+      classRestriction: "ranger",
+      baseStats: { arrowPierce: 1, arrowRange: 12 },
+      statGrowth: { arrowRange: 4 },
       baseSellValue: 10
     }
   ]
@@ -234,6 +326,8 @@ function randomFrom(items) {
 
 const ItemSystem = Object.freeze({
   ITEM_SLOTS,
+  ITEM_SLOT_ORDER,
+  ITEM_SLOT_LABELS,
   ITEM_RARITIES,
   ITEM_RARITY_RULES,
   ITEM_TEMPLATES,

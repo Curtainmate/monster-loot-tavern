@@ -75,6 +75,29 @@
       <div id="hintText" class="hint hud-hint"></div>
     </section>
 
+    <section id="inventoryOverlay" class="overlay hidden" aria-hidden="true">
+      <div class="panel inventory-panel">
+        <header>
+          <div>
+            <h1>Inventory</h1>
+            <p>Equip items to change your adventurer's stats.</p>
+          </div>
+          <button id="closeInventoryButton" class="icon-button" type="button" title="Close inventory">X</button>
+        </header>
+
+        <div class="inventory-layout">
+          <section>
+            <h2>Equipment</h2>
+            <div id="equipmentSlots" class="equipment-slots"></div>
+          </section>
+          <section>
+            <h2>Items</h2>
+            <div id="itemList" class="item-list"></div>
+          </section>
+        </div>
+      </div>
+    </section>
+
     <section id="shopOverlay" class="overlay hidden" aria-hidden="true">
       <div class="panel shop-panel">
         <header>
