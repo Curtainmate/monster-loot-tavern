@@ -6,7 +6,7 @@
     this.chestFrameSize = 160;
     this.powerupFrameSize = 128;
     this.lootSize = 16;
-    this.tileSize = 32;
+    this.tileSize = 64;
     this.lootFrames = {
       "Slime Gel": 0,
       "Goblin Ear": 1,
@@ -22,10 +22,11 @@
       cleave: 4
     };
     this.tileFrames = {
-      grass: 0,
-      grassFlowers: 1,
-      dirt: 2,
-      tavernFloor: 3,
+      grassFlowers: 0,
+      grass: 1,
+      dirt: 1,
+      tavernFloor: 2,
+      wallDark: 3,
       wall: 4,
       door: 5,
       fieldEdge: 6,
@@ -33,7 +34,7 @@
       tree: 8,
       bush: 9,
       counter: 10,
-      stump: 11
+      sign: 11
     };
     for (const name of ["player", "ranger", "slime", "slime_yellow", "goblin", "goblin_red", "wolf", "wolf_black", "loot", "powerups", "tileset", "chest", "shopkeeper"]) {
       const image = new Image();
@@ -192,7 +193,7 @@
     const frame = this.tileFrames[frameName] || 0;
     const row = frame >= 8 ? 1 : 0;
     const col = frame % 8;
-    return this.drawImageFrame("tileset", col, 32, 32, x, y, size, size, row);
+    return this.drawImageFrame("tileset", col, this.tileSize, this.tileSize, x, y, size, size, row);
   }
 
   drawTiledArea(frameName, worldRect, camera, size = 32, alternateFrame = null) {

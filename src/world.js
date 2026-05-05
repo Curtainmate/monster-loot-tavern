@@ -77,13 +77,13 @@ Game.prototype.drawTavern = function() {
       gameSprites.drawTile("wall", wallX - this.camera.x, t.y + t.height - this.camera.y);
     }
     for (let wallY = t.y - 32; wallY < t.y + t.height + 32; wallY += 32) {
-      gameSprites.drawTile("wall", t.x - 32 - this.camera.x, wallY - this.camera.y);
+      gameSprites.drawTile("wallDark", t.x - 32 - this.camera.x, wallY - this.camera.y);
     }
     for (let wallY = t.y - 32; wallY < t.y + 150; wallY += 32) {
-      gameSprites.drawTile("wall", t.x + t.width - this.camera.x, wallY - this.camera.y);
+      gameSprites.drawTile("wallDark", t.x + t.width - this.camera.x, wallY - this.camera.y);
     }
     for (let wallY = t.y + 232; wallY < t.y + t.height + 32; wallY += 32) {
-      gameSprites.drawTile("wall", t.x + t.width - this.camera.x, wallY - this.camera.y);
+      gameSprites.drawTile("wallDark", t.x + t.width - this.camera.x, wallY - this.camera.y);
     }
     ctx.fillStyle = "#f1b14e";
     ctx.fillRect(x + 300, y + 34, 48, 48);
@@ -104,6 +104,10 @@ Game.prototype.drawField = function() {
     ctx.strokeStyle = "rgba(13, 42, 21, 0.45)";
     ctx.lineWidth = 6;
     ctx.strokeRect(f.x - this.camera.x, f.y - this.camera.y, f.width, f.height);
+    gameSprites.drawTile("fieldEdge", f.x - 18 - this.camera.x, f.y - 18 - this.camera.y, 54);
+    gameSprites.drawTile("fieldEdge", f.x + f.width - 36 - this.camera.x, f.y - 18 - this.camera.y, 54);
+    gameSprites.drawTile("fieldEdge", f.x - 18 - this.camera.x, f.y + f.height - 36 - this.camera.y, 54);
+    gameSprites.drawTile("fieldEdge", f.x + f.width - 36 - this.camera.x, f.y + f.height - 36 - this.camera.y, 54);
 
     ctx.fillStyle = "#224925";
     for (let x = f.x + 40; x < f.x + f.width; x += 86) {
@@ -133,6 +137,11 @@ Game.prototype.drawScenery = function() {
       ctx.fillStyle = "#2d7441";
       ctx.fillRect(x - this.camera.x + 8, y - this.camera.y - 8, 28, 28);
       gameSprites.drawTile("tree", x - this.camera.x, y - this.camera.y, 64);
+    }
+
+    const bushes = [[840, 365], [1130, 230], [1295, 610], [1605, 505], [1745, 675]];
+    for (const [x, y] of bushes) {
+      gameSprites.drawTile("bush", x - this.camera.x, y - this.camera.y, 44);
     }
 
     ctx.fillStyle = "rgba(255, 203, 91, 0.16)";

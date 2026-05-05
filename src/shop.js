@@ -26,6 +26,7 @@
     const sx = this.x - camera.x;
     const sy = this.y - camera.y - 116;
     ctx.save();
+    gameSprites.drawTile("sign", sx - 36, sy - 48, 72);
     ctx.fillStyle = "#3c2518";
     ctx.fillRect(Math.floor(sx - 38), Math.floor(sy - 18), 76, 30);
     ctx.strokeStyle = "#d8a452";
