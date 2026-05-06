@@ -33,6 +33,7 @@
     this.startRunButton = document.getElementById("startRunButton");
     this.startMusicButton = document.getElementById("startMusicButton");
     this.hudMusicButton = document.getElementById("hudMusicButton");
+    this.cheatStatus = document.getElementById("cheatStatus");
     this.shopTabs = {
       sell: document.getElementById("shopTabSell"),
       services: document.getElementById("shopTabServices"),
@@ -51,6 +52,12 @@
     document.getElementById("closeShopButton").addEventListener("click", () => game.closeShop());
     document.getElementById("sellAllButton").addEventListener("click", () => game.shop.sellAll());
     document.getElementById("restartButton").addEventListener("click", () => game.restart());
+    document.getElementById("resumeButton").addEventListener("click", () => game.togglePause());
+    document.getElementById("mainMenuButton").addEventListener("click", () => game.returnToMainMenu());
+    document.getElementById("cheatStage10Button").addEventListener("click", () => this.runCheat(() => game.cheatJumpToStage(10), "Stage 10 unlocked."));
+    document.getElementById("cheatFieldBossButton").addEventListener("click", () => this.runCheat(() => game.cheatSpawnFieldBoss(), "Field Boss spawned."));
+    document.getElementById("cheatCastleButton").addEventListener("click", () => this.runCheat(() => game.cheatUnlockCastle(), "Castle unlocked."));
+    document.getElementById("cheatGearButton").addEventListener("click", () => this.runCheat(() => game.cheatEquipTestGear(), "Test gear equipped."));
     this.warriorButton.addEventListener("click", () => this.selectClass("warrior"));
     this.rangerButton.addEventListener("click", () => this.selectClass("ranger"));
     this.startRunButton.addEventListener("click", () => game.startGame(this.selectedClassId));
@@ -60,6 +67,14 @@
       button.addEventListener("click", () => this.setShopTab(tab));
     }
     this.selectClass("warrior");
+  }
+
+  runCheat(action, message) {
+    action();
+    this.cheatStatus.textContent = message;
+    this.renderInventory();
+    this.renderShop();
+    this.update();
   }
 
   selectClass(classId) {

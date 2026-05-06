@@ -57,6 +57,12 @@
     this.restart(false, classId);
   }
 
+  returnToMainMenu() {
+    this.closeShop();
+    this.closeInventory();
+    this.restart(true);
+  }
+
   toggleMusic() {
     this.audio.unlock();
     this.audio.toggleMusic();
@@ -246,6 +252,58 @@
       return;
     }
     if (!this.gameOver) this.paused = !this.paused;
+  }
+
+  cheatJumpToStage(stage) {
+    const targetStage = clamp(stage, 1, CONFIG.fieldBoss.gateStage);
+    this.maxDangerUnlocked = Math.max(this.maxDangerUnlocked, targetStage);
+    this.dangerLevel = targetStage;
+    this.dangerProgress = 0;
+    this.fieldBossActive = false;
+    this.monsters = this.monsters.filter((monster) => !monster.isFieldBoss);
+    this.spawnTimer = Math.min(this.spawnTimer, this.currentStageRule().spawnInterval);
+    this.questNotice = `Test: Stage ${targetStage} opened.`;
+    this.questNoticeTime = 2;
+    this.ui.renderShop();
+  }
+
+  cheatSpawnFieldBoss() {
+    this.maxDangerUnlocked = Math.max(this.maxDangerUnlocked, CONFIG.fieldBoss.gateStage);
+    this.dangerLevel = CONFIG.fieldBoss.gateStage;
+    this.dangerProgress = this.dangerProgressGoal();
+    this.fieldBossDefeated = false;
+    this.spawnFieldBoss();
+    this.ui.renderShop();
+  }
+
+  cheatUnlockCastle() {
+    this.fieldBossDefeated = true;
+    this.fieldBossActive = false;
+    this.monsters = this.monsters.filter((monster) => !monster.isFieldBoss);
+    this.maxDangerUnlocked = Math.max(this.maxDangerUnlocked, CONFIG.fieldBoss.unlockStage);
+    this.dangerLevel = CONFIG.fieldBoss.unlockStage;
+    this.dangerProgress = 0;
+    this.questNotice = "Test: Castle unlocked.";
+    this.questNoticeTime = 2;
+    this.ui.renderShop();
+  }
+
+  cheatEquipTestGear() {
+    const slots = [...ITEM_SLOT_ORDER];
+    for (const slot of slots) {
+      const item = ItemSystem.generateItem({
+        classRestriction: this.player.classId,
+        slot,
+        itemLevel: Math.max(12, this.dangerLevel),
+        rarity: "legendary"
+      });
+      this.player.items.push(item);
+      this.player.equipItem(item.uniqueId);
+    }
+    this.player.health = this.player.maxHealth;
+    this.player.gold += 500;
+    this.questNotice = "Test gear equipped.";
+    this.questNoticeTime = 2;
   }
 
   spawnMonsterWave() {

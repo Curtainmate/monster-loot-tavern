@@ -141,9 +141,23 @@
     </section>
 
     <section id="pauseOverlay" class="overlay hidden" aria-hidden="true">
-      <div class="panel compact-panel">
+      <div class="panel compact-panel pause-panel">
         <h1>Paused</h1>
         <p>Press Escape to return to the field.</p>
+        <div class="pause-actions">
+          <button id="resumeButton" class="primary-button" type="button">Resume</button>
+          <button id="mainMenuButton" class="primary-button" type="button">Main Menu</button>
+        </div>
+        <section class="cheat-console" aria-label="Temporary cheat console">
+          <h2>Test Console</h2>
+          <div class="cheat-grid">
+            <button id="cheatStage10Button" type="button">Jump Stage 10</button>
+            <button id="cheatFieldBossButton" type="button">Spawn Field Boss</button>
+            <button id="cheatCastleButton" type="button">Unlock Castle</button>
+            <button id="cheatGearButton" type="button">Equip Test Gear</button>
+          </div>
+          <small id="cheatStatus">Temporary testing tools.</small>
+        </section>
       </div>
     </section>
 
