@@ -42,6 +42,7 @@
     this.started = !showStart;
     this.paused = showStart;
     this.shopOpen = false;
+    this.shop.backpackUpgradeLevel = 0;
     this.inventoryOpen = false;
     this.gameOver = false;
     this.ui.inventoryOpen = false;

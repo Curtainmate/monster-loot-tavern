@@ -20,6 +20,7 @@
     this.gameOverOverlay = document.getElementById("gameOverOverlay");
     this.gameOverStats = document.getElementById("gameOverStats");
     this.sellList = document.getElementById("sellList");
+    this.servicesList = document.getElementById("servicesList");
     this.dangerList = document.getElementById("dangerList");
     this.equipmentSlots = document.getElementById("equipmentSlots");
     this.itemList = document.getElementById("itemList");
@@ -34,10 +35,12 @@
     this.hudMusicButton = document.getElementById("hudMusicButton");
     this.shopTabs = {
       sell: document.getElementById("shopTabSell"),
+      services: document.getElementById("shopTabServices"),
       danger: document.getElementById("shopTabDanger")
     };
     this.shopPages = {
       sell: document.getElementById("sellPage"),
+      services: document.getElementById("servicesPage"),
       danger: document.getElementById("dangerPage")
     };
     this.activeShopTab = "sell";
@@ -125,7 +128,7 @@
     }
 
     const equippedCount = Object.values(p.equipment).filter(Boolean).length;
-    this.inventoryText.textContent = `Inventory ${p.inventoryCount()}/${CONFIG.inventory.capacity} items | ${equippedCount}/6 equipped | Tab`;
+    this.inventoryText.textContent = `Inventory ${p.inventoryCount()}/${p.inventoryCapacity} items | ${equippedCount}/6 equipped | Tab`;
 
     if (!this.game.started) {
       this.hintText.textContent = "";
@@ -181,6 +184,8 @@
       this.sellList.appendChild(row);
     }
 
+    this.renderShopServices(p);
+
     this.dangerList.innerHTML = "";
     const note = document.createElement("div");
     note.className = "danger-note";
@@ -202,10 +207,81 @@
     }
   }
 
+  renderShopServices(player) {
+    this.servicesList.innerHTML = "";
+    this.addServiceRow({
+      title: "Expand Backpack",
+      detail: this.game.shop.nextBackpackUpgrade()
+        ? `Add ${this.game.shop.nextBackpackUpgrade().slots} backpack slots. Current capacity: ${player.inventoryCapacity}.`
+        : `Maximum capacity reached: ${player.inventoryCapacity}.`,
+      price: this.game.shop.nextBackpackUpgrade()?.price,
+      disabled: !this.game.shop.nextBackpackUpgrade() || player.gold < this.game.shop.nextBackpackUpgrade().price,
+      action: () => this.game.shop.buyBackpackUpgrade()
+    });
+
+    const healCost = this.game.shop.healCost();
+    this.addServiceRow({
+      title: "Heal to Full",
+      detail: healCost > 0 ? `Restore ${player.maxHealth - Math.ceil(player.health)} missing HP.` : "You are already fully healed.",
+      price: healCost,
+      disabled: healCost <= 0 || player.gold < healCost,
+      action: () => this.game.shop.healToFull()
+    });
+
+    const mysteryCost = this.game.shop.mysteryItemCost();
+    this.addServiceRow({
+      title: "Mystery Equipment",
+      detail: `Buy one random ${player.className} item for Stage ${this.game.dangerLevel}.`,
+      price: mysteryCost,
+      disabled: player.gold < mysteryCost || !player.hasInventorySpace(),
+      action: () => this.game.shop.buyMysteryItem()
+    });
+
+    const eligibleItems = player.unequippedItems().filter((item) => this.game.shop.rarityUpgradeCost(item));
+    if (!eligibleItems.length) {
+      this.addServiceRow({
+        title: "Improve Rarity",
+        detail: "Bring a spare Common, Uncommon, or Rare item to upgrade it. Epic is the current limit.",
+        price: null,
+        disabled: true
+      });
+      return;
+    }
+
+    for (const item of eligibleItems) {
+      const nextRarity = ItemSystem.nextRarity(item.rarity);
+      const cost = this.game.shop.rarityUpgradeCost(item);
+      this.addServiceRow({
+        title: `Improve ${item.name}`,
+        detail: `${ITEM_RARITY_RULES[item.rarity].label} -> ${ITEM_RARITY_RULES[nextRarity].label}. Rerolls stats at the same item level.`,
+        price: cost,
+        iconItem: item,
+        disabled: player.gold < cost,
+        action: () => this.game.shop.upgradeItemRarity(item.uniqueId)
+      });
+    }
+  }
+
+  addServiceRow({ title, detail, price, disabled, action, iconItem = null }) {
+    const row = document.createElement("div");
+    row.className = `shop-row ${iconItem ? `rarity-${iconItem.rarity}` : ""}`;
+    row.innerHTML = `
+      ${iconItem ? `<span class="item-icon small" style="background-image:url('${ItemSystem.itemIconPath(iconItem)}')" aria-hidden="true"></span>` : ""}
+      <div><strong>${title}</strong><small>${detail}${price === null || price === undefined ? "" : ` | ${price} gold`}</small></div>
+    `;
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = price === null || price === undefined ? "Locked" : "Buy";
+    button.disabled = disabled;
+    if (action) button.addEventListener("click", action);
+    row.appendChild(button);
+    this.servicesList.appendChild(row);
+  }
+
   renderInventory() {
     const p = this.game.player;
     const backpackItems = p.unequippedItems();
-    this.itemListTitle.textContent = `Backpack ${p.inventoryCount()}/${CONFIG.inventory.capacity}`;
+    this.itemListTitle.textContent = `Backpack ${p.inventoryCount()}/${p.inventoryCapacity}`;
     this.itemListHint.textContent = p.inventoryCount() >= CONFIG.inventory.capacity
       ? "Backpack full. Sell gear before picking up more."
       : "Equipped gear uses no backpack slots.";

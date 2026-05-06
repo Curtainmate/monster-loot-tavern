@@ -313,11 +313,13 @@ function generateItem(options = {}) {
   const rarityRule = ITEM_RARITY_RULES[rarity];
   const stats = rollItemStats(template, itemLevel, rarityRule);
   const rarityName = rarityRule.label;
+  const baseName = template.displayName || template.name;
 
   return {
     uniqueId: `item_${Date.now().toString(36)}_${nextItemId++}`,
     templateId: template.id,
-    name: `${rarityName} ${template.name}`,
+    baseName,
+    name: `${rarityName} ${baseName}`,
     slot: template.slot,
     rarity,
     itemLevel,
@@ -330,6 +332,26 @@ function generateItem(options = {}) {
 
 function itemLevelForStage(stage) {
   return Math.max(1, Math.floor(stage || 1));
+}
+
+function nextRarity(rarity) {
+  return {
+    common: ITEM_RARITIES.UNCOMMON,
+    uncommon: ITEM_RARITIES.RARE,
+    rare: ITEM_RARITIES.EPIC
+  }[rarity] || null;
+}
+
+function upgradeItemRarity(item) {
+  const rarity = nextRarity(item.rarity);
+  if (!rarity) return null;
+  return generateItem({
+    classRestriction: item.classRestriction,
+    templateId: item.templateId,
+    slot: item.slot,
+    itemLevel: item.itemLevel,
+    rarity
+  });
 }
 
 function rollItemDropChance(source, context = {}) {
@@ -432,6 +454,8 @@ const ItemSystem = Object.freeze({
   ITEM_STAT_RULES,
   ITEM_TEMPLATES,
   generateItem,
+  upgradeItemRarity,
+  nextRarity,
   itemLevelForStage,
   rollItemDropChance,
   itemDropChance,

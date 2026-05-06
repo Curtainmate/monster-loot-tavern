@@ -109,13 +109,14 @@
         <header>
           <div>
             <h1>Monster Loot Tavern</h1>
-            <p>Sell spare equipment and choose your stage.</p>
+            <p>Sell gear, buy services, and choose your stage.</p>
           </div>
           <button id="closeShopButton" class="icon-button" type="button" title="Close shop">X</button>
         </header>
 
         <div class="shop-tabs" role="tablist" aria-label="Shop sections">
           <button id="shopTabSell" class="active" type="button">Sell Items</button>
+          <button id="shopTabServices" type="button">Services</button>
           <button id="shopTabDanger" type="button">Stage</button>
         </div>
 
@@ -124,6 +125,11 @@
             <h2>Sell Equipment</h2>
             <div id="sellList" class="shop-list"></div>
             <button id="sellAllButton" class="primary-button" type="button">Sell All Unequipped</button>
+          </div>
+
+          <div id="servicesPage" class="shop-page hidden">
+            <h2>Services</h2>
+            <div id="servicesList" class="shop-list"></div>
           </div>
 
           <div id="dangerPage" class="shop-page hidden">

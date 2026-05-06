@@ -44,6 +44,7 @@
 class Shop {
   constructor(game) {
     this.game = game;
+    this.backpackUpgradeLevel = 0;
   }
 
   sellItem(uniqueId) {
@@ -65,6 +66,77 @@ class Shop {
       this.sellItem(item.uniqueId);
     }
     this.game.ui.renderShop();
+  }
+
+  nextBackpackUpgrade() {
+    return CONFIG.shopServices.backpackUpgrades[this.backpackUpgradeLevel] || null;
+  }
+
+  buyBackpackUpgrade() {
+    const upgrade = this.nextBackpackUpgrade();
+    const p = this.game.player;
+    if (!upgrade || p.gold < upgrade.price) return false;
+    p.gold -= upgrade.price;
+    p.inventoryCapacityBonus += upgrade.slots;
+    this.backpackUpgradeLevel += 1;
+    this.afterPurchase();
+    return true;
+  }
+
+  healCost() {
+    const p = this.game.player;
+    const missingHp = Math.max(0, p.maxHealth - Math.ceil(p.health));
+    return missingHp <= 0 ? 0 : CONFIG.shopServices.healBasePrice + missingHp * CONFIG.shopServices.healPerMissingHp;
+  }
+
+  healToFull() {
+    const p = this.game.player;
+    const cost = this.healCost();
+    if (cost <= 0 || p.gold < cost) return false;
+    p.gold -= cost;
+    p.health = p.maxHealth;
+    this.afterPurchase();
+    return true;
+  }
+
+  mysteryItemCost() {
+    return CONFIG.shopServices.mysteryItemBasePrice + this.game.dangerLevel * CONFIG.shopServices.mysteryItemStagePrice;
+  }
+
+  buyMysteryItem() {
+    const p = this.game.player;
+    const cost = this.mysteryItemCost();
+    if (p.gold < cost || !p.hasInventorySpace()) return false;
+    p.gold -= cost;
+    p.addItem(ItemSystem.generateItem({
+      classRestriction: p.classId,
+      stage: this.game.dangerLevel
+    }));
+    this.afterPurchase();
+    return true;
+  }
+
+  rarityUpgradeCost(item) {
+    return CONFIG.shopServices.rarityUpgradePrices[item.rarity] || null;
+  }
+
+  upgradeItemRarity(uniqueId) {
+    const p = this.game.player;
+    const item = p.unequippedItems().find((candidate) => candidate.uniqueId === uniqueId);
+    const cost = item ? this.rarityUpgradeCost(item) : null;
+    const upgraded = item ? ItemSystem.upgradeItemRarity(item) : null;
+    if (!item || !cost || !upgraded || p.gold < cost) return false;
+    p.gold -= cost;
+    p.removeItem(item.uniqueId);
+    p.addItem(upgraded);
+    this.afterPurchase();
+    return true;
+  }
+
+  afterPurchase() {
+    this.game.audio.play("buy");
+    this.game.ui.renderShop();
+    if (this.game.inventoryOpen) this.game.ui.renderInventory();
   }
 }
 

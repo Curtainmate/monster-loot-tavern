@@ -45,6 +45,22 @@
   inventory: {
     capacity: 10
   },
+  shopServices: {
+    backpackUpgrades: [
+      { slots: 5, price: 150 },
+      { slots: 5, price: 350 },
+      { slots: 5, price: 800 }
+    ],
+    healBasePrice: 25,
+    healPerMissingHp: 1,
+    mysteryItemBasePrice: 120,
+    mysteryItemStagePrice: 12,
+    rarityUpgradePrices: {
+      common: 140,
+      uncommon: 360,
+      rare: 900
+    }
+  },
   spawns: {
     monsterMinPlayerDistance: 260,
     bossMinPlayerDistance: 340

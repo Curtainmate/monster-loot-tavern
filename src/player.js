@@ -31,6 +31,7 @@
     this.walkFrame = 0;
     this.gold = 0;
     this.inventory = {};
+    this.inventoryCapacityBonus = 0;
     this.items = [];
     this.equipment = Object.fromEntries(ITEM_SLOT_ORDER.map((slot) => [slot, null]));
     this.itemStats = {};
@@ -112,6 +113,10 @@
 
   get itemFind() {
     return this.itemStats.itemFind || 0;
+  }
+
+  get inventoryCapacity() {
+    return CONFIG.inventory.capacity + this.inventoryCapacityBonus;
   }
 
   get effectiveAttackCooldown() {
@@ -289,7 +294,7 @@
   }
 
   hasInventorySpace() {
-    return this.inventoryCount() < CONFIG.inventory.capacity;
+    return this.inventoryCount() < this.inventoryCapacity;
   }
 
   canEquipItem(item) {
