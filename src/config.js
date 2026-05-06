@@ -285,12 +285,71 @@
       }
     }
   },
-  quests: [
-    { goal: "Hunt 4 monsters, then return to the tavern.", kills: 4, reward: 12 },
-    { goal: "Collect 6 pieces of equipment, then return to the tavern.", loot: 6, reward: 18 },
-    { goal: "Earn 40 gold from selling equipment, then return to the tavern.", gold: 40, reward: 25 },
-    { goal: "Hunt 10 monsters in one day, then return to the tavern.", kills: 10, reward: 40 }
-  ],
+  contracts: {
+    rewardRarities: [
+      { minStage: 1, weights: { uncommon: 85, rare: 15 } },
+      { minStage: 6, weights: { uncommon: 55, rare: 43, epic: 2 } },
+      { minStage: 10, weights: { uncommon: 35, rare: 58, epic: 7 } },
+      { minStage: 15, weights: { uncommon: 20, rare: 66, epic: 14 } }
+    ],
+    templates: [
+      {
+        id: "hunt",
+        label: "Monster Hunt",
+        text: "Hunt {goal} monsters.",
+        metric: "kills",
+        baseGoal: 24,
+        perStage: 2,
+        gold: 35,
+        stageGold: 6,
+        minStage: 1
+      },
+      {
+        id: "tier2",
+        label: "Elite Cull",
+        text: "Defeat {goal} Tier 2 monsters.",
+        metric: "tier2Kills",
+        baseGoal: 8,
+        perStage: 1,
+        gold: 55,
+        stageGold: 8,
+        minStage: 5
+      },
+      {
+        id: "chests",
+        label: "Treasure Run",
+        text: "Open {goal} treasure chests.",
+        metric: "chests",
+        baseGoal: 3,
+        perStage: 0.12,
+        gold: 45,
+        stageGold: 7,
+        minStage: 3
+      },
+      {
+        id: "gold",
+        label: "Gold Sweep",
+        text: "Collect {goal} gold from the field.",
+        metric: "gold",
+        baseGoal: 160,
+        perStage: 24,
+        gold: 50,
+        stageGold: 6,
+        minStage: 4
+      },
+      {
+        id: "miniboss",
+        label: "Bounty Hunt",
+        text: "Defeat {goal} minibosses.",
+        metric: "minibossKills",
+        baseGoal: 2,
+        perStage: 0.08,
+        gold: 80,
+        stageGold: 10,
+        minStage: 6
+      }
+    ]
+  },
   monsters: {
     slime: {
       name: "Slime",

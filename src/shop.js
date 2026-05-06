@@ -54,7 +54,6 @@ class Shop {
     p.removeItem(uniqueId);
     p.gold += item.sellValue;
     this.game.totalGoldEarned += item.sellValue;
-    this.game.questProgress.gold += item.sellValue;
     this.game.addDangerProgress(Math.max(1, Math.floor(item.sellValue / CONFIG.dangerProgress.saleGoldDivisor)), "stage progress");
     this.game.audio.play("sell");
     this.game.ui.renderShop();

@@ -496,7 +496,7 @@
   }
 
   showGameOver() {
-    this.gameOverStats.textContent = `Day: ${this.game.day} | Kills: ${this.game.kills} | Gold earned: ${this.game.totalGoldEarned} | Stage reached: ${this.game.dangerLevel}`;
+    this.gameOverStats.textContent = `Jobs: ${this.game.day} | Kills: ${this.game.kills} | Gold earned: ${this.game.totalGoldEarned} | Stage reached: ${this.game.dangerLevel}`;
   }
 }
 

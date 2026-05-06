@@ -29,15 +29,16 @@
     this.chestTimer = this.randomRange(CONFIG.chests.minDelay, CONFIG.chests.maxDelay);
     this.powerupTimer = this.randomRange(CONFIG.powerups.minDelay, CONFIG.powerups.maxDelay);
     this.bossTimer = this.randomRange(CONFIG.bosses.minDelay, CONFIG.bosses.maxDelay);
-    this.day = 1;
-    this.questProgress = { kills: 0, loot: 0, gold: 0 };
-    this.questNotice = "";
-    this.questNoticeTime = 0;
     this.dangerLevel = 1;
     this.maxDangerUnlocked = 1;
     this.dangerProgress = 0;
     this.fieldBossDefeated = false;
     this.fieldBossActive = false;
+    this.day = 1;
+    this.lastContractId = null;
+    this.contract = this.createContract();
+    this.questNotice = "";
+    this.questNoticeTime = 0;
     this.kills = 0;
     this.totalGoldEarned = 0;
     this.selectedClass = showStart ? null : (classId || this.selectedClass || "warrior");
@@ -125,8 +126,8 @@
       }
     }
 
-    if (this.questComplete() && this.playerInTavern()) {
-      this.advanceDay();
+    if (this.contractComplete() && this.playerInTavern()) {
+      this.claimContract();
     }
     this.questNoticeTime = Math.max(0, this.questNoticeTime - dt);
     this.recalculateDanger();
@@ -209,6 +210,7 @@
     const chest = this.nearbyChest();
     if (chest) {
       chest.open(this);
+      this.recordContractProgress("chests", 1);
       this.chests = this.chests.filter((candidate) => candidate !== chest);
       return;
     }
@@ -414,7 +416,9 @@
     this.monsters = this.monsters.filter((candidate) => candidate !== monster);
     const monsterScore = monster.isFieldBoss ? 10 : CONFIG.monsters[monster.type].score;
     this.kills += monsterScore * (monster.isBoss ? 5 : 1);
-    this.questProgress.kills += monster.isBoss ? 3 : 1;
+    this.recordContractProgress("kills", monster.isBoss ? 3 : 1);
+    if (monster.variantData) this.recordContractProgress("tier2Kills", 1);
+    if (monster.isBoss && !monster.isFieldBoss) this.recordContractProgress("minibossKills", 1);
     if (this.player.momentumDuration > 0) {
       this.player.momentumLeft = this.player.momentumDuration;
     }
@@ -424,6 +428,7 @@
     this.dropMonsterGold(monster);
     this.tryDropGeneratedItem(monster.isBoss ? "boss" : "monster", monster.x, monster.y - 12, monster);
     if (monster.isFieldBoss) {
+      this.recordContractProgress("fieldBossKills", 1);
       this.defeatFieldBoss(monster);
       return;
     }
@@ -488,7 +493,6 @@
     for (const item of [...this.loot]) {
       if (distance(this.player, item) < this.player.pickupRange) {
         this.player.addLoot(item.name);
-        this.questProgress.loot += 1;
         this.audio.play("loot");
         this.loot = this.loot.filter((candidate) => candidate !== item);
         this.floaters.push(new FloatingText(item.name, this.player.x, this.player.y - 30, "#ffe18a"));
@@ -501,6 +505,7 @@
       if (distance(this.player, coin) < this.player.pickupRange) {
         this.player.gold += coin.value;
         this.totalGoldEarned += coin.value;
+        this.recordContractProgress("gold", coin.value);
         this.audio.play("loot");
         this.coins = this.coins.filter((candidate) => candidate !== coin);
         this.floaters.push(new FloatingText(`+${coin.value} gold`, this.player.x, this.player.y - 30, "#ffe18a"));
@@ -518,7 +523,7 @@
           }
           continue;
         }
-        this.questProgress.loot += 1;
+        this.recordContractProgress("equipment", 1);
         this.audio.play("loot");
         this.itemDrops = this.itemDrops.filter((candidate) => candidate !== itemDrop);
         this.floaters.push(new FloatingText(itemDrop.item.name, this.player.x, this.player.y - 34, itemDrop.color));
@@ -540,40 +545,90 @@
     this.dangerLevel = clamp(this.dangerLevel, 1, this.maxDangerUnlocked);
   }
 
-  currentQuest() {
-    return CONFIG.quests[(this.day - 1) % CONFIG.quests.length];
+  createContract() {
+    const stage = Math.max(1, this.maxDangerUnlocked || this.dangerLevel || 1);
+    let templates = CONFIG.contracts.templates.filter((template) => stage >= template.minStage);
+    if (templates.length > 1 && this.lastContractId) {
+      templates = templates.filter((template) => template.id !== this.lastContractId);
+    }
+    const template = templates[Math.floor(Math.random() * templates.length)] || CONFIG.contracts.templates[0];
+    const goal = Math.max(1, Math.round(template.baseGoal + stage * template.perStage));
+    const rewardGold = Math.round(template.gold + stage * template.stageGold);
+    const rewardRarity = this.rollContractRewardRarity(stage);
+    this.lastContractId = template.id;
+    return {
+      ...template,
+      goal,
+      rewardGold,
+      rewardRarity,
+      progress: 0,
+      completeNotified: false,
+      description: template.text.replace("{goal}", goal)
+    };
   }
 
-  questComplete() {
-    const quest = this.currentQuest();
-    return (!quest.kills || this.questProgress.kills >= quest.kills)
-      && (!quest.loot || this.questProgress.loot >= quest.loot)
-      && (!quest.gold || this.questProgress.gold >= quest.gold);
+  rollContractRewardRarity(stage) {
+    let selected = CONFIG.contracts.rewardRarities[0];
+    for (const table of CONFIG.contracts.rewardRarities) {
+      if (stage >= table.minStage) selected = table;
+    }
+    const entries = Object.entries(selected.weights).map(([rarity, weight]) => ({ rarity, weight }));
+    const total = entries.reduce((sum, entry) => sum + entry.weight, 0);
+    let roll = Math.random() * total;
+    for (const entry of entries) {
+      roll -= entry.weight;
+      if (roll <= 0) return entry.rarity;
+    }
+    return entries[0].rarity;
+  }
+
+  recordContractProgress(metric, amount = 1) {
+    if (!this.contract || this.contract.metric !== metric || this.contractComplete()) return;
+    this.contract.progress = Math.min(this.contract.goal, this.contract.progress + amount);
+    if (this.contractComplete() && !this.contract.completeNotified) {
+      this.contract.completeNotified = true;
+      this.questNotice = "Contract complete: return to the tavern.";
+      this.questNoticeTime = 4;
+      this.audio.play("day");
+    }
+  }
+
+  contractComplete() {
+    return Boolean(this.contract && this.contract.progress >= this.contract.goal);
   }
 
   questSummary() {
-    const quest = this.currentQuest();
+    const contract = this.contract;
     if (this.questNoticeTime > 0) return this.questNotice;
-    if (this.questComplete()) return `Quest complete: return to the tavern for ${quest.reward} bonus gold.`;
-    const parts = [];
-    if (quest.kills) parts.push(`${this.questProgress.kills}/${quest.kills} hunts`);
-    if (quest.loot) parts.push(`${this.questProgress.loot}/${quest.loot} loot`);
-    if (quest.gold) parts.push(`${this.questProgress.gold}/${quest.gold} sale gold`);
-    return `Quest: ${quest.goal} (${parts.join(", ")})`;
+    if (!contract) return "";
+    if (this.contractComplete()) return `Contract complete: return to the tavern for gold and ${contract.rewardRarity} gear.`;
+    return `Contract: ${contract.description} (${Math.floor(contract.progress)}/${contract.goal})`;
   }
 
-  advanceDay() {
-    const quest = this.currentQuest();
-    this.player.gold += quest.reward;
-    this.totalGoldEarned += quest.reward;
+  claimContract() {
+    if (!this.contractComplete()) return;
+    const contract = this.contract;
+    this.player.gold += contract.rewardGold;
+    this.totalGoldEarned += contract.rewardGold;
+    const rewardItem = ItemSystem.generateItem({
+      classRestriction: this.player.classId,
+      stage: Math.max(this.dangerLevel, this.maxDangerUnlocked),
+      rarity: contract.rewardRarity
+    });
+    if (!this.player.addItem(rewardItem)) {
+      this.itemDrops.push(new ItemDrop(rewardItem, this.player.x + 24, this.player.y - 10));
+      this.floaters.push(new FloatingText("Inventory full: reward dropped", this.player.x, this.player.y - 42, "#ffb36b"));
+    }
     this.day += 1;
-    this.questProgress = { kills: 0, loot: 0, gold: 0 };
-    this.questNotice = `Day ${this.day - 1} complete: +${quest.reward} bonus gold. Day ${this.day} begins.`;
+    const completedLabel = contract.label;
+    this.contract = this.createContract();
+    this.questNotice = `${completedLabel} complete: +${contract.rewardGold} gold and ${rewardItem.name}.`;
     this.questNoticeTime = 4;
     this.player.health = Math.min(this.player.maxHealth, this.player.health + 35);
     this.monsters = this.monsters.filter((monster) => distance(monster, this.player) > 420);
     this.audio.play("day");
     this.addDangerProgress(CONFIG.dangerProgress.questComplete, "stage progress");
+    if (this.inventoryOpen) this.ui.renderInventory();
   }
 
   draw() {
