@@ -24,6 +24,9 @@
     this.equipmentSlots = document.getElementById("equipmentSlots");
     this.itemList = document.getElementById("itemList");
     this.itemListTitle = document.getElementById("itemListTitle");
+    this.itemListHint = document.getElementById("itemListHint");
+    this.inventoryHeroPortrait = document.getElementById("inventoryHeroPortrait");
+    this.inventoryStatList = document.getElementById("inventoryStatList");
     this.warriorButton = document.getElementById("warriorButton");
     this.rangerButton = document.getElementById("rangerButton");
     this.startRunButton = document.getElementById("startRunButton");
@@ -199,7 +202,11 @@
   renderInventory() {
     const p = this.game.player;
     const backpackItems = p.unequippedItems();
-    this.itemListTitle.textContent = `Items ${p.inventoryCount()}/${CONFIG.inventory.capacity}`;
+    this.itemListTitle.textContent = `Backpack ${p.inventoryCount()}/${CONFIG.inventory.capacity}`;
+    this.itemListHint.textContent = p.inventoryCount() >= CONFIG.inventory.capacity
+      ? "Backpack full. Sell gear before picking up more."
+      : "Equipped gear uses no backpack slots.";
+    this.renderInventorySummary();
     this.equipmentSlots.innerHTML = "";
     for (const slot of ITEM_SLOT_ORDER) {
       const item = p.equipment[slot];
@@ -210,7 +217,7 @@
       row.disabled = !item || !canUnequip;
       row.innerHTML = item
         ? `<span>${ITEM_SLOT_LABELS[slot]}</span><strong>${item.name}</strong><small>${canUnequip ? this.itemStatsText(item) : "Backpack full"}</small>`
-        : `<span>${ITEM_SLOT_LABELS[slot]}</span><strong>Empty</strong><small>No item equipped</small>`;
+        : `<span>${ITEM_SLOT_LABELS[slot]}</span><strong>${this.emptySlotSymbol(slot)}</strong><small>Empty slot</small>`;
       row.addEventListener("click", () => {
         p.unequipSlot(slot);
         this.renderInventory();
@@ -250,6 +257,41 @@
       empty.innerHTML = "<div><strong>No backpack items</strong><small>Equipped gear does not use backpack slots.</small></div>";
       this.itemList.appendChild(empty);
     }
+  }
+
+  renderInventorySummary() {
+    const p = this.game.player;
+    this.inventoryHeroPortrait.className = `inventory-hero-portrait ${p.classId}`;
+    this.inventoryHeroPortrait.innerHTML = `
+      <span class="hero-shadow"></span>
+      <span class="hero-sprite"></span>
+      <strong>${p.className}</strong>
+    `;
+    const stats = [
+      ["HP", `${Math.ceil(p.health)} / ${p.maxHealth}`],
+      ["Damage", p.damage],
+      ["Speed", p.speed],
+      ["Attack speed", `+${this.formatStatValue(p.attackSpeed, "attackSpeed")}`],
+      ["Crit", `${this.formatStatValue(p.critChance, "critChance")} / ${this.formatStatValue(p.critDamage, "critDamage")}`],
+      ["Gold", p.gold]
+    ];
+    this.inventoryStatList.innerHTML = stats.map(([label, value]) => `
+      <div class="inventory-stat-row">
+        <span>${label}</span>
+        <strong>${value}</strong>
+      </div>
+    `).join("");
+  }
+
+  emptySlotSymbol(slot) {
+    return {
+      weapon: "Sword",
+      helmet: "Helm",
+      armor: "Vest",
+      boots: "Boots",
+      accessory: "Charm",
+      ring: "Ring"
+    }[slot] || "Empty";
   }
 
   itemStatsText(item) {

@@ -78,20 +78,26 @@
     <section id="inventoryOverlay" class="overlay hidden" aria-hidden="true">
       <div class="panel inventory-panel">
         <header>
-          <div>
+          <div class="inventory-title-frame">
             <h1>Inventory</h1>
-            <p>Equip items to change your adventurer's stats.</p>
           </div>
           <button id="closeInventoryButton" class="icon-button" type="button" title="Close inventory">X</button>
         </header>
 
         <div class="inventory-layout">
-          <section>
+          <section class="inventory-equipment-panel">
             <h2>Equipment</h2>
             <div id="equipmentSlots" class="equipment-slots"></div>
           </section>
-          <section>
-            <h2 id="itemListTitle">Items</h2>
+          <section class="inventory-hero-panel" aria-label="Character summary">
+            <div class="inventory-hero-portrait" id="inventoryHeroPortrait"></div>
+            <div id="inventoryStatList" class="inventory-stat-list"></div>
+          </section>
+          <section class="inventory-backpack-panel">
+            <div class="inventory-tabs">
+              <h2 id="itemListTitle">Backpack</h2>
+              <span id="itemListHint">Equipped gear uses no backpack slots.</span>
+            </div>
             <div id="itemList" class="item-list"></div>
           </section>
         </div>

@@ -260,22 +260,95 @@ canvas {
 }
 
 .inventory-panel {
-  width: min(1040px, 100%);
+  width: min(1120px, 100%);
+  padding: 20px;
+  border-color: #c78534;
+  background:
+    linear-gradient(90deg, rgba(85, 49, 22, 0.28), transparent 18%, transparent 82%, rgba(85, 49, 22, 0.28)),
+    repeating-linear-gradient(0deg, rgba(95, 56, 26, 0.22) 0 13px, rgba(42, 23, 12, 0.22) 13px 26px),
+    rgba(29, 18, 11, 0.98);
+  box-shadow: inset 0 0 0 3px rgba(255, 215, 132, 0.14), 0 18px 0 rgba(0, 0, 0, 0.32);
 }
 
 .inventory-panel header {
+  position: relative;
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
+  justify-content: center;
+  align-items: center;
   gap: 16px;
-  padding-bottom: 12px;
-  border-bottom: 2px solid rgba(255, 236, 181, 0.18);
+  padding-bottom: 14px;
+}
+
+.inventory-panel header .icon-button {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 54px;
+  height: 54px;
+  border: 3px solid #e0a857;
+  background: #5a3219;
+  color: #ffe6a0;
+  font-size: 24px;
+}
+
+.inventory-title-frame {
+  min-width: 360px;
+  padding: 10px 34px 12px;
+  border: 4px solid #bd7c34;
+  background:
+    linear-gradient(180deg, rgba(102, 61, 30, 0.96), rgba(42, 24, 15, 0.98));
+  box-shadow: inset 0 0 0 3px rgba(255, 212, 126, 0.18), 0 8px 0 rgba(0, 0, 0, 0.32);
+  text-align: center;
+}
+
+.inventory-title-frame h1 {
+  margin: 0;
+  color: #ffdda0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 46px;
+  line-height: 1;
+  text-shadow: 0 4px 0 #2a160a;
 }
 
 .inventory-layout {
   display: grid;
-  grid-template-columns: minmax(260px, 0.85fr) minmax(360px, 1.15fr);
-  gap: 16px;
+  grid-template-columns: minmax(250px, 0.82fr) minmax(300px, 1fr) minmax(280px, 0.9fr);
+  grid-template-areas:
+    "equipment hero hero"
+    "backpack backpack backpack";
+  gap: 14px;
+}
+
+.inventory-equipment-panel,
+.inventory-hero-panel,
+.inventory-backpack-panel {
+  border: 3px solid rgba(156, 101, 45, 0.74);
+  background: rgba(15, 10, 7, 0.62);
+  box-shadow: inset 0 0 0 2px rgba(255, 215, 132, 0.08);
+}
+
+.inventory-equipment-panel {
+  grid-area: equipment;
+  padding: 12px;
+}
+
+.inventory-hero-panel {
+  grid-area: hero;
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) minmax(250px, 0.9fr);
+  min-height: 310px;
+  padding: 12px;
+}
+
+.inventory-backpack-panel {
+  grid-area: backpack;
+  padding: 12px;
+}
+
+.inventory-equipment-panel h2 {
+  margin-bottom: 10px;
+  color: #ffd98a;
+  text-align: center;
 }
 
 .equipment-slots,
@@ -284,12 +357,18 @@ canvas {
   gap: 8px;
 }
 
+.equipment-slots {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .equipment-slot,
 .item-row {
   min-height: 66px;
   padding: 10px;
-  border: 2px solid rgba(255, 236, 181, 0.16);
-  background: rgba(255, 255, 255, 0.04);
+  border: 2px solid rgba(255, 204, 112, 0.26);
+  background:
+    linear-gradient(180deg, rgba(255, 224, 150, 0.05), transparent),
+    rgba(20, 14, 10, 0.82);
   color: var(--ink);
   text-align: left;
 }
@@ -298,10 +377,13 @@ canvas {
   display: grid;
   gap: 3px;
   width: 100%;
+  min-height: 96px;
+  align-content: center;
+  text-align: center;
 }
 
 .equipment-slot span {
-  color: var(--muted);
+  color: #ffd98a;
   font-size: 11px;
   text-transform: uppercase;
 }
@@ -323,6 +405,99 @@ canvas {
   grid-template-columns: 1fr auto;
   gap: 10px;
   align-items: center;
+}
+
+.inventory-hero-portrait {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 100%;
+  overflow: hidden;
+  border-right: 2px solid rgba(190, 128, 55, 0.44);
+  background:
+    radial-gradient(circle at 50% 58%, rgba(255, 203, 105, 0.18), transparent 34%),
+    radial-gradient(circle at 50% 45%, rgba(255, 228, 157, 0.1), transparent 22%),
+    linear-gradient(180deg, rgba(91, 59, 31, 0.24), rgba(16, 11, 8, 0.14));
+}
+
+.inventory-hero-portrait .hero-shadow {
+  position: absolute;
+  width: 170px;
+  height: 38px;
+  bottom: 52px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.32);
+}
+
+.inventory-hero-portrait .hero-sprite {
+  position: relative;
+  width: 112px;
+  height: 112px;
+  margin-top: 10px;
+  background-image: url("assets/player.png");
+  background-position: 0 0;
+  background-size: 896px 112px;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+}
+
+.inventory-hero-portrait.ranger .hero-sprite {
+  background-image: url("assets/ranger.png");
+}
+
+.inventory-hero-portrait strong {
+  position: absolute;
+  bottom: 14px;
+  color: #ffd98a;
+  font-size: 20px;
+}
+
+.inventory-stat-list {
+  display: grid;
+  align-content: center;
+  gap: 10px;
+  padding: 12px 18px;
+}
+
+.inventory-stat-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 217, 138, 0.16);
+}
+
+.inventory-stat-row span {
+  color: #f2c777;
+}
+
+.inventory-stat-row strong {
+  color: #8ee58e;
+}
+
+.inventory-tabs {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 10px;
+}
+
+.inventory-tabs h2 {
+  min-width: 170px;
+  margin: 0;
+  padding: 9px 18px;
+  border: 3px solid #b77934;
+  background: #4a2d18;
+  color: #ffd98a;
+  text-align: center;
+}
+
+.inventory-tabs span {
+  color: var(--muted);
+}
+
+.inventory-backpack-panel .item-list {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .item-row.equipped {
@@ -797,6 +972,33 @@ button:disabled {
 
   .inventory-layout {
     grid-template-columns: 1fr;
+    grid-template-areas:
+      "equipment"
+      "hero"
+      "backpack";
+  }
+
+  .inventory-hero-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .inventory-hero-portrait {
+    min-height: 210px;
+    border-right: 0;
+    border-bottom: 2px solid rgba(190, 128, 55, 0.44);
+  }
+
+  .inventory-backpack-panel .item-list {
+    grid-template-columns: 1fr;
+  }
+
+  .inventory-title-frame {
+    min-width: 0;
+    width: min(360px, calc(100vw - 120px));
+  }
+
+  .inventory-title-frame h1 {
+    font-size: 34px;
   }
 
   .class-grid {
