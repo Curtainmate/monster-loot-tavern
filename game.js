@@ -98,7 +98,7 @@
       this.spawnTimer -= dt;
       if (this.spawnTimer <= 0) {
         this.spawnMonsterWave();
-        this.spawnTimer = Math.max(0.65, this.spawnInterval - this.dangerLevel * 0.16);
+        this.spawnTimer = this.currentStageRule().spawnInterval;
       }
       this.chestTimer -= dt;
       if (this.chestTimer <= 0) {
@@ -156,6 +156,7 @@
     if (unlocked) {
       this.questNotice = `Stage ${this.maxDangerUnlocked} unlocked.`;
       this.questNoticeTime = 3;
+      if (this.currentStageRule().bosses.length) this.bossTimer = Math.min(this.bossTimer, 8);
       this.audio.play("day");
     } else if (label) {
       this.questNotice = `+${amount} ${label}.`;
@@ -165,7 +166,8 @@
 
   setDangerLevel(level) {
     this.dangerLevel = clamp(level, 1, this.maxDangerUnlocked);
-    this.spawnTimer = Math.min(this.spawnTimer, Math.max(0.65, this.spawnInterval - this.dangerLevel * 0.16));
+    this.spawnTimer = Math.min(this.spawnTimer, this.currentStageRule().spawnInterval);
+    if (this.currentStageRule().bosses.length) this.bossTimer = Math.min(this.bossTimer, 8);
     this.ui.renderShop();
   }
 
@@ -229,32 +231,39 @@
   }
 
   spawnMonsterWave() {
-    const maxMonsters = 5 + this.dangerLevel * 2;
+    const rule = this.currentStageRule();
+    const maxMonsters = rule.maxMonsters;
     if (this.monsters.length >= maxMonsters) return;
-    const count = this.dangerLevel >= 5 && Math.random() < 0.45 ? 2 : 1;
+    const count = Math.min(this.rollWaveSize(rule.waveSize), maxMonsters - this.monsters.length);
     for (let i = 0; i < count; i += 1) {
-      const roll = Math.random();
-      const type = roll < 0.52 ? "slime" : roll < 0.78 ? "goblin" : "wolf";
+      const spawn = this.rollWeighted(rule.spawns);
+      const type = spawn.type;
       const point = this.randomFieldPoint(CONFIG.monsters[type].size, CONFIG.spawns.monsterMinPlayerDistance);
       const x = point.x;
       const y = point.y;
-      this.monsters.push(new Monster(type, x, y, this.dangerLevel, false, this.rollMonsterVariant(type)));
+      this.monsters.push(new Monster(type, x, y, this.dangerLevel, false, spawn.variant || null));
     }
   }
 
-  eliteVariantChance() {
-    if (this.dangerLevel < CONFIG.monsterVariants.eliteStartStage) return 0;
-    if (this.dangerLevel < 12) return 0.25;
-    if (this.dangerLevel < 15) return 0.5;
-    if (this.dangerLevel < 18) return 0.8;
-    return 1;
+  currentStageRule() {
+    const rules = CONFIG.fieldStageRules;
+    return rules[this.dangerLevel] || rules[Math.max(...Object.keys(rules).map(Number))];
   }
 
-  rollMonsterVariant(type, forceAtHighStage = false) {
-    const variant = CONFIG.monsterVariants.types[type];
-    if (!variant) return null;
-    if (forceAtHighStage && this.dangerLevel >= CONFIG.monsterVariants.eliteStartStage) return variant.id;
-    return Math.random() < this.eliteVariantChance() ? variant.id : null;
+  rollWaveSize(range) {
+    const min = range[0];
+    const max = range[1];
+    return min + Math.floor(Math.random() * (max - min + 1));
+  }
+
+  rollWeighted(entries) {
+    const total = entries.reduce((sum, entry) => sum + entry.weight, 0);
+    let roll = Math.random() * total;
+    for (const entry of entries) {
+      roll -= entry.weight;
+      if (roll <= 0) return entry;
+    }
+    return entries[entries.length - 1];
   }
 
   randomFieldPoint(size = 32, minPlayerDistance = 0) {
@@ -298,10 +307,12 @@
 
   spawnBoss() {
     if (this.monsters.filter((monster) => monster.isBoss).length >= CONFIG.bosses.maxActive) return;
-    const types = Object.keys(CONFIG.bosses.types);
-    const type = types[Math.floor(Math.random() * types.length)];
+    const rule = this.currentStageRule();
+    if (!rule.bosses.length) return;
+    const bossEntry = this.rollWeighted(rule.bosses);
+    const type = bossEntry.type;
     const point = this.randomFieldPoint(CONFIG.bosses.types[type].size, CONFIG.spawns.bossMinPlayerDistance);
-    const boss = new Monster(type, point.x, point.y, this.dangerLevel, true, this.rollMonsterVariant(type, true));
+    const boss = new Monster(type, point.x, point.y, this.dangerLevel, true, bossEntry.variant || null);
     this.monsters.push(boss);
     this.floaters.push(new FloatingText(`${boss.name} appears!`, boss.x, boss.y - 44, "#ffcf6b"));
     this.audio.play("day");

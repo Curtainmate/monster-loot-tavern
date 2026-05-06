@@ -12,10 +12,11 @@
     this.x = x;
     this.y = y;
     this.size = bossStats ? bossStats.size : stats.size;
-    this.speed = (stats.speed + dangerLevel * 4) * (bossStats ? bossStats.speed : 1) * (variantStats ? variantStats.speed : 1);
-    this.maxHealth = Math.round(stats.health * (1 + dangerLevel * 0.12) * (bossStats ? bossStats.health : 1) * (variantStats ? variantStats.health : 1));
+    const zoneStats = monsterZoneStats(dangerLevel);
+    this.speed = stats.speed * (bossStats ? bossStats.speed : 1) * (variantStats ? variantStats.speed : 1);
+    this.maxHealth = Math.round(stats.health * zoneStats.health * (bossStats ? bossStats.health : 1) * (variantStats ? variantStats.health : 1));
     this.health = this.maxHealth;
-    this.damage = Math.round(stats.damage * (1 + dangerLevel * 0.08) * (bossStats ? bossStats.damage : 1) * (variantStats ? variantStats.damage : 1));
+    this.damage = Math.round(stats.damage * zoneStats.damage * (bossStats ? bossStats.damage : 1) * (variantStats ? variantStats.damage : 1));
     this.attackCooldown = stats.attackCooldown * (isBoss ? 1.12 : 1) * (variantStats ? variantStats.attackCooldown : 1);
     this.attackLeft = Math.random() * 0.4;
     this.color = variantStats ? variantStats.color : stats.color;
@@ -82,3 +83,10 @@
   }
 }
 
+function monsterZoneStats(stage) {
+  let zone = CONFIG.stageZones[0];
+  for (const candidate of CONFIG.stageZones) {
+    if (stage >= candidate.minStage) zone = candidate;
+  }
+  return zone.statMultiplier || { health: 1, damage: 1 };
+}

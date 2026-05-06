@@ -5,9 +5,81 @@
   transition: { x: 650, y: 280, width: 96, height: 122 },
   field: { x: 720, y: 80, width: 1100, height: 900 },
   stageZones: [
-    { minStage: 1, name: "Green Field", shortName: "Field", theme: "field" },
-    { minStage: 11, name: "Abandoned Castle", shortName: "Castle", theme: "castle" }
+    { minStage: 1, name: "Green Field", shortName: "Field", theme: "field", statMultiplier: { health: 1, damage: 1 } },
+    { minStage: 11, name: "Abandoned Castle", shortName: "Castle", theme: "castle", statMultiplier: { health: 1.1, damage: 1.1 } }
   ],
+  fieldStageRules: {
+    1: {
+      maxMonsters: 5,
+      waveSize: [1, 1],
+      spawnInterval: 2.4,
+      spawns: [{ type: "slime", weight: 100 }],
+      bosses: []
+    },
+    2: {
+      maxMonsters: 6,
+      waveSize: [1, 1],
+      spawnInterval: 2.2,
+      spawns: [{ type: "slime", weight: 80 }, { type: "goblin", weight: 20 }],
+      bosses: []
+    },
+    3: {
+      maxMonsters: 7,
+      waveSize: [1, 1],
+      spawnInterval: 2,
+      spawns: [{ type: "slime", weight: 75 }, { type: "goblin", weight: 25 }],
+      bosses: [{ type: "slime", weight: 100 }]
+    },
+    4: {
+      maxMonsters: 8,
+      waveSize: [1, 1],
+      spawnInterval: 1.9,
+      spawns: [{ type: "slime", weight: 60 }, { type: "goblin", weight: 25 }, { type: "wolf", weight: 15 }],
+      bosses: [{ type: "slime", weight: 70 }, { type: "goblin", weight: 30 }]
+    },
+    5: {
+      maxMonsters: 9,
+      waveSize: [1, 2],
+      spawnInterval: 1.75,
+      spawns: [{ type: "slime", weight: 45 }, { type: "slime", variant: "yellow", weight: 5 }, { type: "goblin", weight: 30 }, { type: "wolf", weight: 20 }],
+      bosses: [{ type: "slime", variant: "yellow", weight: 55 }, { type: "goblin", weight: 45 }]
+    },
+    6: {
+      maxMonsters: 10,
+      waveSize: [1, 2],
+      spawnInterval: 1.65,
+      spawns: [{ type: "slime", weight: 30 }, { type: "slime", variant: "yellow", weight: 5 }, { type: "goblin", weight: 50 }, { type: "goblin", variant: "red", weight: 10 }, { type: "wolf", weight: 5 }],
+      bosses: [{ type: "goblin", variant: "red", weight: 100 }]
+    },
+    7: {
+      maxMonsters: 11,
+      waveSize: [1, 2],
+      spawnInterval: 1.55,
+      spawns: [{ type: "slime", weight: 35 }, { type: "slime", variant: "yellow", weight: 15 }, { type: "goblin", weight: 30 }, { type: "goblin", variant: "red", weight: 10 }, { type: "wolf", weight: 10 }],
+      bosses: [{ type: "goblin", variant: "red", weight: 65 }, { type: "slime", variant: "yellow", weight: 35 }]
+    },
+    8: {
+      maxMonsters: 12,
+      waveSize: [2, 2],
+      spawnInterval: 1.4,
+      spawns: [{ type: "slime", weight: 25 }, { type: "slime", variant: "yellow", weight: 15 }, { type: "goblin", weight: 25 }, { type: "goblin", variant: "red", weight: 10 }, { type: "wolf", weight: 20 }, { type: "wolf", variant: "black", weight: 5 }],
+      bosses: [{ type: "goblin", variant: "red", weight: 45 }, { type: "wolf", weight: 35 }, { type: "slime", variant: "yellow", weight: 20 }]
+    },
+    9: {
+      maxMonsters: 13,
+      waveSize: [2, 2],
+      spawnInterval: 1.3,
+      spawns: [{ type: "slime", weight: 15 }, { type: "slime", variant: "yellow", weight: 15 }, { type: "goblin", weight: 15 }, { type: "goblin", variant: "red", weight: 10 }, { type: "wolf", weight: 35 }, { type: "wolf", variant: "black", weight: 10 }],
+      bosses: [{ type: "wolf", variant: "black", weight: 100 }]
+    },
+    10: {
+      maxMonsters: 14,
+      waveSize: [2, 3],
+      spawnInterval: 1.2,
+      spawns: [{ type: "slime", weight: 15 }, { type: "slime", variant: "yellow", weight: 25 }, { type: "goblin", weight: 15 }, { type: "goblin", variant: "red", weight: 20 }, { type: "wolf", weight: 10 }, { type: "wolf", variant: "black", weight: 15 }],
+      bosses: [{ type: "slime", variant: "yellow", weight: 34 }, { type: "goblin", variant: "red", weight: 33 }, { type: "wolf", variant: "black", weight: 33 }]
+    }
+  },
   scenery: {
     rocks: [[890, 180], [1220, 315], [1000, 700], [1420, 760], [1665, 255], [1700, 830]],
     trees: [[80, 120], [100, 610], [710, 65], [1510, 85], [1535, 900], [740, 910], [1320, 40], [1815, 130], [1810, 940]],
