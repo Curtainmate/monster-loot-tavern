@@ -1077,6 +1077,31 @@ button:disabled {
   gap: 10px;
 }
 
+.volume-control {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 10px;
+  align-items: center;
+  margin-top: 14px;
+  padding: 10px;
+  border: 2px solid rgba(255, 236, 181, 0.16);
+  background: rgba(0, 0, 0, 0.18);
+  color: #ffd98a;
+  font-weight: 700;
+  text-align: left;
+}
+
+.volume-control input {
+  width: 100%;
+  accent-color: #d19a3f;
+}
+
+.volume-control strong {
+  min-width: 42px;
+  color: var(--ink);
+  text-align: right;
+}
+
 .cheat-console {
   margin-top: 16px;
   padding: 12px;

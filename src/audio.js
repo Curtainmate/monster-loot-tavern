@@ -4,7 +4,9 @@
     this.enabled = false;
     this.music = new Audio("assets/audio/music/journey_theme.mp3");
     this.music.loop = true;
-    this.music.volume = 0.34;
+    this.baseMusicVolume = 0.34;
+    this.masterVolume = 0.55;
+    this.music.volume = this.baseMusicVolume * this.masterVolume;
     this.musicEnabled = false;
     this.samples = {
       bowShot: "assets/audio/sfx/bow_shot.mp3",
@@ -27,7 +29,7 @@
     const gain = this.context.createGain();
     oscillator.type = type;
     oscillator.frequency.setValueAtTime(frequency, now);
-    gain.gain.setValueAtTime(volume, now);
+    gain.gain.setValueAtTime(volume * this.masterVolume, now);
     gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
     oscillator.connect(gain);
     gain.connect(this.context.destination);
@@ -64,10 +66,16 @@
     const src = this.samples[name];
     if (!src) return;
     const sound = new Audio(src);
-    sound.volume = volume;
+    sound.volume = volume * this.masterVolume;
     sound.play().catch(() => {
       this.tone(330, 0.06, "square", 0.035);
     });
+  }
+
+  setMasterVolume(value) {
+    this.masterVolume = clamp(value, 0, 1);
+    this.music.volume = this.baseMusicVolume * this.masterVolume;
+    return this.masterVolume;
   }
 
   toggleMusic() {

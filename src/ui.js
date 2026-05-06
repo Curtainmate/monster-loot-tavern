@@ -38,6 +38,8 @@
     this.startMusicButton = document.getElementById("startMusicButton");
     this.hudMusicButton = document.getElementById("hudMusicButton");
     this.cheatStatus = document.getElementById("cheatStatus");
+    this.masterVolumeSlider = document.getElementById("masterVolumeSlider");
+    this.masterVolumeValue = document.getElementById("masterVolumeValue");
     this.shopTabs = {
       sell: document.getElementById("shopTabSell"),
       services: document.getElementById("shopTabServices"),
@@ -62,6 +64,10 @@
     document.getElementById("cheatFieldBossButton").addEventListener("click", () => this.runCheat(() => game.cheatSpawnFieldBoss(), "Field Boss spawned."));
     document.getElementById("cheatCastleButton").addEventListener("click", () => this.runCheat(() => game.cheatUnlockCastle(), "Castle unlocked."));
     document.getElementById("cheatGearButton").addEventListener("click", () => this.runCheat(() => game.cheatEquipTestGear(), "Test gear equipped."));
+    this.masterVolumeSlider.addEventListener("input", () => {
+      const volume = game.audio.setMasterVolume(Number(this.masterVolumeSlider.value) / 100);
+      this.masterVolumeValue.textContent = `${Math.round(volume * 100)}%`;
+    });
     this.warriorButton.addEventListener("click", () => this.selectClass("warrior"));
     this.rangerButton.addEventListener("click", () => this.selectClass("ranger"));
     this.startRunButton.addEventListener("click", () => game.startGame(this.selectedClassId));
@@ -71,6 +77,8 @@
       button.addEventListener("click", () => this.setShopTab(tab));
     }
     this.selectClass("warrior");
+    this.masterVolumeSlider.value = Math.round(game.audio.masterVolume * 100);
+    this.masterVolumeValue.textContent = `${this.masterVolumeSlider.value}%`;
   }
 
   runCheat(action, message) {
