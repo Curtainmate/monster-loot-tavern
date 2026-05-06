@@ -167,7 +167,7 @@
     if (!this.canAttack() || !game.started || game.paused || game.gameOver) return;
     this.cooldownLeft = this.effectiveAttackCooldown;
     if (this.attackType === "ranged") {
-      game.audio.play("attack");
+      game.audio.play("bowShot");
       const totalArrows = 1 + this.extraArrows + (this.hasBuff("cleave") ? 3 : 0);
       const spread = totalArrows === 1 ? 0 : Math.min(0.5, 0.16 * (totalArrows - 1));
       for (let i = 0; i < totalArrows; i += 1) {

@@ -7,6 +7,7 @@
     this.music.volume = 0.34;
     this.musicEnabled = false;
     this.samples = {
+      bowShot: "assets/audio/sfx/bow_shot.mp3",
       swordSwing: "assets/audio/sfx/sword_swoosh.mp3"
     };
   }
@@ -37,6 +38,7 @@
   play(name) {
     const sounds = {
       attack: () => this.tone(330, 0.06, "square", 0.035),
+      bowShot: () => this.playSample("bowShot", 0.42),
       swordSwing: () => this.playSample("swordSwing", 0.42),
       hit: () => this.tone(140, 0.08, "sawtooth", 0.04),
       hurt: () => this.tone(95, 0.16, "triangle", 0.055),
