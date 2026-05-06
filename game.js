@@ -36,6 +36,8 @@
     this.dangerLevel = 1;
     this.maxDangerUnlocked = 1;
     this.dangerProgress = 0;
+    this.fieldBossDefeated = false;
+    this.fieldBossActive = false;
     this.kills = 0;
     this.totalGoldEarned = 0;
     this.selectedClass = showStart ? null : (classId || this.selectedClass || "warrior");
@@ -148,6 +150,11 @@
     this.dangerProgress += amount;
     let unlocked = false;
     while (this.dangerProgress >= this.dangerProgressGoal()) {
+      if (this.stageGateBossRequired()) {
+        this.dangerProgress = this.dangerProgressGoal();
+        this.spawnFieldBoss();
+        return;
+      }
       this.dangerProgress -= this.dangerProgressGoal();
       this.maxDangerUnlocked += 1;
       this.dangerLevel = this.maxDangerUnlocked;
@@ -169,6 +176,17 @@
     this.spawnTimer = Math.min(this.spawnTimer, this.currentStageRule().spawnInterval);
     if (this.currentStageRule().bosses.length) this.bossTimer = Math.min(this.bossTimer, 8);
     this.ui.renderShop();
+  }
+
+  stageGateBossRequired() {
+    return this.dangerLevel === CONFIG.fieldBoss.gateStage
+      && this.maxDangerUnlocked === CONFIG.fieldBoss.gateStage
+      && !this.fieldBossDefeated;
+  }
+
+  stageGateBossActive() {
+    return this.stageGateBossRequired()
+      && (this.fieldBossActive || this.dangerProgress >= this.dangerProgressGoal());
   }
 
   openShop() {
@@ -318,19 +336,55 @@
     this.audio.play("day");
   }
 
+  spawnFieldBoss() {
+    if (this.fieldBossActive || this.monsters.some((monster) => monster.isFieldBoss)) {
+      this.questNotice = "Defeat the Field Boss to reach Castle.";
+      this.questNoticeTime = 2;
+      return;
+    }
+    const point = this.randomFieldPoint(CONFIG.fieldBoss.size, CONFIG.spawns.bossMinPlayerDistance);
+    const boss = new Warboss(point.x, point.y);
+    this.monsters.push(boss);
+    this.fieldBossActive = true;
+    this.questNotice = "Field Boss appeared. Defeat it to reach Castle.";
+    this.questNoticeTime = 4;
+    this.floaters.push(new FloatingText(`${boss.name} appears!`, boss.x, boss.y - 72, "#ffcf6b"));
+    this.audio.play("day");
+  }
+
   killMonster(monster) {
     this.monsters = this.monsters.filter((candidate) => candidate !== monster);
-    this.kills += CONFIG.monsters[monster.type].score * (monster.isBoss ? 5 : 1);
+    const monsterScore = monster.isFieldBoss ? 10 : CONFIG.monsters[monster.type].score;
+    this.kills += monsterScore * (monster.isBoss ? 5 : 1);
     this.questProgress.kills += monster.isBoss ? 3 : 1;
     if (this.player.momentumDuration > 0) {
       this.player.momentumLeft = this.player.momentumDuration;
     }
-    this.addDangerProgress(monster.isBoss ? CONFIG.dangerProgress.bossKill : CONFIG.dangerProgress.normalKill, "stage progress");
+    if (!monster.isFieldBoss) {
+      this.addDangerProgress(monster.isBoss ? CONFIG.dangerProgress.bossKill : CONFIG.dangerProgress.normalKill, "stage progress");
+    }
     this.dropMonsterGold(monster);
     this.tryDropGeneratedItem(monster.isBoss ? "boss" : "monster", monster.x, monster.y - 12, monster);
+    if (monster.isFieldBoss) {
+      this.defeatFieldBoss(monster);
+      return;
+    }
     if (monster.isBoss) {
       this.floaters.push(new FloatingText("Miniboss defeated!", monster.x, monster.y - 42, "#ffe18a"));
     }
+  }
+
+  defeatFieldBoss(monster) {
+    this.fieldBossDefeated = true;
+    this.fieldBossActive = false;
+    this.dangerProgress = 0;
+    this.maxDangerUnlocked = Math.max(this.maxDangerUnlocked, CONFIG.fieldBoss.unlockStage);
+    this.dangerLevel = CONFIG.fieldBoss.unlockStage;
+    this.questNotice = "Castle unlocked.";
+    this.questNoticeTime = 4;
+    this.floaters.push(new FloatingText("Field Boss defeated!", monster.x, monster.y - 72, "#ffe18a"));
+    this.audio.play("day");
+    this.ui.renderShop();
   }
 
   tryDropGeneratedItem(source, x, y, context = {}) {
@@ -344,10 +398,10 @@
   }
 
   dropMonsterGold(monster) {
-    const baseGold = CONFIG.monsters[monster.type].gold || 1;
+    const baseGold = monster.isFieldBoss ? CONFIG.fieldBoss.gold : (CONFIG.monsters[monster.type].gold || 1);
     const stageBonus = Math.floor((this.dangerLevel - 1) * 0.45);
     const variantBonus = monster.variantData ? Math.ceil(baseGold * 0.45) : 0;
-    const bossMultiplier = monster.isBoss ? 6 : 1;
+    const bossMultiplier = monster.isFieldBoss ? 1 : (monster.isBoss ? 6 : 1);
     const bossBonus = monster.isBoss ? Math.min(20, this.dangerLevel * 2) : 0;
     const totalGold = Math.max(1, Math.round(((baseGold + stageBonus + variantBonus) * bossMultiplier + bossBonus) * (1 + this.player.goldFind)));
     this.dropCoins(totalGold, monster.x, monster.y);

@@ -83,6 +83,110 @@
   }
 }
 
+class Warboss extends Monster {
+  constructor(x, y) {
+    super("goblin", x, y, CONFIG.fieldBoss.gateStage, true, "red");
+    const stats = CONFIG.fieldBoss;
+    this.type = stats.type;
+    this.name = stats.name;
+    this.spriteName = "warboss";
+    this.isBoss = true;
+    this.isFieldBoss = true;
+    this.variantId = null;
+    this.variantData = null;
+    this.size = stats.size;
+    this.speed = stats.speed;
+    this.maxHealth = stats.health;
+    this.health = this.maxHealth;
+    this.damage = stats.damage;
+    this.chargeDamage = stats.chargeDamage;
+    this.attackCooldown = 1.1;
+    this.bossTint = "#ffb24f";
+    this.state = "chase";
+    this.stateTime = 0;
+    this.chargeCooldown = 1.4;
+    this.chargeDir = { x: 1, y: 0 };
+    this.chargeDistanceLeft = 0;
+    this.hasHitThisCharge = false;
+  }
+
+  update(dt, game) {
+    this.hitFlash = Math.max(0, this.hitFlash - dt);
+    this.attackLeft = Math.max(0, this.attackLeft - dt);
+    this.chargeCooldown = Math.max(0, this.chargeCooldown - dt);
+    this.stateTime += dt;
+    this.walkFrame += dt * (this.speed / 16);
+
+    const player = game.player;
+    if (this.state === "windup") {
+      if (this.stateTime >= CONFIG.fieldBoss.chargeWindup) this.startCharge();
+    } else if (this.state === "charge") {
+      this.updateCharge(dt, game);
+    } else if (this.state === "recover") {
+      if (this.stateTime >= CONFIG.fieldBoss.chargeRecover) this.setState("chase");
+    } else {
+      this.updateChase(dt, game, player);
+    }
+
+    this.x = clamp(this.x, CONFIG.field.x + this.size / 2, CONFIG.field.x + CONFIG.field.width - this.size / 2);
+    this.y = clamp(this.y, CONFIG.field.y + this.size / 2, CONFIG.field.y + CONFIG.field.height - this.size / 2);
+    this.tryContactDamage(player, game, this.state === "charge" ? this.chargeDamage : this.damage);
+  }
+
+  updateChase(dt, game, player) {
+    if (distance(this, player) <= CONFIG.fieldBoss.chargeRange && this.chargeCooldown <= 0 && !game.playerInTavern()) {
+      this.chargeDir = normalize(player.x - this.x, player.y - this.y);
+      this.lastMoveX = this.chargeDir.x;
+      this.lastMoveY = this.chargeDir.y;
+      this.setState("windup");
+      game.floaters.push(new FloatingText("Charge!", this.x, this.y - 64, "#ffcf6b"));
+      return;
+    }
+
+    if (distance(this, player) < 420 && !game.playerInTavern()) {
+      const move = normalize(player.x - this.x, player.y - this.y);
+      game.moveEntity(this, move.x * this.speed * dt, move.y * this.speed * dt, CONFIG.field);
+      this.lastMoveX = move.x;
+      this.lastMoveY = move.y;
+    }
+  }
+
+  startCharge() {
+    this.setState("charge");
+    this.chargeDistanceLeft = CONFIG.fieldBoss.chargeDistance;
+    this.hasHitThisCharge = false;
+  }
+
+  updateCharge(dt, game) {
+    const step = Math.min(this.chargeDistanceLeft, CONFIG.fieldBoss.chargeSpeed * dt);
+    const beforeX = this.x;
+    const beforeY = this.y;
+    game.moveEntity(this, this.chargeDir.x * step, this.chargeDir.y * step, CONFIG.field);
+    this.lastMoveX = this.chargeDir.x;
+    this.lastMoveY = this.chargeDir.y;
+    this.chargeDistanceLeft -= Math.hypot(this.x - beforeX, this.y - beforeY);
+    if (this.chargeDistanceLeft <= 0 || (Math.abs(this.x - beforeX) < 0.5 && Math.abs(this.y - beforeY) < 0.5)) {
+      this.chargeCooldown = CONFIG.fieldBoss.chargeCooldown;
+      this.setState("recover");
+    }
+  }
+
+  tryContactDamage(player, game, amount) {
+    if (distance(this, player) >= (this.size + player.size) / 2 || this.attackLeft > 0 || game.playerInTavern()) return;
+    if (this.state === "charge" && this.hasHitThisCharge) return;
+    player.takeDamage(amount);
+    game.audio.play("hurt");
+    game.floaters.push(new FloatingText(`-${amount}`, player.x, player.y - 22, "#ff6657"));
+    this.attackLeft = this.state === "charge" ? 0.4 : this.attackCooldown;
+    this.hasHitThisCharge = this.state === "charge";
+  }
+
+  setState(state) {
+    this.state = state;
+    this.stateTime = 0;
+  }
+}
+
 function monsterZoneStats(stage) {
   let zone = CONFIG.stageZones[0];
   for (const candidate of CONFIG.stageZones) {

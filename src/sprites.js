@@ -45,6 +45,7 @@
       goblin_red: "assets/goblin_red.png",
       wolf: "assets/wolf.png",
       wolf_black: "assets/wolf_black.png",
+      warboss: "assets/warboss.png",
       loot: "assets/loot.png",
       powerups: "assets/powerups.png",
       tileset: "assets/tileset.png",
@@ -152,6 +153,8 @@
   }
 
   drawMonster(monster, camera) {
+    if (monster.type === "warboss") return this.drawWarboss(monster, camera);
+
     const sx = monster.x - camera.x;
     const sy = monster.y - camera.y;
     const pose = this.directionalPose({ x: monster.lastMoveX, y: monster.lastMoveY }, Math.floor(monster.walkFrame) % 2 === 1, monster.hitFlash > 0);
@@ -191,6 +194,44 @@
     ctx.fillStyle = "#19120d";
     ctx.fillRect(Math.floor(sx - 6), Math.floor(sy - 4), 4, 4);
     ctx.fillRect(Math.floor(sx + 3), Math.floor(sy - 4), 4, 4);
+  }
+
+  drawWarboss(monster, camera) {
+    const sx = monster.x - camera.x;
+    const sy = monster.y - camera.y;
+    const pose = this.directionalPose({ x: monster.lastMoveX, y: monster.lastMoveY }, monster.state === "charge" || Math.floor(monster.walkFrame) % 2 === 1, monster.hitFlash > 0);
+    const frame = pose.frame >= 4 ? pose.frame - 4 : pose.frame;
+    const row = pose.frame >= 4 ? 1 : 0;
+    const drawWidth = 166;
+    const drawHeight = 120;
+    const image = this.images.warboss;
+    const frameWidth = image ? image.width / 4 : 176.75;
+    const frameHeight = image ? image.height / 2 : 176.5;
+    const drawn = this.drawImageFrame("warboss", frame, frameWidth, frameHeight, sx - drawWidth / 2, sy - drawHeight * 0.82, drawWidth, drawHeight, row, pose.flip);
+    if (drawn) {
+      if (monster.state === "windup") {
+        ctx.globalAlpha = 0.35 + Math.sin(monster.stateTime * 22) * 0.12;
+        ctx.fillStyle = "#ffcf6b";
+        ctx.fillRect(Math.floor(sx - drawWidth / 2), Math.floor(sy - drawHeight * 0.82), drawWidth, drawHeight);
+        ctx.globalAlpha = 1;
+        ctx.strokeStyle = "rgba(255, 94, 61, 0.74)";
+        ctx.lineWidth = 6;
+        ctx.beginPath();
+        ctx.moveTo(sx, sy - 18);
+        ctx.lineTo(sx + monster.chargeDir.x * 210, sy - 18 + monster.chargeDir.y * 210);
+        ctx.stroke();
+      }
+      if (monster.hitFlash > 0) {
+        ctx.globalAlpha = 0.32;
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(Math.floor(sx - drawWidth / 2), Math.floor(sy - drawHeight * 0.82), drawWidth, drawHeight);
+        ctx.globalAlpha = 1;
+      }
+      return true;
+    }
+
+    drawRectSprite(sx, sy, monster.size, monster.size, monster.hitFlash > 0 ? "#ffffff" : "#7d4a2c");
+    return false;
   }
 
   drawLoot(loot, camera) {

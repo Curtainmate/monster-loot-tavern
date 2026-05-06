@@ -147,6 +147,24 @@
     monsterMinPlayerDistance: 260,
     bossMinPlayerDistance: 340
   },
+  fieldBoss: {
+    gateStage: 10,
+    unlockStage: 11,
+    type: "warboss",
+    name: "Goblin Warboar Rider",
+    health: 520,
+    damage: 18,
+    chargeDamage: 34,
+    speed: 76,
+    chargeSpeed: 350,
+    chargeRange: 360,
+    chargeDistance: 410,
+    chargeWindup: 0.72,
+    chargeRecover: 0.85,
+    chargeCooldown: 5.5,
+    size: 78,
+    gold: 120
+  },
   classes: {
     warrior: {
       name: "Warrior",

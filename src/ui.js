@@ -109,7 +109,9 @@
     this.goldText.textContent = p.gold;
     this.damageText.textContent = p.damage;
     const stageZone = this.game.currentStageZone();
-    this.dangerText.textContent = this.game.canEarnDangerProgress()
+    this.dangerText.textContent = this.game.stageGateBossActive()
+      ? `Stage ${this.game.dangerLevel} Field Boss`
+      : this.game.canEarnDangerProgress()
       ? `Stage ${this.game.dangerLevel} ${stageZone.shortName} ${this.game.dangerProgress}/${this.game.dangerProgressGoal()}`
       : `Stage ${this.game.dangerLevel} ${stageZone.shortName} / Cap ${this.game.maxDangerUnlocked}`;
     this.dangerBar.style.width = this.game.canEarnDangerProgress()
@@ -190,7 +192,9 @@
     this.dangerList.innerHTML = "";
     const note = document.createElement("div");
     note.className = "danger-note";
-    note.textContent = this.game.dangerLevel === this.game.maxDangerUnlocked
+    note.textContent = this.game.stageGateBossActive()
+      ? "Defeat the Field Boss to unlock Castle."
+      : this.game.dangerLevel === this.game.maxDangerUnlocked
       ? `Next unlock: ${this.game.dangerProgress}/${this.game.dangerProgressGoal()} progress.`
       : "Lower stage selected. New stages will not unlock.";
     this.dangerList.appendChild(note);
