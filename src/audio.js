@@ -6,6 +6,9 @@
     this.music.loop = true;
     this.music.volume = 0.34;
     this.musicEnabled = false;
+    this.samples = {
+      swordSwing: "assets/audio/sfx/sword_swoosh.mp3"
+    };
   }
 
   unlock() {
@@ -34,6 +37,7 @@
   play(name) {
     const sounds = {
       attack: () => this.tone(330, 0.06, "square", 0.035),
+      swordSwing: () => this.playSample("swordSwing", 0.42),
       hit: () => this.tone(140, 0.08, "sawtooth", 0.04),
       hurt: () => this.tone(95, 0.16, "triangle", 0.055),
       loot: () => {
@@ -52,6 +56,16 @@
       gameOver: () => this.tone(70, 0.35, "sawtooth", 0.055)
     };
     if (sounds[name]) sounds[name]();
+  }
+
+  playSample(name, volume = 0.5) {
+    const src = this.samples[name];
+    if (!src) return;
+    const sound = new Audio(src);
+    sound.volume = volume;
+    sound.play().catch(() => {
+      this.tone(330, 0.06, "square", 0.035);
+    });
   }
 
   toggleMusic() {

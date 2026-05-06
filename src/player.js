@@ -166,8 +166,8 @@
   attack(game) {
     if (!this.canAttack() || !game.started || game.paused || game.gameOver) return;
     this.cooldownLeft = this.effectiveAttackCooldown;
-    game.audio.play("attack");
     if (this.attackType === "ranged") {
+      game.audio.play("attack");
       const totalArrows = 1 + this.extraArrows + (this.hasBuff("cleave") ? 3 : 0);
       const spread = totalArrows === 1 ? 0 : Math.min(0.5, 0.16 * (totalArrows - 1));
       for (let i = 0; i < totalArrows; i += 1) {
@@ -198,6 +198,7 @@
       return;
     }
 
+    game.audio.play("swordSwing");
     const swingDirs = this.swingDirections();
     const cleaveBoost = this.hasBuff("cleave");
     const swingRadius = cleaveBoost ? 116 : 58;
