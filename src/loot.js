@@ -100,17 +100,19 @@ class ItemDrop {
     const sx = this.x - camera.x;
     const sy = this.y - camera.y + Math.sin(this.life * 4.8) * 2;
     ctx.save();
-    ctx.globalAlpha = 0.28 + Math.sin(this.life * 6) * 0.08;
+    ctx.globalAlpha = 0.32 + Math.sin(this.life * 6) * 0.08;
     ctx.fillStyle = this.color;
-    ctx.fillRect(Math.floor(sx - 16), Math.floor(sy - 16), 32, 32);
+    ctx.fillRect(Math.floor(sx - 17), Math.floor(sy - 17), 34, 34);
     ctx.globalAlpha = 1;
-    ctx.fillStyle = "#21140e";
-    ctx.fillRect(Math.floor(sx - 10), Math.floor(sy - 12), 20, 24);
-    ctx.fillStyle = this.color;
-    ctx.fillRect(Math.floor(sx - 8), Math.floor(sy - 10), 16, 20);
-    ctx.fillStyle = "#fff8d9";
-    ctx.fillRect(Math.floor(sx - 4), Math.floor(sy - 6), 8, 2);
-    ctx.fillRect(Math.floor(sx - 5), Math.floor(sy - 1), 10, 2);
+    ctx.fillStyle = "rgba(18, 11, 7, 0.9)";
+    ctx.fillRect(Math.floor(sx - 14), Math.floor(sy - 14), 28, 28);
+    ctx.strokeStyle = this.color;
+    ctx.lineWidth = 2;
+    ctx.strokeRect(Math.floor(sx - 14), Math.floor(sy - 14), 28, 28);
+    if (!gameSprites.drawItemIcon(this.item, sx, sy, 26)) {
+      ctx.fillStyle = this.color;
+      ctx.fillRect(Math.floor(sx - 8), Math.floor(sy - 10), 16, 20);
+    }
     ctx.restore();
   }
 }

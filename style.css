@@ -379,6 +379,7 @@ canvas {
   width: 100%;
   min-height: 96px;
   align-content: center;
+  justify-items: center;
   text-align: center;
 }
 
@@ -402,9 +403,39 @@ canvas {
 
 .item-row {
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: auto 1fr auto;
   gap: 10px;
   align-items: center;
+}
+
+.item-icon {
+  display: inline-block;
+  flex: 0 0 auto;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  image-rendering: auto;
+}
+
+.item-icon.equipment {
+  width: 42px;
+  height: 42px;
+  margin: 2px 0;
+}
+
+.item-icon.equipment.empty {
+  opacity: 0.34;
+  filter: sepia(0.6) saturate(0.45);
+}
+
+.item-icon.backpack {
+  width: 42px;
+  height: 42px;
+}
+
+.item-icon.small {
+  width: 34px;
+  height: 34px;
 }
 
 .inventory-hero-portrait {
@@ -871,7 +902,7 @@ p {
 
 .shop-row {
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: auto 1fr auto;
   gap: 10px;
   align-items: center;
   min-height: 54px;
@@ -887,6 +918,10 @@ p {
 
 .shop-row small {
   color: var(--muted);
+}
+
+.shop-row > div:only-child {
+  grid-column: 1 / -1;
 }
 
 .shop-row.equipped {

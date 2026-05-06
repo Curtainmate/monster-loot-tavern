@@ -56,6 +56,25 @@ const ITEM_RARITY_TABLES = Object.freeze([
   { minStage: 20, common: 0.38, uncommon: 0.35, rare: 0.19, epic: 0.07, legendary: 0.01 }
 ]);
 
+const ITEM_ICON_FILES = Object.freeze({
+  sword: "assets/icons/sword_icon.png",
+  bow: "assets/icons/bow_icon.png",
+  helmet: "assets/icons/helmet_icon.png",
+  armor: "assets/icons/armor_icon.png",
+  boots: "assets/icons/boots_icon.png",
+  ring: "assets/icons/ring_icon.png",
+  accessory: "assets/icons/accessory_icon.png"
+});
+
+const ITEM_SLOT_ICONS = Object.freeze({
+  weapon: "sword",
+  helmet: "helmet",
+  armor: "armor",
+  boots: "boots",
+  accessory: "accessory",
+  ring: "ring"
+});
+
 const ITEM_STAT_RULES = Object.freeze({
   damage: { base: 2, growth: 0.85, type: "flat" },
   maxHealth: { base: 8, growth: 3.2, type: "flat" },
@@ -380,6 +399,22 @@ function normalizeStatValue(stat, value) {
   return Math.max(1, Math.round(value));
 }
 
+function itemIconName(itemOrSlot) {
+  const slot = typeof itemOrSlot === "string" ? itemOrSlot : itemOrSlot.slot;
+  const classRestriction = typeof itemOrSlot === "string" ? "" : itemOrSlot.classRestriction;
+  if (slot === ITEM_SLOTS.WEAPON && classRestriction === "ranger") return "bow";
+  if (slot === ITEM_SLOTS.WEAPON) return "sword";
+  return ITEM_SLOT_ICONS[slot] || "accessory";
+}
+
+function itemIconPath(item) {
+  return ITEM_ICON_FILES[itemIconName(item)] || ITEM_ICON_FILES.accessory;
+}
+
+function slotIconPath(slot) {
+  return ITEM_ICON_FILES[itemIconName(slot)] || ITEM_ICON_FILES.accessory;
+}
+
 function randomFrom(items) {
   return items[Math.floor(Math.random() * items.length)];
 }
@@ -392,6 +427,8 @@ const ItemSystem = Object.freeze({
   ITEM_RARITY_RULES,
   ITEM_DROP_CHANCES,
   ITEM_RARITY_TABLES,
+  ITEM_ICON_FILES,
+  ITEM_SLOT_ICONS,
   ITEM_STAT_RULES,
   ITEM_TEMPLATES,
   generateItem,
@@ -399,7 +436,10 @@ const ItemSystem = Object.freeze({
   rollItemDropChance,
   itemDropChance,
   rollRarityForStage,
-  rarityTableForStage
+  rarityTableForStage,
+  itemIconName,
+  itemIconPath,
+  slotIconPath
 });
 
 globalThis.ItemSystem = ItemSystem;

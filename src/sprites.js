@@ -36,7 +36,36 @@
       counter: 10,
       sign: 11
     };
-    for (const name of ["player", "ranger", "slime", "slime_yellow", "goblin", "goblin_red", "wolf", "wolf_black", "loot", "powerups", "tileset", "chest", "shopkeeper", "tree", "bush", "table", "sign", "coin_bronze", "coin_silver", "coin_gold"]) {
+    const imagePaths = {
+      player: "assets/player.png",
+      ranger: "assets/ranger.png",
+      slime: "assets/slime.png",
+      slime_yellow: "assets/slime_yellow.png",
+      goblin: "assets/goblin.png",
+      goblin_red: "assets/goblin_red.png",
+      wolf: "assets/wolf.png",
+      wolf_black: "assets/wolf_black.png",
+      loot: "assets/loot.png",
+      powerups: "assets/powerups.png",
+      tileset: "assets/tileset.png",
+      chest: "assets/chest.png",
+      shopkeeper: "assets/shopkeeper.png",
+      tree: "assets/tree.png",
+      bush: "assets/bush.png",
+      table: "assets/table.png",
+      sign: "assets/sign.png",
+      coin_bronze: "assets/coin_bronze.png",
+      coin_silver: "assets/coin_silver.png",
+      coin_gold: "assets/coin_gold.png",
+      icon_sword: "assets/icons/sword_icon.png",
+      icon_bow: "assets/icons/bow_icon.png",
+      icon_helmet: "assets/icons/helmet_icon.png",
+      icon_armor: "assets/icons/armor_icon.png",
+      icon_boots: "assets/icons/boots_icon.png",
+      icon_ring: "assets/icons/ring_icon.png",
+      icon_accessory: "assets/icons/accessory_icon.png"
+    };
+    for (const [name, path] of Object.entries(imagePaths)) {
       const image = new Image();
       image.onload = () => {
         this.loaded[name] = true;
@@ -44,7 +73,7 @@
       image.onerror = () => {
         this.loaded[name] = false;
       };
-      image.src = `assets/${name}.png`;
+      image.src = path;
       this.images[name] = image;
       this.loaded[name] = false;
     }
@@ -170,6 +199,11 @@
     const sx = coin.x - camera.x;
     const sy = coin.y - camera.y + Math.sin(coin.life * 5.8) * 2;
     return this.drawImage(`coin_${coin.type}`, sx - 14, sy - 14, 28, 28);
+  }
+
+  drawItemIcon(item, x, y, size) {
+    const iconName = ItemSystem.itemIconName(item);
+    return this.drawImage(`icon_${iconName}`, x - size / 2, y - size / 2, size, size);
   }
 
   drawPowerup(powerup, camera) {

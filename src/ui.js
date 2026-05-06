@@ -163,7 +163,10 @@
     for (const item of sellableItems) {
       const row = document.createElement("div");
       row.className = `shop-row rarity-${item.rarity}`;
-      row.innerHTML = `<div><strong>${item.name}</strong><small>${ITEM_SLOT_LABELS[item.slot]} | Level ${item.itemLevel} | ${this.itemStatsText(item)} | ${item.sellValue} gold</small></div>`;
+      row.innerHTML = `
+        <span class="item-icon small" style="background-image:url('${ItemSystem.itemIconPath(item)}')" aria-hidden="true"></span>
+        <div><strong>${item.name}</strong><small>${ITEM_SLOT_LABELS[item.slot]} | Level ${item.itemLevel} | ${this.itemStatsText(item)} | ${item.sellValue} gold</small></div>
+      `;
       const button = document.createElement("button");
       button.type = "button";
       button.textContent = "Sell";
@@ -215,9 +218,10 @@
       row.type = "button";
       row.className = `equipment-slot ${item ? `rarity-${item.rarity}` : ""}`;
       row.disabled = !item || !canUnequip;
+      const iconPath = item ? ItemSystem.itemIconPath(item) : ItemSystem.slotIconPath(slot);
       row.innerHTML = item
-        ? `<span>${ITEM_SLOT_LABELS[slot]}</span><strong>${item.name}</strong><small>${canUnequip ? this.itemStatsText(item) : "Backpack full"}</small>`
-        : `<span>${ITEM_SLOT_LABELS[slot]}</span><strong>${this.emptySlotSymbol(slot)}</strong><small>Empty slot</small>`;
+        ? `<span>${ITEM_SLOT_LABELS[slot]}</span><span class="item-icon equipment" style="background-image:url('${iconPath}')" aria-hidden="true"></span><strong>${item.name}</strong><small>${canUnequip ? this.itemStatsText(item) : "Backpack full"}</small>`
+        : `<span>${ITEM_SLOT_LABELS[slot]}</span><span class="item-icon equipment empty" style="background-image:url('${iconPath}')" aria-hidden="true"></span><strong>${this.emptySlotSymbol(slot)}</strong><small>Empty slot</small>`;
       row.addEventListener("click", () => {
         p.unequipSlot(slot);
         this.renderInventory();
@@ -232,6 +236,7 @@
       row.className = `item-row rarity-${item.rarity}`;
       const comparison = this.itemComparisonText(item, p.equipment[item.slot]);
       row.innerHTML = `
+        <span class="item-icon backpack" style="background-image:url('${ItemSystem.itemIconPath(item)}')" aria-hidden="true"></span>
         <div>
           <strong>${item.name}</strong>
           <small>${ITEM_SLOT_LABELS[item.slot]} | Level ${item.itemLevel} | ${this.itemStatsText(item)} | Sell ${item.sellValue}g</small>
