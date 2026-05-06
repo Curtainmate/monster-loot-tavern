@@ -35,14 +35,14 @@
       waveSize: [1, 1],
       spawnInterval: 1.9,
       spawns: [{ type: "slime", weight: 60 }, { type: "goblin", weight: 25 }, { type: "wolf", weight: 15 }],
-      bosses: [{ type: "slime", weight: 70 }, { type: "goblin", weight: 30 }]
+      bosses: []
     },
     5: {
       maxMonsters: 9,
       waveSize: [1, 2],
       spawnInterval: 1.75,
       spawns: [{ type: "slime", weight: 45 }, { type: "slime", variant: "yellow", weight: 5 }, { type: "goblin", weight: 30 }, { type: "wolf", weight: 20 }],
-      bosses: [{ type: "slime", variant: "yellow", weight: 55 }, { type: "goblin", weight: 45 }]
+      bosses: []
     },
     6: {
       maxMonsters: 10,
@@ -56,14 +56,14 @@
       waveSize: [1, 2],
       spawnInterval: 1.55,
       spawns: [{ type: "slime", weight: 35 }, { type: "slime", variant: "yellow", weight: 15 }, { type: "goblin", weight: 30 }, { type: "goblin", variant: "red", weight: 10 }, { type: "wolf", weight: 10 }],
-      bosses: [{ type: "goblin", variant: "red", weight: 65 }, { type: "slime", variant: "yellow", weight: 35 }]
+      bosses: []
     },
     8: {
       maxMonsters: 12,
       waveSize: [2, 2],
       spawnInterval: 1.4,
       spawns: [{ type: "slime", weight: 25 }, { type: "slime", variant: "yellow", weight: 15 }, { type: "goblin", weight: 25 }, { type: "goblin", variant: "red", weight: 10 }, { type: "wolf", weight: 20 }, { type: "wolf", variant: "black", weight: 5 }],
-      bosses: [{ type: "goblin", variant: "red", weight: 45 }, { type: "wolf", weight: 35 }, { type: "slime", variant: "yellow", weight: 20 }]
+      bosses: []
     },
     9: {
       maxMonsters: 13,
@@ -77,7 +77,7 @@
       waveSize: [2, 3],
       spawnInterval: 1.2,
       spawns: [{ type: "slime", weight: 15 }, { type: "slime", variant: "yellow", weight: 25 }, { type: "goblin", weight: 15 }, { type: "goblin", variant: "red", weight: 20 }, { type: "wolf", weight: 10 }, { type: "wolf", variant: "black", weight: 15 }],
-      bosses: [{ type: "slime", variant: "yellow", weight: 34 }, { type: "goblin", variant: "red", weight: 33 }, { type: "wolf", variant: "black", weight: 33 }]
+      bosses: []
     }
   },
   scenery: {

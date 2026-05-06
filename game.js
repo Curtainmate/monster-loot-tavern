@@ -329,7 +329,7 @@
     this.dropMonsterGold(monster);
     this.tryDropGeneratedItem(monster.isBoss ? "boss" : "monster", monster.x, monster.y - 12, monster);
     if (monster.isBoss) {
-      this.floaters.push(new FloatingText("Boss defeated!", monster.x, monster.y - 42, "#ffe18a"));
+      this.floaters.push(new FloatingText("Miniboss defeated!", monster.x, monster.y - 42, "#ffe18a"));
     }
   }
 
