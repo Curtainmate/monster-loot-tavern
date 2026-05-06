@@ -251,12 +251,6 @@
       this.itemList.appendChild(row);
     }
 
-    if (!backpackItems.length) {
-      const empty = document.createElement("div");
-      empty.className = "item-row";
-      empty.innerHTML = "<div><strong>No backpack items</strong><small>Equipped gear does not use backpack slots.</small></div>";
-      this.itemList.appendChild(empty);
-    }
   }
 
   renderInventorySummary() {
