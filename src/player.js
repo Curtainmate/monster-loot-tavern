@@ -221,8 +221,8 @@
         const inArc = angleDot > swingDot;
         const inReach = distance(this, monster) <= monster.size / 2 + swingRadius;
         if (inArc && inReach) {
-          const damage = this.rollAttackDamage(monster.isBoss);
-          monster.takeDamage(damage, dir, game);
+          const hit = this.rollAttackDamage(monster.isBoss);
+          monster.takeDamage(hit.damage, dir, game, { crit: hit.crit });
           break;
         }
       }
@@ -250,7 +250,10 @@
     let multiplier = 1 + extraMultiplier + (isBoss ? this.bossDamage : 0);
     const didCrit = Math.random() < clamp(this.critChance, 0, 0.75);
     if (didCrit) multiplier += this.critDamage || 0.5;
-    return Math.max(1, Math.round(this.damage * multiplier));
+    return {
+      damage: Math.max(1, Math.round(this.damage * multiplier)),
+      crit: didCrit
+    };
   }
 
   addBuff(type, duration) {

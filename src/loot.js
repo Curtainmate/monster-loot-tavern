@@ -267,9 +267,10 @@ class Projectile {
         this.hitMonsters.add(monster);
         const traveled = Math.hypot(this.x - this.startX, this.y - this.startY);
         let multiplier = traveled >= this.range * 0.45 ? 1 + this.longRangeDamage : 1;
-        if (Math.random() < clamp(this.critChance, 0, 0.75)) multiplier += this.critDamage || 0.5;
+        const didCrit = Math.random() < clamp(this.critChance, 0, 0.75);
+        if (didCrit) multiplier += this.critDamage || 0.5;
         const damage = Math.max(1, Math.round(this.damage * multiplier));
-        monster.takeDamage(damage, this.dir, game);
+        monster.takeDamage(damage, this.dir, game, { crit: didCrit });
         game.attackEffects.push({
           x: this.x,
           y: this.y,
@@ -308,11 +309,12 @@ class Projectile {
 }
 
 class FloatingText {
-  constructor(text, x, y, color) {
+  constructor(text, x, y, color, options = {}) {
     this.text = text;
     this.x = x;
     this.y = y;
     this.color = color;
+    this.size = options.size || 16;
     this.life = 0.75;
   }
 
@@ -324,7 +326,7 @@ class FloatingText {
   draw(camera) {
     ctx.globalAlpha = clamp(this.life / 0.75, 0, 1);
     ctx.fillStyle = this.color;
-    ctx.font = "bold 16px Trebuchet MS";
+    ctx.font = `bold ${this.size}px Trebuchet MS`;
     ctx.textAlign = "center";
     ctx.fillText(this.text, this.x - camera.x, this.y - camera.y);
     ctx.globalAlpha = 1;

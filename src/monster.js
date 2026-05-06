@@ -58,13 +58,15 @@
     }
   }
 
-  takeDamage(amount, direction, game) {
+  takeDamage(amount, direction, game, options = {}) {
     this.health -= amount;
     this.hitFlash = 0.12;
     game.audio.play("hit");
     this.knockback.x += direction.x * 470;
     this.knockback.y += direction.y * 470;
-    game.floaters.push(new FloatingText(amount, this.x, this.y - 22, "#fff0a3"));
+    const color = options.crit ? "#ff4d3d" : "#fff0a3";
+    const size = options.crit ? 18 : 16;
+    game.floaters.push(new FloatingText(amount, this.x, this.y - 22, color, { size }));
     if (this.health <= 0) {
       game.killMonster(this);
     }
