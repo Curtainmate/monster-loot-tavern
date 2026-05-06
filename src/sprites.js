@@ -54,6 +54,11 @@
       bush: "assets/bush.png",
       table: "assets/table.png",
       sign: "assets/sign.png",
+      castle_floor: "assets/castle_floor.png",
+      castle_floor_alt: "assets/castle_floor_alt.png",
+      castle_broken_wall: "assets/castle_broken_wall.png",
+      castle_pillar: "assets/castle_pillar.png",
+      castle_dead_tree: "assets/castle_dead_tree.png",
       coin_bronze: "assets/coin_bronze.png",
       coin_silver: "assets/coin_silver.png",
       coin_gold: "assets/coin_gold.png",
@@ -251,6 +256,15 @@
       for (let x = worldRect.x; x < worldRect.x + worldRect.width; x += size) {
         const frame = alternateFrame && ((x / size + y / size) % 5 === 0) ? alternateFrame : frameName;
         this.drawTile(frame, x - camera.x, y - camera.y, size);
+      }
+    }
+  }
+
+  drawTiledImageArea(imageName, worldRect, camera, size = 96, alternateImageName = null) {
+    for (let y = worldRect.y; y < worldRect.y + worldRect.height; y += size) {
+      for (let x = worldRect.x; x < worldRect.x + worldRect.width; x += size) {
+        const name = alternateImageName && ((x / size + y / size) % 6 === 0) ? alternateImageName : imageName;
+        this.drawImage(name, x - camera.x, y - camera.y, size, size);
       }
     }
   }

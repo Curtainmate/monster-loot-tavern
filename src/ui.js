@@ -108,9 +108,10 @@
     this.healthBar.style.width = `${clamp((p.health / p.maxHealth) * 100, 0, 100)}%`;
     this.goldText.textContent = p.gold;
     this.damageText.textContent = p.damage;
+    const stageZone = this.game.currentStageZone();
     this.dangerText.textContent = this.game.canEarnDangerProgress()
-      ? `Stage ${this.game.dangerLevel} ${this.game.dangerProgress}/${this.game.dangerProgressGoal()}`
-      : `Stage ${this.game.dangerLevel} / Cap ${this.game.maxDangerUnlocked}`;
+      ? `Stage ${this.game.dangerLevel} ${stageZone.shortName} ${this.game.dangerProgress}/${this.game.dangerProgressGoal()}`
+      : `Stage ${this.game.dangerLevel} ${stageZone.shortName} / Cap ${this.game.maxDangerUnlocked}`;
     this.dangerBar.style.width = this.game.canEarnDangerProgress()
       ? `${clamp((this.game.dangerProgress / this.game.dangerProgressGoal()) * 100, 0, 100)}%`
       : "0%";

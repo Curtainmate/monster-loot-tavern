@@ -41,8 +41,18 @@ Game.prototype.moveEntity = function(entity, dx, dy, bounds = null) {
   
 };
 
+Game.prototype.currentStageZone = function() {
+    let zone = CONFIG.stageZones[0];
+    for (const candidate of CONFIG.stageZones) {
+      if (this.dangerLevel >= candidate.minStage) zone = candidate;
+    }
+    return zone;
+
+};
+
 Game.prototype.drawWorld = function() {
-    ctx.fillStyle = "#2e6b35";
+    const zone = this.currentStageZone();
+    ctx.fillStyle = zone.theme === "castle" ? "#3d4140" : "#2e6b35";
     ctx.fillRect(-this.camera.x, -this.camera.y, CONFIG.world.width, CONFIG.world.height);
 
     this.drawField();
@@ -96,6 +106,11 @@ Game.prototype.drawTavern = function() {
 
 Game.prototype.drawField = function() {
     const f = CONFIG.field;
+    if (this.currentStageZone().theme === "castle") {
+      this.drawCastleField(f);
+      return;
+    }
+
     ctx.fillStyle = "#367a3b";
     ctx.fillRect(f.x - this.camera.x, f.y - this.camera.y, f.width, f.height);
     gameSprites.drawTiledArea("grass", f, this.camera, 32, "grassFlowers");
@@ -125,7 +140,37 @@ Game.prototype.drawField = function() {
   
 };
 
+Game.prototype.drawCastleField = function(f) {
+    ctx.fillStyle = "#555850";
+    ctx.fillRect(f.x - this.camera.x, f.y - this.camera.y, f.width, f.height);
+    gameSprites.drawTiledImageArea("castle_floor_alt", f, this.camera, 128);
+
+    ctx.fillStyle = "rgba(30, 31, 28, 0.18)";
+    for (let x = f.x + 30; x < f.x + f.width; x += 96) {
+      for (let y = f.y + 44; y < f.y + f.height; y += 84) {
+        if ((x + y) % 4 === 0) ctx.fillRect(x - this.camera.x, y - this.camera.y, 22, 8);
+      }
+    }
+
+    for (const [x, y] of CONFIG.scenery.castle.crackedTiles) {
+      gameSprites.drawImage("castle_floor", x - this.camera.x - 44, y - this.camera.y - 44, 88, 88);
+    }
+
+    ctx.strokeStyle = "rgba(20, 20, 18, 0.62)";
+    ctx.lineWidth = 8;
+    ctx.strokeRect(f.x - this.camera.x, f.y - this.camera.y, f.width, f.height);
+    ctx.strokeStyle = "rgba(205, 195, 155, 0.22)";
+    ctx.lineWidth = 2;
+    ctx.strokeRect(f.x - this.camera.x + 8, f.y - this.camera.y + 8, f.width - 16, f.height - 16);
+
+};
+
 Game.prototype.drawScenery = function() {
+    if (this.currentStageZone().theme === "castle") {
+      this.drawCastleScenery();
+      return;
+    }
+
     const trees = CONFIG.scenery.trees;
     for (const [x, y] of trees) {
       if (!gameSprites.drawImage("tree", x - this.camera.x - 10, y - this.camera.y - 14, 86, 86)) {
@@ -143,4 +188,24 @@ Game.prototype.drawScenery = function() {
     ctx.fillStyle = "rgba(255, 203, 91, 0.16)";
     ctx.fillRect(CONFIG.door.x - this.camera.x + 12, CONFIG.door.y - this.camera.y + 78, 24, 76);
   
+};
+
+Game.prototype.drawCastleScenery = function() {
+    const scenery = CONFIG.scenery.castle;
+
+    for (const [x, y] of scenery.deadTrees) {
+      gameSprites.drawImage("castle_dead_tree", x - this.camera.x - 44, y - this.camera.y - 86, 88, 100);
+    }
+
+    for (const [x, y] of scenery.walls) {
+      gameSprites.drawImage("castle_broken_wall", x - this.camera.x - 64, y - this.camera.y - 70, 128, 103);
+    }
+
+    for (const [x, y] of scenery.pillars) {
+      gameSprites.drawImage("castle_pillar", x - this.camera.x - 30, y - this.camera.y - 88, 60, 99);
+    }
+
+    ctx.fillStyle = "rgba(255, 203, 91, 0.12)";
+    ctx.fillRect(CONFIG.door.x - this.camera.x + 12, CONFIG.door.y - this.camera.y + 78, 24, 76);
+
 };
