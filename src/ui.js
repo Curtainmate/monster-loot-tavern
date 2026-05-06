@@ -194,17 +194,39 @@
       ? `Next unlock: ${this.game.dangerProgress}/${this.game.dangerProgressGoal()} progress.`
       : "Lower stage selected. New stages will not unlock.";
     this.dangerList.appendChild(note);
-    for (let level = 1; level <= this.game.maxDangerUnlocked; level += 1) {
-      const row = document.createElement("div");
-      row.className = "shop-row";
-      const button = document.createElement("button");
-      button.type = "button";
-      button.textContent = `${level}`;
-      button.className = level === this.game.dangerLevel ? "active" : "";
-      button.title = level === this.game.dangerLevel ? "Current stage" : `Switch to stage ${level}`;
-      button.addEventListener("click", () => this.game.setDangerLevel(level));
-      row.appendChild(button);
-      this.dangerList.appendChild(row);
+    this.renderStageGroups();
+  }
+
+  renderStageGroups() {
+    for (let zoneIndex = 0; zoneIndex < CONFIG.stageZones.length; zoneIndex += 1) {
+      const zone = CONFIG.stageZones[zoneIndex];
+      const nextZone = CONFIG.stageZones[zoneIndex + 1];
+      const firstLevel = zone.minStage;
+      const lastLevel = Math.min(this.game.maxDangerUnlocked, nextZone ? nextZone.minStage - 1 : this.game.maxDangerUnlocked);
+      if (lastLevel < firstLevel) continue;
+
+      const section = document.createElement("section");
+      section.className = `stage-zone stage-zone-${zone.theme}`;
+
+      const header = document.createElement("div");
+      header.className = "stage-zone-header";
+      const rangeText = nextZone ? `Stages ${firstLevel}-${nextZone.minStage - 1}` : `Stages ${firstLevel}+`;
+      header.innerHTML = `<strong>${zone.name}</strong><small>${rangeText}</small>`;
+      section.appendChild(header);
+
+      const buttons = document.createElement("div");
+      buttons.className = "stage-zone-buttons";
+      for (let level = firstLevel; level <= lastLevel; level += 1) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.textContent = `${level}`;
+        button.className = level === this.game.dangerLevel ? "active" : "";
+        button.title = level === this.game.dangerLevel ? "Current stage" : `Switch to stage ${level}`;
+        button.addEventListener("click", () => this.game.setDangerLevel(level));
+        buttons.appendChild(button);
+      }
+      section.appendChild(buttons);
+      this.dangerList.appendChild(section);
     }
   }
 
