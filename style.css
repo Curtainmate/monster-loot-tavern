@@ -139,6 +139,51 @@ canvas {
   width: 168px;
 }
 
+.boss-bar {
+  position: absolute;
+  top: 48px;
+  left: 50%;
+  width: min(520px, 44vw);
+  transform: translateX(-50%);
+  padding: 8px 12px 10px;
+  border: 3px solid rgba(255, 207, 107, 0.72);
+  background:
+    linear-gradient(180deg, rgba(65, 31, 23, 0.9), rgba(24, 13, 10, 0.9));
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.38);
+}
+
+.boss-bar-title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 5px;
+}
+
+.boss-bar-title strong {
+  color: #ffe18a;
+  font-size: 18px;
+}
+
+.boss-bar-title span {
+  color: var(--muted);
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.boss-health-frame {
+  height: 13px;
+  border: 2px solid rgba(255, 236, 181, 0.28);
+  background: rgba(0, 0, 0, 0.42);
+}
+
+.boss-health-frame span {
+  display: block;
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg, #9c1f1f, #e04b37, #ff9d4b);
+}
+
 .inventory {
   position: absolute;
   right: 0;

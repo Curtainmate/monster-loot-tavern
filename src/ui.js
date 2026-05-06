@@ -8,6 +8,10 @@
     this.dangerText = document.getElementById("dangerText");
     this.dangerBar = document.getElementById("dangerBar");
     this.dayText = document.getElementById("dayText");
+    this.bossBar = document.getElementById("bossBar");
+    this.bossName = document.getElementById("bossName");
+    this.bossRole = document.getElementById("bossRole");
+    this.bossHealthBar = document.getElementById("bossHealthBar");
     this.questText = document.getElementById("questText");
     this.buffText = document.getElementById("buffText");
     this.inventoryText = document.getElementById("inventoryText");
@@ -133,6 +137,7 @@
       ? `${clamp((this.game.dangerProgress / this.game.dangerProgressGoal()) * 100, 0, 100)}%`
       : "0%";
     this.dayText.textContent = this.game.day;
+    this.updateBossBar();
     this.questText.textContent = this.game.questSummary();
     const activeBuffs = Object.entries(p.buffs).filter(([, time]) => time > 0);
     if (activeBuffs.length) {
@@ -174,6 +179,17 @@
     this.gameOverOverlay.classList.toggle("hidden", !this.game.gameOver);
     this.gameOverOverlay.setAttribute("aria-hidden", String(!this.game.gameOver));
     this.updateMusicButtons();
+  }
+
+  updateBossBar() {
+    const boss = this.game.monsters.find((monster) => monster.isFieldBoss);
+    const visible = Boolean(boss) && this.game.started && !this.game.gameOver;
+    this.bossBar.classList.toggle("hidden", !visible);
+    this.bossBar.setAttribute("aria-hidden", String(!visible));
+    if (!visible) return;
+    this.bossName.textContent = boss.name;
+    this.bossRole.textContent = "Field Boss";
+    this.bossHealthBar.style.width = `${clamp((boss.health / boss.maxHealth) * 100, 0, 100)}%`;
   }
 
   renderShop() {
