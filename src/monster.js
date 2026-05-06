@@ -38,7 +38,7 @@
     this.walkFrame += dt * (this.speed / 16);
 
     const player = game.player;
-    const chaseRange = 330;
+    const chaseRange = CONFIG.spawns.monsterAggroRange;
     const inField = rectContains(CONFIG.field, this.x, this.y);
     if (distance(this, player) < chaseRange && !game.playerInTavern() && inField) {
       const move = normalize(player.x - this.x, player.y - this.y);
@@ -143,7 +143,7 @@ class Warboss extends Monster {
       return;
     }
 
-    if (distance(this, player) < 420 && !game.playerInTavern()) {
+    if (!game.playerInTavern()) {
       const move = normalize(player.x - this.x, player.y - this.y);
       game.moveEntity(this, move.x * this.speed * dt, move.y * this.speed * dt, CONFIG.field);
       this.lastMoveX = move.x;
