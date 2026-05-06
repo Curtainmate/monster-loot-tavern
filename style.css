@@ -438,6 +438,11 @@ canvas {
   height: 34px;
 }
 
+.item-icon.service {
+  width: 40px;
+  height: 40px;
+}
+
 .inventory-hero-portrait {
   position: relative;
   display: grid;

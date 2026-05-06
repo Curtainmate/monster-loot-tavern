@@ -215,6 +215,7 @@
         ? `Add ${this.game.shop.nextBackpackUpgrade().slots} backpack slots. Current capacity: ${player.inventoryCapacity}.`
         : `Maximum capacity reached: ${player.inventoryCapacity}.`,
       price: this.game.shop.nextBackpackUpgrade()?.price,
+      serviceIcon: "assets/icons/backpack_service_icon.png",
       disabled: !this.game.shop.nextBackpackUpgrade() || player.gold < this.game.shop.nextBackpackUpgrade().price,
       action: () => this.game.shop.buyBackpackUpgrade()
     });
@@ -224,6 +225,7 @@
       title: "Heal to Full",
       detail: healCost > 0 ? `Restore ${player.maxHealth - Math.ceil(player.health)} missing HP.` : "You are already fully healed.",
       price: healCost,
+      serviceIcon: "assets/icons/heal_service_icon.png",
       disabled: healCost <= 0 || player.gold < healCost,
       action: () => this.game.shop.healToFull()
     });
@@ -233,6 +235,7 @@
       title: "Mystery Equipment",
       detail: `Buy one random ${player.className} item for Stage ${this.game.dangerLevel}.`,
       price: mysteryCost,
+      serviceIcon: "assets/icons/mystery_item_icon.png",
       disabled: player.gold < mysteryCost || !player.hasInventorySpace(),
       action: () => this.game.shop.buyMysteryItem()
     });
@@ -243,6 +246,7 @@
         title: "Improve Rarity",
         detail: "Bring a spare Common, Uncommon, or Rare item to upgrade it. Epic is the current limit.",
         price: null,
+        serviceIcon: "assets/icons/rarity_upgrade_icon.png",
         disabled: true
       });
       return;
@@ -256,17 +260,18 @@
         detail: `${ITEM_RARITY_RULES[item.rarity].label} -> ${ITEM_RARITY_RULES[nextRarity].label}. Rerolls stats at the same item level.`,
         price: cost,
         iconItem: item,
+        serviceIcon: "assets/icons/rarity_upgrade_icon.png",
         disabled: player.gold < cost,
         action: () => this.game.shop.upgradeItemRarity(item.uniqueId)
       });
     }
   }
 
-  addServiceRow({ title, detail, price, disabled, action, iconItem = null }) {
+  addServiceRow({ title, detail, price, disabled, action, iconItem = null, serviceIcon = "" }) {
     const row = document.createElement("div");
     row.className = `shop-row ${iconItem ? `rarity-${iconItem.rarity}` : ""}`;
     row.innerHTML = `
-      ${iconItem ? `<span class="item-icon small" style="background-image:url('${ItemSystem.itemIconPath(iconItem)}')" aria-hidden="true"></span>` : ""}
+      <span class="item-icon small service" style="background-image:url('${serviceIcon || (iconItem ? ItemSystem.itemIconPath(iconItem) : "")}')" aria-hidden="true"></span>
       <div><strong>${title}</strong><small>${detail}${price === null || price === undefined ? "" : ` | ${price} gold`}</small></div>
     `;
     const button = document.createElement("button");
