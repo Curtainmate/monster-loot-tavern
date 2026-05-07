@@ -822,21 +822,24 @@ canvas {
 
 .class-badge {
   position: absolute;
-  top: -22px;
+  top: -58px;
   left: 50%;
-  width: 54px;
-  height: 54px;
-  border: 4px solid #211408;
-  background: linear-gradient(135deg, #946329, #1e3c26);
-  box-shadow: inset 0 0 0 3px #c8953c, 0 0 0 2px rgba(255, 230, 161, 0.24);
-  transform: translateX(-50%) rotate(45deg);
+  width: 128px;
+  height: 128px;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  filter: drop-shadow(0 4px 0 rgba(18, 8, 3, 0.72)) drop-shadow(0 0 8px rgba(255, 204, 91, 0.24));
+  pointer-events: none;
+  transform: translateX(-50%);
 }
 
-.class-badge::before {
-  content: "";
-  position: absolute;
-  inset: 17px 8px;
-  background: #f5d279;
+.warrior-badge {
+  background-image: url("assets/ui/warrior_icon_main.png");
+}
+
+.ranger-badge {
+  background-image: url("assets/ui/ranger_icon_main.png");
 }
 
 .class-card:hover:not(:disabled),
@@ -849,8 +852,7 @@ canvas {
 }
 
 .class-card.selected .class-badge {
-  background: linear-gradient(135deg, #ffca62, #9a5b18);
-  box-shadow: inset 0 0 0 3px #fff0a6, 0 0 22px rgba(255, 194, 82, 0.8);
+  filter: drop-shadow(0 4px 0 rgba(18, 8, 3, 0.72)) drop-shadow(0 0 18px rgba(255, 210, 97, 0.78));
 }
 
 .class-portrait {
@@ -1299,9 +1301,9 @@ button:disabled {
   }
 
   .class-badge {
-    width: 48px;
-    height: 48px;
-    top: -19px;
+    width: 104px;
+    height: 104px;
+    top: -48px;
   }
 
   .class-portrait {
