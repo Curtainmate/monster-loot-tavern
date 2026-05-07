@@ -31,8 +31,8 @@
   }
 
   drawSign(camera) {
-    const sx = this.x - camera.x;
-    const sy = this.y - camera.y - 116;
+    const sx = this.x - camera.x - 28;
+    const sy = this.y - camera.y - 94;
     ctx.save();
     if (!gameSprites.drawImage("sign", sx - 45, sy - 50, 90, 90)) {
       gameSprites.drawTile("sign", sx - 36, sy - 48, 72);
