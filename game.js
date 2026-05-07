@@ -5,6 +5,7 @@
     this.shopkeeper = new Shopkeeper();
     this.shop = new Shop(this);
     this.ui = new UI(this);
+    this.layoutEditor = new TavernLayoutEditor(this);
     this.camera = { x: 0, y: 0 };
     this.lastTime = 0;
     this.started = false;
@@ -245,6 +246,10 @@
 
   togglePause() {
     if (!this.started) return;
+    if (this.layoutEditor.active) {
+      this.layoutEditor.toggle();
+      return;
+    }
     if (this.inventoryOpen) {
       this.closeInventory();
       return;
@@ -647,6 +652,7 @@
     this.player.draw(this.camera);
     this.drawAttackEffects();
     for (const floater of this.floaters) floater.draw(this.camera);
+    this.layoutEditor.draw();
   }
 
   drawAttackEffects() {

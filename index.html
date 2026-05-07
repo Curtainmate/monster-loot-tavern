@@ -82,6 +82,19 @@
       <div id="hintText" class="hint hud-hint"></div>
     </section>
 
+    <section id="layoutEditorPanel" class="layout-editor-panel hidden" aria-hidden="true">
+      <header>
+        <strong>Tavern Layout</strong>
+        <span id="layoutEditorStatus">No prop selected</span>
+      </header>
+      <div class="layout-editor-actions">
+        <button id="layoutExportButton" type="button">Export</button>
+        <button id="layoutResetButton" type="button">Reset Draft</button>
+      </div>
+      <small>L close | Drag move | Arrows nudge | Shift fine</small>
+      <textarea id="layoutExportText" readonly spellcheck="false"></textarea>
+    </section>
+
     <section id="inventoryOverlay" class="overlay hidden" aria-hidden="true">
       <div class="panel inventory-panel">
         <header>
@@ -194,6 +207,7 @@
   <script src="src/ui.js"></script>
   <script src="game.js"></script>
   <script src="src/world.js"></script>
+  <script src="src/layout-editor.js"></script>
   <script src="src/main.js"></script>
 </body>
 </html>

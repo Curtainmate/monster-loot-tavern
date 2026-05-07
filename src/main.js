@@ -7,6 +7,10 @@ const game = new Game();
 window.addEventListener("keydown", (event) => {
   game.audio.unlock();
   const key = movementKey(event);
+  if (game.layoutEditor.keyDown(event, key)) {
+    event.preventDefault();
+    return;
+  }
   keys.add(key);
   if ([" ", "arrowup", "arrowdown", "arrowleft", "arrowright"].includes(key)) {
     event.preventDefault();
@@ -32,10 +36,17 @@ canvas.addEventListener("mousemove", (event) => {
   const scaleY = canvas.height / rect.height;
   mouse.x = (event.clientX - rect.left) * scaleX;
   mouse.y = (event.clientY - rect.top) * scaleY;
+  mouse.worldX = mouse.x + game.camera.x;
+  mouse.worldY = mouse.y + game.camera.y;
+  if (game.layoutEditor.mouseMove()) event.preventDefault();
 });
 
 canvas.addEventListener("mousedown", (event) => {
   game.audio.unlock();
+  if (game.layoutEditor.mouseDown()) {
+    event.preventDefault();
+    return;
+  }
   if (event.button === 0) {
     mouse.down = true;
     game.player.attack(game);
@@ -43,6 +54,7 @@ canvas.addEventListener("mousedown", (event) => {
 });
 
 window.addEventListener("mouseup", () => {
+  game.layoutEditor.mouseUp();
   mouse.down = false;
 });
 
