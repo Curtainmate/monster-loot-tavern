@@ -1,7 +1,7 @@
 ﻿class Shopkeeper {
   constructor() {
-    this.x = 510;
-    this.y = 255;
+    this.x = 558;
+    this.y = 270;
     this.size = 30;
   }
 

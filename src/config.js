@@ -85,19 +85,19 @@
     trees: [[80, 120], [100, 610], [710, 65], [1510, 85], [1535, 900], [740, 910], [1320, 40], [1815, 130], [1810, 940]],
     tavern: {
       floorProps: [
-        { image: "tavern_rug", x: 286, y: 356, width: 220, height: 86 }
+        { image: "tavern_rug", x: 318, y: 374, width: 190, height: 68 }
       ],
       backProps: [
-        { image: "tavern_fireplace", x: 204, y: 166, width: 108, height: 108 },
-        { image: "tavern_shelf", x: 494, y: 168, width: 122, height: 104 },
-        { image: "tavern_counter", x: 432, y: 258, width: 188, height: 126 }
+        { image: "tavern_fireplace", x: 196, y: 170, width: 106, height: 102 },
+        { image: "tavern_shelf", x: 526, y: 178, width: 118, height: 98 },
+        { image: "tavern_counter", x: 458, y: 264, width: 172, height: 88 }
       ],
       frontProps: [
-        { image: "tavern_table", x: 240, y: 346, width: 108, height: 82 },
-        { image: "tavern_chair", x: 352, y: 350, width: 58, height: 72 },
-        { image: "tavern_chair", x: 214, y: 352, width: 58, height: 72 },
-        { image: "tavern_crate", x: 608, y: 438, width: 58, height: 58 },
-        { image: "tavern_crate", x: 178, y: 438, width: 54, height: 54 }
+        { image: "tavern_table", x: 214, y: 360, width: 100, height: 74 },
+        { image: "tavern_chair", x: 316, y: 356, width: 50, height: 62 },
+        { image: "tavern_chair", x: 174, y: 360, width: 50, height: 62 },
+        { image: "tavern_crate", x: 612, y: 454, width: 48, height: 48 },
+        { image: "tavern_crate", x: 176, y: 454, width: 46, height: 46 }
       ]
     },
     castle: {
@@ -113,11 +113,11 @@
     { x: 145, y: 132, width: 22, height: 400 },
     { x: 680, y: 132, width: 22, height: 166 },
     { x: 680, y: 382, width: 22, height: 150 },
-    { x: 438, y: 304, width: 176, height: 46 },
-    { x: 210, y: 208, width: 92, height: 58 },
-    { x: 505, y: 208, width: 104, height: 44 },
-    { x: 251, y: 380, width: 86, height: 36 },
-    { x: 615, y: 468, width: 42, height: 28 },
+    { x: 468, y: 304, width: 152, height: 42 },
+    { x: 206, y: 214, width: 84, height: 44 },
+    { x: 536, y: 214, width: 96, height: 38 },
+    { x: 222, y: 390, width: 80, height: 30 },
+    { x: 618, y: 474, width: 34, height: 22 },
     { x: 890, y: 180, width: 32, height: 22 },
     { x: 1220, y: 315, width: 32, height: 22 },
     { x: 1000, y: 700, width: 32, height: 22 },
