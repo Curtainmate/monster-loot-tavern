@@ -182,8 +182,14 @@
     this.inventoryOverlay.setAttribute("aria-hidden", String(!this.inventoryOpen));
     this.shopOverlay.classList.toggle("hidden", !this.game.shopOpen);
     this.shopOverlay.setAttribute("aria-hidden", String(!this.game.shopOpen));
-    this.pauseOverlay.classList.toggle("hidden", !this.game.paused || this.inventoryOpen || this.game.shopOpen || this.game.gameOver || !this.game.started);
-    this.pauseOverlay.setAttribute("aria-hidden", String(!this.game.paused || this.inventoryOpen || this.game.shopOpen || this.game.gameOver || !this.game.started));
+    const pauseHidden = !this.game.paused
+      || this.inventoryOpen
+      || this.game.shopOpen
+      || this.game.gameOver
+      || !this.game.started
+      || this.game.layoutEditor.active;
+    this.pauseOverlay.classList.toggle("hidden", pauseHidden);
+    this.pauseOverlay.setAttribute("aria-hidden", String(pauseHidden));
     this.gameOverOverlay.classList.toggle("hidden", !this.game.gameOver);
     this.gameOverOverlay.setAttribute("aria-hidden", String(!this.game.gameOver));
     this.updateMusicButtons();
