@@ -55,7 +55,6 @@
       bush: "assets/bush.png",
       table: "assets/table.png",
       sign: "assets/sign.png",
-      tavern_door: "assets/tavern/tavern_door.png",
       tavern_table: "assets/tavern/tavern_table.png",
       tavern_counter: "assets/tavern/tavern_counter.png",
       tavern_crate: "assets/tavern/tavern_crate.png",

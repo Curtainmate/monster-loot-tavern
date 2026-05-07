@@ -140,11 +140,11 @@ Game.prototype.drawTavernDoor = function() {
     const sy = d.y - this.camera.y;
     ctx.fillStyle = "#24150f";
     ctx.fillRect(sx - 10, sy - 10, d.width + 20, d.height + 20);
-    ctx.fillStyle = "rgba(255, 203, 91, 0.14)";
-    ctx.fillRect(sx + 10, sy + 70, 24, 72);
-    if (!gameSprites.drawImage("tavern_door", sx - 8, sy - 6, 58, 88)) {
-      gameSprites.drawTile("door", sx, sy, 48);
-    }
+    ctx.fillStyle = "#58331f";
+    ctx.fillRect(sx, sy, d.width, d.height);
+    ctx.fillStyle = "#d8a452";
+    ctx.fillRect(sx + 7, sy + 8, d.width - 14, d.height - 16);
+    gameSprites.drawTile("door", sx, sy, 48);
 
 };
 
