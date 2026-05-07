@@ -35,6 +35,8 @@
     this.dangerProgress = 0;
     this.fieldBossDefeated = false;
     this.fieldBossActive = false;
+    this.fieldBossRewardPending = false;
+    this.stageTransitionTimer = 0;
     this.day = 1;
     this.lastContractId = null;
     this.contract = this.createContract();
@@ -104,7 +106,9 @@
     for (const effect of this.attackEffects) effect.life -= dt;
     this.attackEffects = this.attackEffects.filter((effect) => effect.life > 0);
 
-    if (!this.playerInTavern()) {
+    this.updateStageTransition(dt);
+
+    if (!this.playerInTavern() && !this.spawningPaused()) {
       this.spawnTimer -= dt;
       if (this.spawnTimer <= 0) {
         this.spawnMonsterWave();
@@ -189,7 +193,9 @@
   stageGateBossRequired() {
     return this.dangerLevel === CONFIG.fieldBoss.gateStage
       && this.maxDangerUnlocked === CONFIG.fieldBoss.gateStage
-      && !this.fieldBossDefeated;
+      && !this.fieldBossDefeated
+      && !this.fieldBossRewardPending
+      && this.stageTransitionTimer <= 0;
   }
 
   stageGateBossActive() {
@@ -212,6 +218,7 @@
     if (chest) {
       chest.open(this);
       this.recordContractProgress("chests", 1);
+      if (chest.kind === "fieldBoss") this.startCastleTransition();
       this.chests = this.chests.filter((candidate) => candidate !== chest);
       return;
     }
@@ -267,6 +274,8 @@
     this.dangerLevel = targetStage;
     this.dangerProgress = 0;
     this.fieldBossActive = false;
+    this.fieldBossRewardPending = false;
+    this.stageTransitionTimer = 0;
     this.monsters = this.monsters.filter((monster) => !monster.isFieldBoss);
     this.spawnTimer = Math.min(this.spawnTimer, this.currentStageRule().spawnInterval);
     this.questNotice = `Test: Stage ${targetStage} opened.`;
@@ -279,6 +288,8 @@
     this.dangerLevel = CONFIG.fieldBoss.gateStage;
     this.dangerProgress = this.dangerProgressGoal();
     this.fieldBossDefeated = false;
+    this.fieldBossRewardPending = false;
+    this.stageTransitionTimer = 0;
     this.spawnFieldBoss();
     this.ui.renderShop();
   }
@@ -286,6 +297,8 @@
   cheatUnlockCastle() {
     this.fieldBossDefeated = true;
     this.fieldBossActive = false;
+    this.fieldBossRewardPending = false;
+    this.stageTransitionTimer = 0;
     this.monsters = this.monsters.filter((monster) => !monster.isFieldBoss);
     this.maxDangerUnlocked = Math.max(this.maxDangerUnlocked, CONFIG.fieldBoss.unlockStage);
     this.dangerLevel = CONFIG.fieldBoss.unlockStage;
@@ -402,6 +415,7 @@
   }
 
   spawnFieldBoss() {
+    if (this.fieldBossRewardPending || this.stageTransitionTimer > 0) return;
     if (this.fieldBossActive || this.monsters.some((monster) => monster.isFieldBoss)) {
       this.questNotice = "Defeat the Field Boss to reach Castle.";
       this.questNoticeTime = 2;
@@ -430,29 +444,81 @@
     if (!monster.isFieldBoss) {
       this.addDangerProgress(monster.isBoss ? CONFIG.dangerProgress.bossKill : CONFIG.dangerProgress.normalKill, "stage progress");
     }
-    this.dropMonsterGold(monster);
-    this.tryDropGeneratedItem(monster.isBoss ? "boss" : "monster", monster.x, monster.y - 12, monster);
     if (monster.isFieldBoss) {
       this.recordContractProgress("fieldBossKills", 1);
       this.defeatFieldBoss(monster);
       return;
     }
+    this.dropMonsterGold(monster);
+    this.tryDropGeneratedItem(monster.isBoss ? "boss" : "monster", monster.x, monster.y - 12, monster);
     if (monster.isBoss) {
       this.floaters.push(new FloatingText("Miniboss defeated!", monster.x, monster.y - 42, "#ffe18a"));
     }
   }
 
   defeatFieldBoss(monster) {
+    this.fieldBossActive = false;
+    this.fieldBossRewardPending = true;
+    this.monsters = [];
+    this.chests = [];
+    this.projectiles = [];
+    this.powerups = [];
+    this.spawnTimer = 999;
+    this.bossTimer = 999;
+    this.chestTimer = 999;
+    this.spawnFieldBossChest(monster.x, monster.y);
+    this.questNotice = "Field Boss defeated! Claim the victory chest.";
+    this.questNoticeTime = 4;
+    this.floaters.push(new FloatingText("Field cleared!", monster.x, monster.y - 72, "#ffe18a"));
+    this.audio.play("day");
+  }
+
+  spawnFieldBossChest(x, y) {
+    const chestX = clamp(x, CONFIG.field.x + 70, CONFIG.field.x + CONFIG.field.width - 70);
+    const chestY = clamp(y, CONFIG.field.y + 70, CONFIG.field.y + CONFIG.field.height - 70);
+    this.chests = this.chests.filter((chest) => chest.kind !== "fieldBoss");
+    this.chests.push(new TreasureChest(chestX, chestY, this.dangerLevel, "fieldBoss"));
+    this.floaters.push(new FloatingText("Victory Chest", chestX, chestY - 54, "#ffe18a", { size: 18 }));
+  }
+
+  startCastleTransition() {
+    if (!this.fieldBossRewardPending || this.stageTransitionTimer > 0) return;
+    this.fieldBossRewardPending = false;
+    this.stageTransitionTimer = 5;
+    this.questNoticeTime = 0;
+    this.audio.play("day");
+  }
+
+  updateStageTransition(dt) {
+    if (this.stageTransitionTimer <= 0) return;
+    this.stageTransitionTimer = Math.max(0, this.stageTransitionTimer - dt);
+    if (this.stageTransitionTimer === 0) this.enterCastleStage();
+  }
+
+  enterCastleStage() {
     this.fieldBossDefeated = true;
     this.fieldBossActive = false;
+    this.fieldBossRewardPending = false;
     this.dangerProgress = 0;
     this.maxDangerUnlocked = Math.max(this.maxDangerUnlocked, CONFIG.fieldBoss.unlockStage);
     this.dangerLevel = CONFIG.fieldBoss.unlockStage;
+    this.monsters = [];
+    this.chests = [];
+    this.powerups = [];
+    this.projectiles = [];
+    this.attackEffects = [];
+    this.spawnTimer = 1.2;
+    this.chestTimer = this.randomRange(CONFIG.chests.minDelay, CONFIG.chests.maxDelay);
+    this.powerupTimer = this.randomRange(CONFIG.powerups.minDelay, CONFIG.powerups.maxDelay);
+    this.bossTimer = this.randomRange(CONFIG.bosses.minDelay, CONFIG.bosses.maxDelay);
     this.questNotice = "Castle unlocked.";
     this.questNoticeTime = 4;
-    this.floaters.push(new FloatingText("Field Boss defeated!", monster.x, monster.y - 72, "#ffe18a"));
     this.audio.play("day");
     this.ui.renderShop();
+  }
+
+  spawningPaused() {
+    return this.fieldBossRewardPending || this.stageTransitionTimer > 0;
   }
 
   tryDropGeneratedItem(source, x, y, context = {}) {
@@ -461,8 +527,12 @@
       classRestriction: this.player.classId,
       stage: this.dangerLevel
     });
-    this.itemDrops.push(new ItemDrop(item, x + Math.random() * 34 - 17, y + Math.random() * 28 - 14));
+    this.dropGeneratedItem(item, x, y);
     return item;
+  }
+
+  dropGeneratedItem(item, x, y) {
+    this.itemDrops.push(new ItemDrop(item, x + Math.random() * 34 - 17, y + Math.random() * 28 - 14));
   }
 
   dropMonsterGold(monster) {
@@ -604,6 +674,8 @@
 
   questSummary() {
     const contract = this.contract;
+    if (this.stageTransitionTimer > 0) return `Entering Castle in ${Math.ceil(this.stageTransitionTimer)}...`;
+    if (this.fieldBossRewardPending) return "Field Boss defeated: open the victory chest.";
     if (this.questNoticeTime > 0) return this.questNotice;
     if (!contract) return "";
     if (this.contractComplete()) return `Contract complete: return to the tavern for gold and ${contract.rewardRarity} gear.`;

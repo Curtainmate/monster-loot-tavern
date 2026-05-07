@@ -174,11 +174,12 @@ class PowerUp {
 }
 
 class TreasureChest {
-  constructor(x, y, dangerLevel) {
+  constructor(x, y, dangerLevel, kind = "normal") {
     this.x = x;
     this.y = y;
     this.size = 34;
     this.dangerLevel = dangerLevel;
+    this.kind = kind;
     this.life = 0;
     this.opened = false;
   }
@@ -194,6 +195,10 @@ class TreasureChest {
   open(game) {
     if (this.opened) return;
     this.opened = true;
+    if (this.kind === "fieldBoss") {
+      this.openFieldBossChest(game);
+      return;
+    }
     const baseGold = 18 + this.dangerLevel * 4;
     const bonusGold = Math.floor(Math.random() * (8 + this.dangerLevel * 2));
     const totalGold = Math.max(1, Math.round((baseGold + bonusGold) * (1 + game.player.goldFind)));
@@ -201,6 +206,20 @@ class TreasureChest {
     game.tryDropGeneratedItem("chest", this.x, this.y - 10);
     game.floaters.push(new FloatingText(`Treasure! +${totalGold} gold`, this.x, this.y - 30, "#ffe18a"));
     game.audio.play("loot");
+  }
+
+  openFieldBossChest(game) {
+    const totalGold = Math.round((150 + this.dangerLevel * 5) * (1 + game.player.goldFind));
+    const rarity = Math.random() < 0.16 ? "epic" : "rare";
+    game.dropCoins(totalGold, this.x, this.y);
+    game.dropGeneratedItem(ItemSystem.generateItem({
+      classRestriction: game.player.classId,
+      stage: this.dangerLevel,
+      rarity
+    }), this.x, this.y - 12);
+    game.tryDropGeneratedItem("boss", this.x + 24, this.y - 10, { isBoss: true });
+    game.floaters.push(new FloatingText(`Victory! +${totalGold} gold`, this.x, this.y - 34, "#ffe18a", { size: 18 }));
+    game.audio.play("day");
   }
 
   draw(camera, showPrompt = false) {
