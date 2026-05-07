@@ -72,36 +72,91 @@ Game.prototype.drawTavern = function() {
     for (let row = 0; row < t.height; row += 32) {
       ctx.fillRect(x, y + row, t.width, 4);
     }
-    ctx.fillStyle = "#2c1b13";
-    ctx.fillRect(x - 15, y - 18, t.width + 30, 18);
-    ctx.fillRect(x - 15, y + t.height, t.width + 30, 18);
-    ctx.fillRect(x - 18, y - 18, 18, t.height + 36);
-    ctx.fillRect(x + t.width, y - 18, 18, 148);
-    ctx.fillRect(x + t.width, y + 232, 18, 146);
-    for (let wallX = t.x - 32; wallX < t.x + t.width + 32; wallX += 32) {
+    for (const prop of CONFIG.scenery.tavern.floorProps) {
+      this.drawTavernProp(prop);
+    }
+    this.drawTavernWalls();
+    this.drawTavernDoor();
+    for (const prop of CONFIG.scenery.tavern.backProps) {
+      this.drawTavernProp(prop);
+    }
+    for (const prop of CONFIG.scenery.tavern.frontProps) {
+      this.drawTavernProp(prop);
+    }
+
+};
+
+Game.prototype.drawTavernWalls = function() {
+    const t = CONFIG.tavern;
+    const wall = 32;
+    ctx.fillStyle = "#24150f";
+    ctx.fillRect(t.x - this.camera.x, t.y - wall - this.camera.y, t.width, wall);
+    ctx.fillRect(t.x - this.camera.x, t.y + t.height - this.camera.y, t.width, wall);
+    ctx.fillRect(t.x - wall - this.camera.x, t.y - this.camera.y, wall, t.height);
+    ctx.fillRect(t.x + t.width - this.camera.x, t.y - this.camera.y, wall, CONFIG.door.y - t.y);
+    ctx.fillRect(
+      t.x + t.width - this.camera.x,
+      CONFIG.door.y + CONFIG.door.height - this.camera.y,
+      wall,
+      t.y + t.height - (CONFIG.door.y + CONFIG.door.height)
+    );
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(t.x - this.camera.x, t.y - wall - this.camera.y, t.width, wall);
+    ctx.rect(t.x - this.camera.x, t.y + t.height - this.camera.y, t.width, wall);
+    ctx.clip();
+    for (let wallX = t.x; wallX < t.x + t.width; wallX += wall) {
       gameSprites.drawTile("wall", wallX - this.camera.x, t.y - 32 - this.camera.y);
       gameSprites.drawTile("wall", wallX - this.camera.x, t.y + t.height - this.camera.y);
     }
-    for (let wallY = t.y - 32; wallY < t.y + t.height + 32; wallY += 32) {
+    ctx.restore();
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(t.x - wall - this.camera.x, t.y - this.camera.y, wall, t.height);
+    ctx.rect(t.x + t.width - this.camera.x, t.y - this.camera.y, wall, CONFIG.door.y - t.y);
+    ctx.rect(
+      t.x + t.width - this.camera.x,
+      CONFIG.door.y + CONFIG.door.height - this.camera.y,
+      wall,
+      t.y + t.height - (CONFIG.door.y + CONFIG.door.height)
+    );
+    ctx.clip();
+    for (let wallY = t.y; wallY < t.y + t.height; wallY += wall) {
       gameSprites.drawTile("wallDark", t.x - 32 - this.camera.x, wallY - this.camera.y);
     }
-    for (let wallY = t.y - 32; wallY < t.y + 150; wallY += 32) {
+    for (let wallY = t.y; wallY < CONFIG.door.y; wallY += wall) {
       gameSprites.drawTile("wallDark", t.x + t.width - this.camera.x, wallY - this.camera.y);
     }
-    for (let wallY = t.y + 232; wallY < t.y + t.height + 32; wallY += 32) {
+    for (let wallY = CONFIG.door.y + CONFIG.door.height; wallY < t.y + t.height; wallY += wall) {
       gameSprites.drawTile("wallDark", t.x + t.width - this.camera.x, wallY - this.camera.y);
     }
-    ctx.fillStyle = "#f1b14e";
-    ctx.fillRect(x + 300, y + 34, 48, 48);
-    ctx.fillStyle = "#58331f";
-    ctx.fillRect(CONFIG.door.x - this.camera.x, CONFIG.door.y - this.camera.y, CONFIG.door.width, CONFIG.door.height);
-    ctx.fillStyle = "#d8a452";
-    ctx.fillRect(CONFIG.door.x - this.camera.x + 7, CONFIG.door.y - this.camera.y + 8, CONFIG.door.width - 14, CONFIG.door.height - 16);
-    gameSprites.drawTile("door", CONFIG.door.x - this.camera.x, CONFIG.door.y - this.camera.y, 48);
-    if (!gameSprites.drawImage("table", x + 24, y + 64, 230, 122)) {
-      gameSprites.drawTile("counter", x + 24, y + 88, 64);
+    ctx.restore();
+
+};
+
+Game.prototype.drawTavernDoor = function() {
+    const d = CONFIG.door;
+    const sx = d.x - this.camera.x;
+    const sy = d.y - this.camera.y;
+    ctx.fillStyle = "#24150f";
+    ctx.fillRect(sx - 10, sy - 10, d.width + 20, d.height + 20);
+    ctx.fillStyle = "rgba(255, 203, 91, 0.14)";
+    ctx.fillRect(sx + 10, sy + 70, 24, 72);
+    if (!gameSprites.drawImage("tavern_door", sx - 16, sy - 12, 78, 104)) {
+      gameSprites.drawTile("door", sx, sy, 48);
     }
-  
+
+};
+
+Game.prototype.drawTavernProp = function(prop) {
+    return gameSprites.drawImage(
+      prop.image,
+      prop.x - this.camera.x,
+      prop.y - this.camera.y,
+      prop.width,
+      prop.height
+    );
+
 };
 
 Game.prototype.drawField = function() {

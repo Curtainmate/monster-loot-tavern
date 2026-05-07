@@ -83,6 +83,23 @@
   scenery: {
     rocks: [[890, 180], [1220, 315], [1000, 700], [1420, 760], [1665, 255], [1700, 830]],
     trees: [[80, 120], [100, 610], [710, 65], [1510, 85], [1535, 900], [740, 910], [1320, 40], [1815, 130], [1810, 940]],
+    tavern: {
+      floorProps: [
+        { image: "tavern_rug", x: 286, y: 356, width: 220, height: 86 }
+      ],
+      backProps: [
+        { image: "tavern_fireplace", x: 204, y: 166, width: 108, height: 108 },
+        { image: "tavern_shelf", x: 494, y: 168, width: 122, height: 104 },
+        { image: "tavern_counter", x: 432, y: 258, width: 188, height: 126 }
+      ],
+      frontProps: [
+        { image: "tavern_table", x: 240, y: 346, width: 108, height: 82 },
+        { image: "tavern_chair", x: 352, y: 350, width: 58, height: 72 },
+        { image: "tavern_chair", x: 214, y: 352, width: 58, height: 72 },
+        { image: "tavern_crate", x: 608, y: 438, width: 58, height: 58 },
+        { image: "tavern_crate", x: 178, y: 438, width: 54, height: 54 }
+      ]
+    },
     castle: {
       walls: [[820, 155], [1245, 120], [1520, 220], [915, 765], [1340, 835], [1630, 680]],
       pillars: [[965, 310], [1460, 360], [1110, 635], [1715, 470]],
@@ -96,8 +113,11 @@
     { x: 145, y: 132, width: 22, height: 400 },
     { x: 680, y: 132, width: 22, height: 166 },
     { x: 680, y: 382, width: 22, height: 150 },
-    { x: 184, y: 242, width: 250, height: 54 },
-    { x: 452, y: 172, width: 82, height: 82 },
+    { x: 438, y: 304, width: 176, height: 46 },
+    { x: 210, y: 208, width: 92, height: 58 },
+    { x: 505, y: 208, width: 104, height: 44 },
+    { x: 251, y: 380, width: 86, height: 36 },
+    { x: 615, y: 468, width: 42, height: 28 },
     { x: 890, y: 180, width: 32, height: 22 },
     { x: 1220, y: 315, width: 32, height: 22 },
     { x: 1000, y: 700, width: 32, height: 22 },
