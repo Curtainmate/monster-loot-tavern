@@ -138,13 +138,14 @@ Game.prototype.drawTavernDoor = function() {
     const d = CONFIG.door;
     const sx = d.x - this.camera.x;
     const sy = d.y - this.camera.y;
-    ctx.fillStyle = "#24150f";
-    ctx.fillRect(sx - 10, sy - 10, d.width + 20, d.height + 20);
-    ctx.fillStyle = "#58331f";
-    ctx.fillRect(sx, sy, d.width, d.height);
-    ctx.fillStyle = "#d8a452";
-    ctx.fillRect(sx + 7, sy + 8, d.width - 14, d.height - 16);
-    gameSprites.drawTile("door", sx, sy, 48);
+    ctx.fillStyle = "#2a1a12";
+    ctx.fillRect(sx - 3, sy - 4, d.width + 6, d.height + 8);
+    ctx.fillStyle = "#7a4a25";
+    ctx.fillRect(sx + 2, sy + 4, d.width - 4, d.height - 8);
+    ctx.fillStyle = "#c1843f";
+    ctx.fillRect(sx + 8, sy + 10, d.width - 16, d.height - 20);
+    ctx.fillStyle = "#f0b95d";
+    ctx.fillRect(sx + 10, sy + d.height - 14, d.width - 20, 5);
 
 };
 
