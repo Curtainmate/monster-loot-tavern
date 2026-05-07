@@ -6,7 +6,15 @@
   }
 
   nearby(player) {
-    return Math.hypot(player.x - this.x, player.y - this.y) < 78;
+    return Math.hypot(player.x - this.x, player.y - this.y) < 78 || this.nearCounter(player);
+  }
+
+  nearCounter(player) {
+    const counter = CONFIG.scenery.tavern.frontProps.find((prop) => prop.image === "tavern_counter");
+    if (!counter) return false;
+    const nearestX = clamp(player.x, counter.x, counter.x + counter.width);
+    const nearestY = clamp(player.y, counter.y, counter.y + counter.height);
+    return Math.hypot(player.x - nearestX, player.y - nearestY) < 54;
   }
 
   draw(camera) {

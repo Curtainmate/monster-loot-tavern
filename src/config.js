@@ -89,10 +89,10 @@
       ],
       backProps: [
         { image: "tavern_fireplace", x: 196, y: 170, width: 106, height: 102 },
-        { image: "tavern_shelf", x: 548, y: 154, width: 118, height: 98 },
-        { image: "tavern_counter", x: 458, y: 264, width: 172, height: 88 }
+        { image: "tavern_shelf", x: 548, y: 154, width: 118, height: 98 }
       ],
       frontProps: [
+        { image: "tavern_counter", x: 482, y: 238, width: 172, height: 88 },
         { image: "tavern_table", x: 214, y: 360, width: 100, height: 74 },
         { image: "tavern_chair", x: 316, y: 356, width: 50, height: 62 },
         { image: "tavern_chair", x: 174, y: 360, width: 50, height: 62 },
@@ -113,7 +113,7 @@
     { x: 145, y: 132, width: 22, height: 400 },
     { x: 680, y: 132, width: 22, height: 166 },
     { x: 680, y: 382, width: 22, height: 150 },
-    { x: 468, y: 304, width: 152, height: 42 },
+    { x: 492, y: 278, width: 152, height: 42 },
     { x: 206, y: 214, width: 84, height: 44 },
     { x: 558, y: 190, width: 96, height: 38 },
     { x: 222, y: 390, width: 80, height: 30 },
