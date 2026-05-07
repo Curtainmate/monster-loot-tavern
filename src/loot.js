@@ -235,7 +235,8 @@ class TreasureChest {
 
   drawPrompt(camera) {
     const sx = this.x - camera.x;
-    const sy = this.y - camera.y - 72 + Math.sin(this.life * 5) * 2;
+    const offsetY = this.kind === "fieldBoss" ? -112 : -72;
+    const sy = this.y - camera.y + offsetY + Math.sin(this.life * 5) * 2;
     ctx.save();
     ctx.font = "700 13px Trebuchet MS, Verdana, sans-serif";
     ctx.textAlign = "center";

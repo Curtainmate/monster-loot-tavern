@@ -50,6 +50,7 @@
       powerups: "assets/powerups.png",
       tileset: "assets/tileset.png",
       chest: "assets/chest.png",
+      boss_chest: "assets/boss_chest.png",
       shopkeeper: "assets/shopkeeper.png",
       tree: "assets/tree.png",
       bush: "assets/bush.png",
@@ -267,10 +268,23 @@
   }
 
   drawChest(chest, camera) {
+    if (chest.kind === "fieldBoss") return this.drawBossChest(chest, camera);
     const frame = chest.opened ? 3 : Math.floor(chest.life * 3) % 3;
     const sx = chest.x - camera.x;
     const sy = chest.y - camera.y + Math.sin(chest.life * 2.4) * 1.5;
     return this.drawImageFrame("chest", frame, this.chestFrameSize, this.chestFrameSize, sx - 39, sy - 58, 78, 78);
+  }
+
+  drawBossChest(chest, camera) {
+    const image = this.images.boss_chest;
+    const frameWidth = image ? image.width / 4 : 224;
+    const frameHeight = image ? image.height : 144;
+    const frame = chest.opened ? 2 : Math.floor(chest.life * 2.4) % 2;
+    const sx = chest.x - camera.x;
+    const sy = chest.y - camera.y + Math.sin(chest.life * 2.2) * 1.3;
+    const drawn = this.drawImageFrame("boss_chest", frame, frameWidth, frameHeight, sx - 66, sy - 130, 132, 176);
+    if (drawn) return true;
+    return this.drawImageFrame("chest", chest.opened ? 3 : 0, this.chestFrameSize, this.chestFrameSize, sx - 44, sy - 62, 88, 88);
   }
 
   drawShopkeeper(shopkeeper, camera) {
