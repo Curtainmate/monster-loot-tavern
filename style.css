@@ -782,11 +782,11 @@ canvas {
 .class-card {
   position: relative;
   display: grid;
-  grid-template-rows: auto auto auto 1fr;
+  grid-template-rows: auto auto auto;
   justify-items: center;
-  gap: 9px;
+  gap: 12px;
   min-height: 280px;
-  padding: 24px 22px 20px;
+  padding: 42px 22px 22px;
   border: 4px solid #5c4a2b;
   background:
     radial-gradient(circle at 50% 34%, rgba(236, 166, 60, 0.24), transparent 28%),
@@ -822,7 +822,7 @@ canvas {
 
 .class-badge {
   position: absolute;
-  top: -58px;
+  top: -62px;
   left: 50%;
   width: 128px;
   height: 128px;
@@ -859,8 +859,8 @@ canvas {
   display: grid;
   place-items: center;
   width: min(100%, 360px);
-  height: 104px;
-  margin-top: 6px;
+  height: 132px;
+  margin-top: 0;
   border-bottom: 2px solid rgba(216, 164, 82, 0.72);
   background:
     radial-gradient(ellipse at 50% 72%, rgba(244, 177, 68, 0.42), transparent 31%),
@@ -873,6 +873,7 @@ canvas {
   background-repeat: no-repeat;
   background-size: 784px 98px;
   image-rendering: pixelated;
+  transform: translateY(16px);
 }
 
 .warrior-sprite {
@@ -895,6 +896,7 @@ canvas {
 }
 
 .class-card small {
+  display: none;
   max-width: 360px;
   color: #f3dfb7;
   font-size: 16px;
@@ -1297,17 +1299,17 @@ button:disabled {
 
   .class-card {
     min-height: 248px;
-    padding: 20px 22px 16px;
+    padding: 34px 22px 16px;
   }
 
   .class-badge {
     width: 104px;
     height: 104px;
-    top: -48px;
+    top: -50px;
   }
 
   .class-portrait {
-    height: 78px;
+    height: 104px;
   }
 
   .class-sprite {
