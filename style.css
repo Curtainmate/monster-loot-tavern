@@ -274,8 +274,8 @@ canvas {
 
 .layout-editor-panel {
   position: absolute;
-  left: 14px;
-  top: 92px;
+  right: 14px;
+  bottom: 14px;
   z-index: 14;
   width: 320px;
   padding: 10px;
@@ -291,6 +291,8 @@ canvas {
   align-items: baseline;
   justify-content: space-between;
   margin-bottom: 8px;
+  cursor: move;
+  user-select: none;
 }
 
 .layout-editor-panel span,

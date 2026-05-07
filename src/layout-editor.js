@@ -4,13 +4,18 @@ class TavernLayoutEditor {
     this.active = false;
     this.selected = null;
     this.dragging = false;
+    this.panelDragging = false;
     this.dragOffset = { x: 0, y: 0 };
+    this.panelDragOffset = { x: 0, y: 0 };
     this.savedPause = false;
     this.grid = 8;
     this.storageKey = "monsterLootTavern.tavernLayoutDraft";
     this.panel = document.getElementById("layoutEditorPanel");
     this.status = document.getElementById("layoutEditorStatus");
     this.exportText = document.getElementById("layoutExportText");
+    this.panel.querySelector("header").addEventListener("mousedown", (event) => this.startPanelDrag(event));
+    window.addEventListener("mousemove", (event) => this.dragPanel(event));
+    window.addEventListener("mouseup", () => this.stopPanelDrag());
     document.getElementById("layoutExportButton").addEventListener("click", () => this.exportLayout());
     document.getElementById("layoutResetButton").addEventListener("click", () => this.resetDraft());
     this.loadDraft();
@@ -27,6 +32,7 @@ class TavernLayoutEditor {
       keys.clear();
     } else {
       this.dragging = false;
+      this.panelDragging = false;
       this.game.paused = this.savedPause;
     }
     this.panel.classList.toggle("hidden", !this.active);
@@ -52,6 +58,7 @@ class TavernLayoutEditor {
 
   mouseDown() {
     if (!this.active) return false;
+    if (this.pointerInsidePanel()) return false;
     const picked = this.pick(mouse.worldX, mouse.worldY);
     this.selected = picked;
     this.dragging = Boolean(picked);
@@ -65,6 +72,7 @@ class TavernLayoutEditor {
 
   mouseMove() {
     if (!this.active || !this.dragging || !this.selected) return false;
+    if (this.pointerInsidePanel()) return false;
     const prop = this.selected.prop;
     prop.x = this.snap(mouse.worldX - this.dragOffset.x);
     prop.y = this.snap(mouse.worldY - this.dragOffset.y);
@@ -77,6 +85,39 @@ class TavernLayoutEditor {
     if (!this.active) return false;
     this.dragging = false;
     return true;
+  }
+
+  pointerInsidePanel() {
+    const rect = this.panel.getBoundingClientRect();
+    const shellRect = document.querySelector(".game-shell").getBoundingClientRect();
+    const clientX = shellRect.left + (mouse.x / canvas.width) * shellRect.width;
+    const clientY = shellRect.top + (mouse.y / canvas.height) * shellRect.height;
+    return clientX >= rect.left && clientX <= rect.right && clientY >= rect.top && clientY <= rect.bottom;
+  }
+
+  startPanelDrag(event) {
+    if (!this.active) return;
+    const rect = this.panel.getBoundingClientRect();
+    this.panelDragging = true;
+    this.panelDragOffset.x = event.clientX - rect.left;
+    this.panelDragOffset.y = event.clientY - rect.top;
+    event.preventDefault();
+  }
+
+  dragPanel(event) {
+    if (!this.panelDragging) return;
+    const shell = document.querySelector(".game-shell").getBoundingClientRect();
+    const panel = this.panel.getBoundingClientRect();
+    const left = clamp(event.clientX - shell.left - this.panelDragOffset.x, 8, shell.width - panel.width - 8);
+    const top = clamp(event.clientY - shell.top - this.panelDragOffset.y, 8, shell.height - panel.height - 8);
+    this.panel.style.left = `${left}px`;
+    this.panel.style.top = `${top}px`;
+    this.panel.style.right = "auto";
+    this.panel.style.bottom = "auto";
+  }
+
+  stopPanelDrag() {
+    this.panelDragging = false;
   }
 
   keyDown(event, key) {
