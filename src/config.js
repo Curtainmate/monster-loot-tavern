@@ -166,8 +166,7 @@
   },
   spawns: {
     monsterMinPlayerDistance: 260,
-    bossMinPlayerDistance: 340,
-    monsterAggroRange: 430
+    bossMinPlayerDistance: 340
   },
   fieldBoss: {
     gateStage: 10,
