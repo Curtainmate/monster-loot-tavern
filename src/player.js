@@ -165,6 +165,7 @@
 
   attack(game) {
     if (!this.canAttack() || !game.started || game.paused || game.gameOver) return;
+    if (game.playerInTavern()) return;
     this.cooldownLeft = this.effectiveAttackCooldown;
     if (this.attackType === "ranged") {
       game.audio.play("bowShot");
