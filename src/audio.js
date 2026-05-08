@@ -10,7 +10,9 @@
     this.musicEnabled = false;
     this.samples = {
       bowShot: "assets/audio/sfx/bow_shot.mp3",
-      swordSwing: "assets/audio/sfx/sword_swoosh.mp3"
+      swordSwing: "assets/audio/sfx/sword_swoosh.mp3",
+      necroSpell: "assets/audio/sfx/necro_spell.mp3",
+      warbossCharge: "assets/audio/sfx/warboss_charge.mp3"
     };
   }
 
@@ -42,6 +44,8 @@
       attack: () => this.tone(330, 0.06, "square", 0.035),
       bowShot: () => this.playSample("bowShot", 0.42),
       swordSwing: () => this.playSample("swordSwing", 0.42),
+      necroSpell: () => this.playSample("necroSpell", 0.46),
+      warbossCharge: () => this.playSample("warbossCharge", 0.5),
       hit: () => this.tone(140, 0.08, "sawtooth", 0.04),
       hurt: () => this.tone(95, 0.16, "triangle", 0.055),
       loot: () => {

@@ -159,7 +159,7 @@ class Warboss extends Monster {
 
     const player = game.player;
     if (this.state === "windup") {
-      if (this.stateTime >= CONFIG.fieldBoss.chargeWindup) this.startCharge();
+      if (this.stateTime >= CONFIG.fieldBoss.chargeWindup) this.startCharge(game);
     } else if (this.state === "charge") {
       this.updateCharge(dt, game);
     } else if (this.state === "recover") {
@@ -191,10 +191,11 @@ class Warboss extends Monster {
     }
   }
 
-  startCharge() {
+  startCharge(game) {
     this.setState("charge");
     this.chargeDistanceLeft = CONFIG.fieldBoss.chargeDistance;
     this.hasHitThisCharge = false;
+    game.audio.play("warbossCharge");
   }
 
   updateCharge(dt, game) {
@@ -289,6 +290,7 @@ class Necromancer extends Monster {
       CONFIG.castleBoss.spellWarningTime,
       CONFIG.castleBoss.spellBurstTime
     ));
+    game.audio.play("necroSpell");
     game.floaters.push(new FloatingText("Dark ritual!", x, y - 62, "#d9a6ff"));
     this.spellCooldown = CONFIG.castleBoss.spellCooldown;
   }
