@@ -256,6 +256,23 @@
     size: 78,
     gold: 120
   },
+  castleBoss: {
+    gateStage: 20,
+    type: "necromancer",
+    name: "Necromancer",
+    health: 880,
+    damage: 18,
+    speed: 62,
+    size: 62,
+    castRange: 620,
+    preferredRange: 360,
+    spellRadius: 108,
+    spellDamage: 58,
+    spellCooldown: 4.2,
+    spellWarningTime: 1.35,
+    spellBurstTime: 0.42,
+    gold: 240
+  },
   classes: {
     warrior: {
       name: "Warrior",
@@ -558,6 +575,18 @@
       attackCooldown: 0.68,
       score: 3,
       loot: [["Monster Fang", 0.38]]
+    },
+    necromancer: {
+      name: "Necromancer",
+      color: "#5c3b72",
+      size: 32,
+      speed: 62,
+      health: 220,
+      damage: 18,
+      gold: 24,
+      attackCooldown: 1.1,
+      score: 10,
+      loot: [["Monster Fang", 0.5], ["Rusty Dagger", 0.32]]
     }
   }
 };

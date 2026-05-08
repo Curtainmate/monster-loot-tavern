@@ -199,6 +199,10 @@ class TreasureChest {
       this.openFieldBossChest(game);
       return;
     }
+    if (this.kind === "castleBoss") {
+      this.openCastleBossChest(game);
+      return;
+    }
     const baseGold = 18 + this.dangerLevel * 4;
     const bonusGold = Math.floor(Math.random() * (8 + this.dangerLevel * 2));
     const totalGold = Math.max(1, Math.round((baseGold + bonusGold) * (1 + game.player.goldFind)));
@@ -222,6 +226,19 @@ class TreasureChest {
     game.audio.play("day");
   }
 
+  openCastleBossChest(game) {
+    const totalGold = Math.round((CONFIG.castleBoss.gold + this.dangerLevel * 8) * (1 + game.player.goldFind));
+    game.dropCoins(totalGold, this.x, this.y);
+    game.dropGeneratedItem(ItemSystem.generateItem({
+      classRestriction: game.player.classId,
+      stage: this.dangerLevel,
+      rarity: "epic"
+    }), this.x, this.y - 12);
+    game.tryDropGeneratedItem("boss", this.x + 24, this.y - 10, { isBoss: true });
+    game.floaters.push(new FloatingText(`Cursed spoils! +${totalGold} gold`, this.x, this.y - 34, "#d9a6ff", { size: 18 }));
+    game.audio.play("day");
+  }
+
   draw(camera, showPrompt = false) {
     const sx = this.x - camera.x;
     if (!gameSprites.drawChest(this, camera)) {
@@ -235,7 +252,7 @@ class TreasureChest {
 
   drawPrompt(camera) {
     const sx = this.x - camera.x;
-    const offsetY = this.kind === "fieldBoss" ? -112 : -72;
+    const offsetY = this.kind === "fieldBoss" || this.kind === "castleBoss" ? -112 : -72;
     const sy = this.y - camera.y + offsetY + Math.sin(this.life * 5) * 2;
     ctx.save();
     ctx.font = "700 13px Trebuchet MS, Verdana, sans-serif";
@@ -376,6 +393,54 @@ class EnemyProjectile {
     ctx.fillStyle = "#8b7354";
     ctx.fillRect(-10, -4, 4, 2);
     ctx.fillRect(-10, 2, 4, 2);
+    ctx.restore();
+  }
+}
+
+class NecroSpellZone {
+  constructor(x, y, radius, damage, warningTime, burstTime) {
+    this.x = x;
+    this.y = y;
+    this.radius = radius;
+    this.damage = damage;
+    this.warningTime = warningTime;
+    this.burstTime = burstTime;
+    this.life = 0;
+    this.dead = false;
+    this.damaged = false;
+  }
+
+  update(dt, game) {
+    this.life += dt;
+    if (!this.damaged && this.life >= this.warningTime) {
+      this.damaged = true;
+      const player = game.player;
+      if (!game.playerInTavern() && Math.hypot(player.x - this.x, player.y - this.y) <= this.radius) {
+        player.takeDamage(this.damage);
+        game.audio.play("hurt");
+        game.floaters.push(new FloatingText(`-${this.damage}`, player.x, player.y - 24, "#c884ff", { size: 18 }));
+      }
+    }
+    if (this.life >= this.warningTime + this.burstTime) this.dead = true;
+  }
+
+  frameIndex() {
+    if (this.life < this.warningTime * 0.5) return 0;
+    if (this.life < this.warningTime) return 1;
+    return 2;
+  }
+
+  draw(camera) {
+    if (gameSprites.drawNecroSpell(this, camera)) return;
+    const sx = this.x - camera.x;
+    const sy = this.y - camera.y;
+    ctx.save();
+    ctx.globalAlpha = this.life < this.warningTime ? 0.42 : 0.72;
+    ctx.strokeStyle = this.life < this.warningTime ? "#b88cff" : "#d65cff";
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.ellipse(sx, sy, this.radius, this.radius * 0.58, 0, 0, Math.PI * 2);
+    ctx.stroke();
     ctx.restore();
   }
 }

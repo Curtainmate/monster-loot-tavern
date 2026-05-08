@@ -23,6 +23,7 @@
     this.powerups = [];
     this.chests = [];
     this.projectiles = [];
+    this.necroSpells = [];
     this.floaters = [];
     this.attackEffects = [];
     this.spawnTimer = 1;
@@ -36,6 +37,9 @@
     this.fieldBossDefeated = false;
     this.fieldBossActive = false;
     this.fieldBossRewardPending = false;
+    this.castleBossDefeated = false;
+    this.castleBossActive = false;
+    this.castleBossRewardPending = false;
     this.stageTransitionTimer = 0;
     this.day = 1;
     this.lastContractId = null;
@@ -94,6 +98,8 @@
     for (const monster of this.monsters) monster.update(dt, this);
     for (const projectile of this.projectiles) projectile.update(dt, this);
     this.projectiles = this.projectiles.filter((projectile) => !projectile.dead);
+    for (const spell of this.necroSpells) spell.update(dt, this);
+    this.necroSpells = this.necroSpells.filter((spell) => !spell.dead);
     for (const item of this.loot) item.update(dt);
     for (const coin of this.coins) coin.update(dt);
     for (const itemDrop of this.itemDrops) itemDrop.update(dt);
@@ -162,9 +168,20 @@
     this.dangerProgress += amount;
     let unlocked = false;
     while (this.dangerProgress >= this.dangerProgressGoal()) {
-      if (this.stageGateBossRequired()) {
+      if (this.fieldStageGateBossRequired()) {
         this.dangerProgress = this.dangerProgressGoal();
         this.spawnFieldBoss();
+        return;
+      }
+      if (this.castleStageGateBossRequired()) {
+        this.dangerProgress = this.dangerProgressGoal();
+        this.spawnCastleBoss();
+        return;
+      }
+      if (this.maxDangerUnlocked >= CONFIG.castleBoss.gateStage) {
+        this.dangerProgress = this.dangerProgressGoal();
+        this.questNotice = "Castle boss defeated. Next zone is not ready yet.";
+        this.questNoticeTime = 3;
         return;
       }
       this.dangerProgress -= this.dangerProgressGoal();
@@ -191,6 +208,10 @@
   }
 
   stageGateBossRequired() {
+    return this.fieldStageGateBossRequired() || this.castleStageGateBossRequired();
+  }
+
+  fieldStageGateBossRequired() {
     return this.dangerLevel === CONFIG.fieldBoss.gateStage
       && this.maxDangerUnlocked === CONFIG.fieldBoss.gateStage
       && !this.fieldBossDefeated
@@ -198,9 +219,17 @@
       && this.stageTransitionTimer <= 0;
   }
 
+  castleStageGateBossRequired() {
+    return this.dangerLevel === CONFIG.castleBoss.gateStage
+      && this.maxDangerUnlocked === CONFIG.castleBoss.gateStage
+      && !this.castleBossDefeated
+      && !this.castleBossRewardPending
+      && this.stageTransitionTimer <= 0;
+  }
+
   stageGateBossActive() {
-    return this.stageGateBossRequired()
-      && (this.fieldBossActive || this.dangerProgress >= this.dangerProgressGoal());
+    return (this.fieldStageGateBossRequired() && (this.fieldBossActive || this.dangerProgress >= this.dangerProgressGoal()))
+      || (this.castleStageGateBossRequired() && (this.castleBossActive || this.dangerProgress >= this.dangerProgressGoal()));
   }
 
   openShop() {
@@ -219,6 +248,7 @@
       chest.open(this);
       this.recordContractProgress("chests", 1);
       if (chest.kind === "fieldBoss") this.startCastleTransition();
+      if (chest.kind === "castleBoss") this.castleBossRewardPending = false;
       this.chests = this.chests.filter((candidate) => candidate !== chest);
       return;
     }
@@ -269,14 +299,17 @@
   }
 
   cheatJumpToStage(stage) {
-    const targetStage = clamp(stage, 1, CONFIG.fieldBoss.gateStage);
+    const targetStage = clamp(stage, 1, CONFIG.castleBoss.gateStage);
     this.maxDangerUnlocked = Math.max(this.maxDangerUnlocked, targetStage);
     this.dangerLevel = targetStage;
     this.dangerProgress = 0;
     this.fieldBossActive = false;
     this.fieldBossRewardPending = false;
+    this.castleBossActive = false;
+    this.castleBossRewardPending = false;
     this.stageTransitionTimer = 0;
-    this.monsters = this.monsters.filter((monster) => !monster.isFieldBoss);
+    this.monsters = this.monsters.filter((monster) => !monster.isFieldBoss && !monster.isCastleBoss);
+    this.necroSpells = [];
     this.spawnTimer = Math.min(this.spawnTimer, this.currentStageRule().spawnInterval);
     this.questNotice = `Test: Stage ${targetStage} opened.`;
     this.questNoticeTime = 2;
@@ -298,8 +331,11 @@
     this.fieldBossDefeated = true;
     this.fieldBossActive = false;
     this.fieldBossRewardPending = false;
+    this.castleBossActive = false;
+    this.castleBossRewardPending = false;
     this.stageTransitionTimer = 0;
-    this.monsters = this.monsters.filter((monster) => !monster.isFieldBoss);
+    this.monsters = this.monsters.filter((monster) => !monster.isFieldBoss && !monster.isCastleBoss);
+    this.necroSpells = [];
     this.maxDangerUnlocked = Math.max(this.maxDangerUnlocked, CONFIG.fieldBoss.unlockStage);
     this.dangerLevel = CONFIG.fieldBoss.unlockStage;
     this.dangerProgress = 0;
@@ -431,22 +467,43 @@
     this.audio.play("day");
   }
 
+  spawnCastleBoss() {
+    if (this.castleBossRewardPending || this.stageTransitionTimer > 0) return;
+    if (this.castleBossActive || this.monsters.some((monster) => monster.isCastleBoss)) {
+      this.questNotice = "Defeat the Castle Boss.";
+      this.questNoticeTime = 2;
+      return;
+    }
+    const point = this.randomFieldPoint(CONFIG.castleBoss.size, CONFIG.spawns.bossMinPlayerDistance);
+    const boss = new Necromancer(point.x, point.y);
+    this.monsters.push(boss);
+    this.castleBossActive = true;
+    this.questNotice = "Castle Boss appeared. Dodge the pentagrams.";
+    this.questNoticeTime = 4;
+    this.floaters.push(new FloatingText(`${boss.name} appears!`, boss.x, boss.y - 72, "#d9a6ff"));
+    this.audio.play("day");
+  }
+
   killMonster(monster) {
     this.monsters = this.monsters.filter((candidate) => candidate !== monster);
-    const monsterScore = monster.isFieldBoss ? 10 : CONFIG.monsters[monster.type].score;
+    const monsterScore = (monster.isFieldBoss || monster.isCastleBoss) ? 10 : CONFIG.monsters[monster.type].score;
     this.kills += monsterScore * (monster.isBoss ? 5 : 1);
     this.recordContractProgress("kills", monster.isBoss ? 3 : 1);
     if (monster.variantData) this.recordContractProgress("tier2Kills", 1);
-    if (monster.isBoss && !monster.isFieldBoss) this.recordContractProgress("minibossKills", 1);
+    if (monster.isBoss && !monster.isFieldBoss && !monster.isCastleBoss) this.recordContractProgress("minibossKills", 1);
     if (this.player.momentumDuration > 0) {
       this.player.momentumLeft = this.player.momentumDuration;
     }
-    if (!monster.isFieldBoss) {
+    if (!monster.isFieldBoss && !monster.isCastleBoss) {
       this.addDangerProgress(monster.isBoss ? CONFIG.dangerProgress.bossKill : CONFIG.dangerProgress.normalKill, "stage progress");
     }
     if (monster.isFieldBoss) {
       this.recordContractProgress("fieldBossKills", 1);
       this.defeatFieldBoss(monster);
+      return;
+    }
+    if (monster.isCastleBoss) {
+      this.defeatCastleBoss(monster);
       return;
     }
     this.dropMonsterGold(monster);
@@ -462,6 +519,7 @@
     this.monsters = [];
     this.chests = [];
     this.projectiles = [];
+    this.necroSpells = [];
     this.powerups = [];
     this.spawnTimer = 999;
     this.bossTimer = 999;
@@ -471,6 +529,33 @@
     this.questNoticeTime = 4;
     this.floaters.push(new FloatingText("Field cleared!", monster.x, monster.y - 72, "#ffe18a"));
     this.audio.play("day");
+  }
+
+  defeatCastleBoss(monster) {
+    this.castleBossActive = false;
+    this.castleBossDefeated = true;
+    this.castleBossRewardPending = true;
+    this.monsters = [];
+    this.chests = [];
+    this.projectiles = [];
+    this.necroSpells = [];
+    this.powerups = [];
+    this.spawnTimer = 999;
+    this.bossTimer = 999;
+    this.chestTimer = 999;
+    this.spawnCastleBossChest(monster.x, monster.y);
+    this.questNotice = "Necromancer defeated! Claim the cursed chest.";
+    this.questNoticeTime = 4;
+    this.floaters.push(new FloatingText("Castle cleared!", monster.x, monster.y - 72, "#d9a6ff"));
+    this.audio.play("day");
+  }
+
+  spawnCastleBossChest(x, y) {
+    const chestX = clamp(x, CONFIG.field.x + 70, CONFIG.field.x + CONFIG.field.width - 70);
+    const chestY = clamp(y, CONFIG.field.y + 70, CONFIG.field.y + CONFIG.field.height - 70);
+    this.chests = this.chests.filter((chest) => chest.kind !== "castleBoss");
+    this.chests.push(new TreasureChest(chestX, chestY, this.dangerLevel, "castleBoss"));
+    this.floaters.push(new FloatingText("Cursed Chest", chestX, chestY - 54, "#d9a6ff", { size: 18 }));
   }
 
   spawnFieldBossChest(x, y) {
@@ -506,6 +591,7 @@
     this.chests = [];
     this.powerups = [];
     this.projectiles = [];
+    this.necroSpells = [];
     this.attackEffects = [];
     this.spawnTimer = 1.2;
     this.chestTimer = this.randomRange(CONFIG.chests.minDelay, CONFIG.chests.maxDelay);
@@ -517,8 +603,22 @@
     this.ui.renderShop();
   }
 
+  cheatSpawnCastleBoss() {
+    this.fieldBossDefeated = true;
+    this.fieldBossRewardPending = false;
+    this.castleBossDefeated = false;
+    this.castleBossRewardPending = false;
+    this.stageTransitionTimer = 0;
+    this.necroSpells = [];
+    this.maxDangerUnlocked = Math.max(this.maxDangerUnlocked, CONFIG.castleBoss.gateStage);
+    this.dangerLevel = CONFIG.castleBoss.gateStage;
+    this.dangerProgress = this.dangerProgressGoal();
+    this.spawnCastleBoss();
+    this.ui.renderShop();
+  }
+
   spawningPaused() {
-    return this.fieldBossRewardPending || this.stageTransitionTimer > 0;
+    return this.fieldBossRewardPending || this.castleBossRewardPending || this.stageTransitionTimer > 0;
   }
 
   tryDropGeneratedItem(source, x, y, context = {}) {
@@ -676,6 +776,7 @@
     const contract = this.contract;
     if (this.stageTransitionTimer > 0) return `Entering Castle in ${Math.ceil(this.stageTransitionTimer)}...`;
     if (this.fieldBossRewardPending) return "Field Boss defeated: open the victory chest.";
+    if (this.castleBossRewardPending) return "Castle Boss defeated: open the cursed chest.";
     if (this.questNoticeTime > 0) return this.questNotice;
     if (!contract) return "";
     if (this.contractComplete()) return `Contract complete: return to the tavern for gold and ${contract.rewardRarity} gear.`;
@@ -716,6 +817,7 @@
     for (const coin of this.coins) coin.draw(this.camera);
     for (const itemDrop of this.itemDrops) itemDrop.draw(this.camera);
     for (const powerup of this.powerups) powerup.draw(this.camera);
+    for (const spell of this.necroSpells) spell.draw(this.camera);
     const promptedChest = this.nearbyChest();
     for (const chest of this.chests) chest.draw(this.camera, chest === promptedChest);
     for (const projectile of this.projectiles) projectile.draw(this.camera);

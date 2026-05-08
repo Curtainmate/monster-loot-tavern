@@ -63,6 +63,7 @@
     document.getElementById("cheatStage10Button").addEventListener("click", () => this.runCheat(() => game.cheatJumpToStage(10), "Stage 10 unlocked."));
     document.getElementById("cheatFieldBossButton").addEventListener("click", () => this.runCheat(() => game.cheatSpawnFieldBoss(), "Field Boss spawned."));
     document.getElementById("cheatCastleButton").addEventListener("click", () => this.runCheat(() => game.cheatUnlockCastle(), "Castle unlocked."));
+    document.getElementById("cheatCastleBossButton").addEventListener("click", () => this.runCheat(() => game.cheatSpawnCastleBoss(), "Castle Boss spawned."));
     document.getElementById("cheatGearButton").addEventListener("click", () => this.runCheat(() => game.cheatEquipTestGear(), "Test gear equipped."));
     this.masterVolumeSlider.addEventListener("input", () => {
       const volume = game.audio.setMasterVolume(Number(this.masterVolumeSlider.value) / 100);
@@ -137,7 +138,7 @@
     this.damageText.textContent = p.damage;
     const stageZone = this.game.currentStageZone();
     this.dangerText.textContent = this.game.stageGateBossActive()
-      ? `Stage ${this.game.dangerLevel} Field Boss`
+      ? `Stage ${this.game.dangerLevel} ${this.game.castleStageGateBossRequired() ? "Castle Boss" : "Field Boss"}`
       : this.game.canEarnDangerProgress()
       ? `Stage ${this.game.dangerLevel} ${stageZone.shortName} ${this.game.dangerProgress}/${this.game.dangerProgressGoal()}`
       : `Stage ${this.game.dangerLevel} ${stageZone.shortName} / Cap ${this.game.maxDangerUnlocked}`;
@@ -196,13 +197,13 @@
   }
 
   updateBossBar() {
-    const boss = this.game.monsters.find((monster) => monster.isFieldBoss);
+    const boss = this.game.monsters.find((monster) => monster.isFieldBoss || monster.isCastleBoss);
     const visible = Boolean(boss) && this.game.started && !this.game.gameOver;
     this.bossBar.classList.toggle("hidden", !visible);
     this.bossBar.setAttribute("aria-hidden", String(!visible));
     if (!visible) return;
     this.bossName.textContent = boss.name;
-    this.bossRole.textContent = "Field Boss";
+    this.bossRole.textContent = boss.isCastleBoss ? "Castle Boss" : "Field Boss";
     this.bossHealthBar.style.width = `${clamp((boss.health / boss.maxHealth) * 100, 0, 100)}%`;
   }
 

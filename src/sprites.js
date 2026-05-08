@@ -51,6 +51,8 @@
       skeleton_black: "assets/enemies/skeleton_black.png",
       skeleton_archer_black: "assets/enemies/skeleton_archer_black.png",
       gargoyle_moss: "assets/enemies/gargoyle_moss.png",
+      necromancer: "assets/enemies/necromancer.png",
+      necro_spell: "assets/enemies/necro_spell.png",
       warboss: "assets/warboss.png",
       loot: "assets/loot.png",
       powerups: "assets/powerups.png",
@@ -172,7 +174,7 @@
     const sx = monster.x - camera.x;
     const sy = monster.y - camera.y;
     const pose = this.directionalPose({ x: monster.lastMoveX, y: monster.lastMoveY }, Math.floor(monster.walkFrame) % 2 === 1, monster.hitFlash > 0);
-    const baseSize = { slime: 62, goblin: 78, wolf: 72, skeleton: 76, skeletonArcher: 76, gargoyle: 72 }[monster.type] || 74;
+    const baseSize = { slime: 62, goblin: 78, wolf: 72, skeleton: 76, skeletonArcher: 76, gargoyle: 72, necromancer: 92 }[monster.type] || 74;
     const drawSize = monster.isBoss ? baseSize * 1.55 : baseSize;
     const drawn = this.drawImageFrame(monster.spriteName, pose.frame, this.frameSize, this.frameSize, sx - drawSize / 2, sy - drawSize * 0.76, drawSize, drawSize, 0, pose.flip);
     if (drawn) {
@@ -273,8 +275,20 @@
     return this.drawImageFrame("powerups", frame, this.powerupFrameSize, this.powerupFrameSize, sx - 19, sy - 19, 38, 38);
   }
 
+  drawNecroSpell(spell, camera) {
+    const image = this.images.necro_spell;
+    const frameWidth = image ? image.width / 3 : 288;
+    const frameHeight = image ? image.height : 288;
+    const frame = spell.frameIndex();
+    const sx = spell.x - camera.x;
+    const sy = spell.y - camera.y;
+    const drawWidth = spell.radius * 2.45;
+    const drawHeight = spell.radius * 1.5;
+    return this.drawImageFrame("necro_spell", frame, frameWidth, frameHeight, sx - drawWidth / 2, sy - drawHeight / 2, drawWidth, drawHeight);
+  }
+
   drawChest(chest, camera) {
-    if (chest.kind === "fieldBoss") return this.drawBossChest(chest, camera);
+    if (chest.kind === "fieldBoss" || chest.kind === "castleBoss") return this.drawBossChest(chest, camera);
     const frame = chest.opened ? 3 : Math.floor(chest.life * 3) % 3;
     const sx = chest.x - camera.x;
     const sy = chest.y - camera.y + Math.sin(chest.life * 2.4) * 1.5;

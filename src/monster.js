@@ -227,6 +227,73 @@ class Warboss extends Monster {
   }
 }
 
+class Necromancer extends Monster {
+  constructor(x, y) {
+    super("necromancer", x, y, CONFIG.castleBoss.gateStage, true);
+    const stats = CONFIG.castleBoss;
+    this.name = stats.name;
+    this.spriteName = "necromancer";
+    this.isBoss = true;
+    this.isCastleBoss = true;
+    this.size = stats.size;
+    this.speed = stats.speed;
+    this.maxHealth = stats.health;
+    this.health = this.maxHealth;
+    this.damage = stats.damage;
+    this.attackCooldown = 1.1;
+    this.spellCooldown = 1.2;
+    this.bossTint = "#b66cff";
+  }
+
+  update(dt, game) {
+    this.hitFlash = Math.max(0, this.hitFlash - dt);
+    this.attackLeft = Math.max(0, this.attackLeft - dt);
+    this.spellCooldown = Math.max(0, this.spellCooldown - dt);
+    this.walkFrame += dt * (this.speed / 16);
+
+    const player = game.player;
+    if (!game.playerInTavern()) {
+      const toPlayer = normalize(player.x - this.x, player.y - this.y);
+      const playerDistance = distance(this, player);
+      this.lastMoveX = toPlayer.x;
+      this.lastMoveY = toPlayer.y;
+
+      if (playerDistance > CONFIG.castleBoss.preferredRange) {
+        game.moveEntity(this, toPlayer.x * this.speed * dt, toPlayer.y * this.speed * dt, CONFIG.field);
+      }
+
+      if (playerDistance <= CONFIG.castleBoss.castRange && this.spellCooldown <= 0) {
+        this.castSpell(game, player);
+      }
+    }
+
+    this.x = clamp(this.x, CONFIG.field.x + this.size / 2, CONFIG.field.x + CONFIG.field.width - this.size / 2);
+    this.y = clamp(this.y, CONFIG.field.y + this.size / 2, CONFIG.field.y + CONFIG.field.height - this.size / 2);
+
+    if (distance(this, player) < (this.size + player.size) / 2 && this.attackLeft <= 0 && !game.playerInTavern()) {
+      player.takeDamage(this.damage);
+      game.audio.play("hurt");
+      game.floaters.push(new FloatingText(`-${this.damage}`, player.x, player.y - 22, "#ff6657"));
+      this.attackLeft = this.attackCooldown;
+    }
+  }
+
+  castSpell(game, player) {
+    const x = clamp(player.x, CONFIG.field.x + CONFIG.castleBoss.spellRadius, CONFIG.field.x + CONFIG.field.width - CONFIG.castleBoss.spellRadius);
+    const y = clamp(player.y, CONFIG.field.y + CONFIG.castleBoss.spellRadius, CONFIG.field.y + CONFIG.field.height - CONFIG.castleBoss.spellRadius);
+    game.necroSpells.push(new NecroSpellZone(
+      x,
+      y,
+      CONFIG.castleBoss.spellRadius,
+      CONFIG.castleBoss.spellDamage,
+      CONFIG.castleBoss.spellWarningTime,
+      CONFIG.castleBoss.spellBurstTime
+    ));
+    game.floaters.push(new FloatingText("Dark ritual!", x, y - 62, "#d9a6ff"));
+    this.spellCooldown = CONFIG.castleBoss.spellCooldown;
+  }
+}
+
 function monsterZoneStats(stage) {
   let zone = CONFIG.stageZones[0];
   for (const candidate of CONFIG.stageZones) {
