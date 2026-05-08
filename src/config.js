@@ -104,49 +104,49 @@
       maxMonsters: 18,
       waveSize: [2, 3],
       spawnInterval: 1.05,
-      spawns: [{ type: "goblin", variant: "red", weight: 10 }, { type: "wolf", variant: "black", weight: 10 }, { type: "skeleton", weight: 42 }, { type: "skeletonArcher", weight: 20 }, { type: "gargoyle", weight: 18 }],
+      spawns: [{ type: "goblin", variant: "red", weight: 10 }, { type: "wolf", variant: "black", weight: 10 }, { type: "skeleton", weight: 34 }, { type: "skeleton", variant: "black", weight: 8 }, { type: "skeletonArcher", weight: 20 }, { type: "gargoyle", weight: 18 }],
       bosses: []
     },
     15: {
       maxMonsters: 19,
       waveSize: [2, 4],
       spawnInterval: 1,
-      spawns: [{ type: "skeleton", weight: 44 }, { type: "skeletonArcher", weight: 22 }, { type: "gargoyle", weight: 28 }, { type: "goblin", variant: "red", weight: 6 }],
+      spawns: [{ type: "skeleton", weight: 30 }, { type: "skeleton", variant: "black", weight: 14 }, { type: "skeletonArcher", weight: 18 }, { type: "skeletonArcher", variant: "black", weight: 4 }, { type: "gargoyle", weight: 28 }, { type: "goblin", variant: "red", weight: 6 }],
       bosses: []
     },
     16: {
       maxMonsters: 20,
       waveSize: [2, 4],
       spawnInterval: 0.96,
-      spawns: [{ type: "skeleton", weight: 38 }, { type: "skeletonArcher", weight: 28 }, { type: "gargoyle", weight: 34 }],
-      bosses: [{ type: "skeletonArcher", weight: 100 }]
+      spawns: [{ type: "skeleton", weight: 25 }, { type: "skeleton", variant: "black", weight: 13 }, { type: "skeletonArcher", weight: 22 }, { type: "skeletonArcher", variant: "black", weight: 6 }, { type: "gargoyle", weight: 26 }, { type: "gargoyle", variant: "moss", weight: 8 }],
+      bosses: [{ type: "skeletonArcher", variant: "black", weight: 100 }]
     },
     17: {
       maxMonsters: 21,
       waveSize: [2, 4],
       spawnInterval: 0.92,
-      spawns: [{ type: "skeleton", weight: 36 }, { type: "skeletonArcher", weight: 30 }, { type: "gargoyle", weight: 34 }],
+      spawns: [{ type: "skeleton", weight: 22 }, { type: "skeleton", variant: "black", weight: 14 }, { type: "skeletonArcher", weight: 20 }, { type: "skeletonArcher", variant: "black", weight: 10 }, { type: "gargoyle", weight: 24 }, { type: "gargoyle", variant: "moss", weight: 10 }],
       bosses: []
     },
     18: {
       maxMonsters: 22,
       waveSize: [3, 4],
       spawnInterval: 0.88,
-      spawns: [{ type: "skeleton", weight: 34 }, { type: "skeletonArcher", weight: 30 }, { type: "gargoyle", weight: 36 }],
+      spawns: [{ type: "skeleton", weight: 18 }, { type: "skeleton", variant: "black", weight: 16 }, { type: "skeletonArcher", weight: 18 }, { type: "skeletonArcher", variant: "black", weight: 12 }, { type: "gargoyle", weight: 22 }, { type: "gargoyle", variant: "moss", weight: 14 }],
       bosses: []
     },
     19: {
       maxMonsters: 23,
       waveSize: [3, 4],
       spawnInterval: 0.84,
-      spawns: [{ type: "skeleton", weight: 32 }, { type: "skeletonArcher", weight: 32 }, { type: "gargoyle", weight: 36 }],
-      bosses: [{ type: "gargoyle", weight: 100 }]
+      spawns: [{ type: "skeleton", weight: 14 }, { type: "skeleton", variant: "black", weight: 18 }, { type: "skeletonArcher", weight: 16 }, { type: "skeletonArcher", variant: "black", weight: 16 }, { type: "gargoyle", weight: 18 }, { type: "gargoyle", variant: "moss", weight: 18 }],
+      bosses: [{ type: "gargoyle", variant: "moss", weight: 100 }]
     },
     20: {
       maxMonsters: 24,
       waveSize: [3, 5],
       spawnInterval: 0.8,
-      spawns: [{ type: "skeleton", weight: 32 }, { type: "skeletonArcher", weight: 34 }, { type: "gargoyle", weight: 34 }],
+      spawns: [{ type: "skeleton", weight: 10 }, { type: "skeleton", variant: "black", weight: 22 }, { type: "skeletonArcher", weight: 14 }, { type: "skeletonArcher", variant: "black", weight: 20 }, { type: "gargoyle", weight: 14 }, { type: "gargoyle", variant: "moss", weight: 20 }],
       bosses: []
     }
   },
@@ -375,6 +375,48 @@
         attackCooldown: 0.85,
         extraLoot: [["Monster Fang", 0.32], ["Wolf Pelt", 0.36]],
         bonusLootChance: 0.34
+      },
+      skeleton: {
+        id: "black",
+        name: "Black Skeleton",
+        bossTitle: "Black Skeleton Captain",
+        sprite: "skeleton_black",
+        color: "#4f525d",
+        tint: "#8d91a0",
+        health: 1.4,
+        damage: 1.2,
+        speed: 1,
+        attackCooldown: 0.96,
+        extraLoot: [["Monster Fang", 0.34], ["Rusty Dagger", 0.32]],
+        bonusLootChance: 0.36
+      },
+      skeletonArcher: {
+        id: "black",
+        name: "Black Skeleton Archer",
+        bossTitle: "Black Bone Marksman",
+        sprite: "skeleton_archer_black",
+        color: "#4b4e58",
+        tint: "#8d91a0",
+        health: 1.25,
+        damage: 1.2,
+        speed: 1,
+        attackCooldown: 0.9,
+        extraLoot: [["Monster Fang", 0.36], ["Rusty Dagger", 0.28]],
+        bonusLootChance: 0.36
+      },
+      gargoyle: {
+        id: "moss",
+        name: "Moss Gargoyle",
+        bossTitle: "Moss Stone Gargoyle",
+        sprite: "gargoyle_moss",
+        color: "#62aa60",
+        tint: "#8fdd78",
+        health: 1.3,
+        damage: 1.15,
+        speed: 1.08,
+        attackCooldown: 0.92,
+        extraLoot: [["Monster Fang", 0.42]],
+        bonusLootChance: 0.38
       }
     }
   },
