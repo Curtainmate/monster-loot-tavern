@@ -328,6 +328,58 @@ class Projectile {
   }
 }
 
+class EnemyProjectile {
+  constructor(x, y, direction, damage, speed, range, size = 9) {
+    this.x = x;
+    this.y = y;
+    this.startX = x;
+    this.startY = y;
+    this.dir = { ...direction };
+    this.damage = damage;
+    this.speed = speed;
+    this.range = range;
+    this.size = size;
+    this.dead = false;
+  }
+
+  update(dt, game) {
+    this.x += this.dir.x * this.speed * dt;
+    this.y += this.dir.y * this.speed * dt;
+    if (
+      Math.hypot(this.x - this.startX, this.y - this.startY) > this.range
+      || !rectContains(CONFIG.field, this.x, this.y)
+    ) {
+      this.dead = true;
+      return;
+    }
+
+    const player = game.player;
+    if (!game.playerInTavern() && Math.hypot(player.x - this.x, player.y - this.y) <= player.size / 2 + this.size / 2) {
+      player.takeDamage(this.damage);
+      game.audio.play("hurt");
+      game.floaters.push(new FloatingText(`-${this.damage}`, player.x, player.y - 22, "#ff6657"));
+      this.dead = true;
+    }
+  }
+
+  draw(camera) {
+    const sx = this.x - camera.x;
+    const sy = this.y - camera.y;
+    const angle = Math.atan2(this.dir.y, this.dir.x);
+    ctx.save();
+    ctx.translate(sx, sy);
+    ctx.rotate(angle);
+    ctx.fillStyle = "#2a1b12";
+    ctx.fillRect(-8, -2, 15, 4);
+    ctx.fillStyle = "#cfc6aa";
+    ctx.fillRect(5, -3, 5, 6);
+    ctx.fillStyle = "#8b7354";
+    ctx.fillRect(-10, -4, 4, 2);
+    ctx.fillRect(-10, 2, 4, 2);
+    ctx.restore();
+  }
+}
+
 class FloatingText {
   constructor(text, x, y, color, options = {}) {
     this.text = text;

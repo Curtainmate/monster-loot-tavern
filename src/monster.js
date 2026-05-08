@@ -19,6 +19,7 @@
     this.damage = Math.round(stats.damage * zoneStats.damage * (bossStats ? bossStats.damage : 1) * (variantStats ? variantStats.damage : 1));
     this.attackCooldown = stats.attackCooldown * (isBoss ? 1.12 : 1) * (variantStats ? variantStats.attackCooldown : 1);
     this.attackLeft = Math.random() * 0.4;
+    this.ranged = stats.ranged || null;
     this.color = variantStats ? variantStats.color : stats.color;
     this.bossTint = variantStats ? variantStats.tint : (bossStats ? bossStats.tint : null);
     this.hitFlash = 0;
@@ -40,10 +41,14 @@
     const player = game.player;
     const inField = rectContains(CONFIG.field, this.x, this.y);
     if (!game.playerInTavern() && inField) {
-      const move = normalize(player.x - this.x, player.y - this.y);
-      game.moveEntity(this, move.x * this.speed * dt, move.y * this.speed * dt, CONFIG.field);
-      this.lastMoveX = move.x;
-      this.lastMoveY = move.y;
+      if (this.ranged) {
+        this.updateRanged(dt, game, player);
+      } else {
+        const move = normalize(player.x - this.x, player.y - this.y);
+        game.moveEntity(this, move.x * this.speed * dt, move.y * this.speed * dt, CONFIG.field);
+        this.lastMoveX = move.x;
+        this.lastMoveY = move.y;
+      }
     }
 
     this.x = clamp(this.x, CONFIG.field.x + this.size / 2, CONFIG.field.x + CONFIG.field.width - this.size / 2);
@@ -53,6 +58,40 @@
       player.takeDamage(this.damage);
       game.audio.play("hurt");
       game.floaters.push(new FloatingText(`-${this.damage}`, player.x, player.y - 22, "#ff6657"));
+      this.attackLeft = this.attackCooldown;
+    }
+  }
+
+  updateRanged(dt, game, player) {
+    const toPlayer = normalize(player.x - this.x, player.y - this.y);
+    const playerDistance = distance(this, player);
+    this.lastMoveX = toPlayer.x;
+    this.lastMoveY = toPlayer.y;
+
+    if (playerDistance > this.ranged.range) {
+      game.moveEntity(this, toPlayer.x * this.speed * dt, toPlayer.y * this.speed * dt, CONFIG.field);
+      return;
+    }
+
+    if (this.attackLeft <= 0) {
+      game.projectiles.push(new EnemyProjectile(
+        this.x + toPlayer.x * 22,
+        this.y + toPlayer.y * 22,
+        toPlayer,
+        this.damage,
+        this.ranged.projectileSpeed,
+        this.ranged.range + 90,
+        this.ranged.projectileSize
+      ));
+      game.attackEffects.push({
+        x: this.x + toPlayer.x * 26,
+        y: this.y + toPlayer.y * 26,
+        dir: { ...toPlayer },
+        life: 0.12,
+        maxLife: 0.12,
+        radius: 24,
+        type: "enemyRanged"
+      });
       this.attackLeft = this.attackCooldown;
     }
   }

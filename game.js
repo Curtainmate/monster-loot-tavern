@@ -731,17 +731,18 @@
     for (const effect of this.attackEffects) {
       const alpha = effect.life / effect.maxLife;
       ctx.globalAlpha = alpha;
-      const px = (effect.type === "impact" || effect.type === "ranged" ? effect.x : this.player.x) - this.camera.x;
-      const py = (effect.type === "impact" || effect.type === "ranged" ? effect.y : this.player.y) - this.camera.y;
+      const fixedPosition = effect.type === "impact" || effect.type === "ranged" || effect.type === "enemyRanged";
+      const px = (fixedPosition ? effect.x : this.player.x) - this.camera.x;
+      const py = (fixedPosition ? effect.y : this.player.y) - this.camera.y;
       const angle = Math.atan2(effect.dir.y, effect.dir.x);
       ctx.fillStyle = effect.type === "impact" ? "rgba(255, 246, 186, 0.7)" : "rgba(255, 230, 161, 0.58)";
-      ctx.strokeStyle = effect.type === "impact" ? "#f5d279" : "#fff1a8";
+      ctx.strokeStyle = effect.type === "enemyRanged" ? "#d6c8a2" : (effect.type === "impact" ? "#f5d279" : "#fff1a8");
       ctx.lineWidth = 4;
       ctx.beginPath();
       if (effect.type === "impact") {
         ctx.arc(px, py, effect.radius, 0, Math.PI * 2);
         ctx.fill();
-      } else if (effect.type === "ranged") {
+      } else if (effect.type === "ranged" || effect.type === "enemyRanged") {
         ctx.moveTo(px - effect.dir.x * 8, py - effect.dir.y * 8);
         ctx.lineTo(px + effect.dir.x * effect.radius, py + effect.dir.y * effect.radius);
         ctx.stroke();

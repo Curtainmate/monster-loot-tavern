@@ -45,6 +45,9 @@
       goblin_red: "assets/goblin_red.png",
       wolf: "assets/wolf.png",
       wolf_black: "assets/wolf_black.png",
+      skeleton: "assets/enemies/skeleton.png",
+      skeletonArcher: "assets/enemies/skeleton_archer.png",
+      gargoyle: "assets/enemies/gargoyle.png",
       warboss: "assets/warboss.png",
       loot: "assets/loot.png",
       powerups: "assets/powerups.png",
@@ -166,7 +169,7 @@
     const sx = monster.x - camera.x;
     const sy = monster.y - camera.y;
     const pose = this.directionalPose({ x: monster.lastMoveX, y: monster.lastMoveY }, Math.floor(monster.walkFrame) % 2 === 1, monster.hitFlash > 0);
-    const baseSize = { slime: 62, goblin: 78, wolf: 72 }[monster.type] || 74;
+    const baseSize = { slime: 62, goblin: 78, wolf: 72, skeleton: 76, skeletonArcher: 76, gargoyle: 72 }[monster.type] || 74;
     const drawSize = monster.isBoss ? baseSize * 1.55 : baseSize;
     const drawn = this.drawImageFrame(monster.spriteName, pose.frame, this.frameSize, this.frameSize, sx - drawSize / 2, sy - drawSize * 0.76, drawSize, drawSize, 0, pose.flip);
     if (drawn) {

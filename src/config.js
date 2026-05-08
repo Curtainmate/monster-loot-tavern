@@ -78,6 +78,76 @@
       spawnInterval: 1.2,
       spawns: [{ type: "slime", weight: 15 }, { type: "slime", variant: "yellow", weight: 25 }, { type: "goblin", weight: 15 }, { type: "goblin", variant: "red", weight: 20 }, { type: "wolf", weight: 10 }, { type: "wolf", variant: "black", weight: 15 }],
       bosses: []
+    },
+    11: {
+      maxMonsters: 15,
+      waveSize: [2, 3],
+      spawnInterval: 1.18,
+      spawns: [{ type: "goblin", variant: "red", weight: 25 }, { type: "wolf", variant: "black", weight: 20 }, { type: "skeleton", weight: 55 }],
+      bosses: []
+    },
+    12: {
+      maxMonsters: 16,
+      waveSize: [2, 3],
+      spawnInterval: 1.15,
+      spawns: [{ type: "goblin", variant: "red", weight: 18 }, { type: "wolf", variant: "black", weight: 16 }, { type: "skeleton", weight: 50 }, { type: "skeletonArcher", weight: 16 }],
+      bosses: []
+    },
+    13: {
+      maxMonsters: 17,
+      waveSize: [2, 3],
+      spawnInterval: 1.1,
+      spawns: [{ type: "goblin", variant: "red", weight: 12 }, { type: "wolf", variant: "black", weight: 12 }, { type: "skeleton", weight: 48 }, { type: "skeletonArcher", weight: 16 }, { type: "gargoyle", weight: 12 }],
+      bosses: [{ type: "skeleton", weight: 100 }]
+    },
+    14: {
+      maxMonsters: 18,
+      waveSize: [2, 3],
+      spawnInterval: 1.05,
+      spawns: [{ type: "goblin", variant: "red", weight: 10 }, { type: "wolf", variant: "black", weight: 10 }, { type: "skeleton", weight: 42 }, { type: "skeletonArcher", weight: 20 }, { type: "gargoyle", weight: 18 }],
+      bosses: []
+    },
+    15: {
+      maxMonsters: 19,
+      waveSize: [2, 4],
+      spawnInterval: 1,
+      spawns: [{ type: "skeleton", weight: 44 }, { type: "skeletonArcher", weight: 22 }, { type: "gargoyle", weight: 28 }, { type: "goblin", variant: "red", weight: 6 }],
+      bosses: []
+    },
+    16: {
+      maxMonsters: 20,
+      waveSize: [2, 4],
+      spawnInterval: 0.96,
+      spawns: [{ type: "skeleton", weight: 38 }, { type: "skeletonArcher", weight: 28 }, { type: "gargoyle", weight: 34 }],
+      bosses: [{ type: "skeletonArcher", weight: 100 }]
+    },
+    17: {
+      maxMonsters: 21,
+      waveSize: [2, 4],
+      spawnInterval: 0.92,
+      spawns: [{ type: "skeleton", weight: 36 }, { type: "skeletonArcher", weight: 30 }, { type: "gargoyle", weight: 34 }],
+      bosses: []
+    },
+    18: {
+      maxMonsters: 22,
+      waveSize: [3, 4],
+      spawnInterval: 0.88,
+      spawns: [{ type: "skeleton", weight: 34 }, { type: "skeletonArcher", weight: 30 }, { type: "gargoyle", weight: 36 }],
+      bosses: []
+    },
+    19: {
+      maxMonsters: 23,
+      waveSize: [3, 4],
+      spawnInterval: 0.84,
+      spawns: [{ type: "skeleton", weight: 32 }, { type: "skeletonArcher", weight: 32 }, { type: "gargoyle", weight: 36 }],
+      bosses: [{ type: "gargoyle", weight: 100 }]
+    },
+    20: {
+      maxMonsters: 24,
+      waveSize: [3, 5],
+      spawnInterval: 0.8,
+      spawns: [{ type: "skeleton", weight: 32 }, { type: "skeletonArcher", weight: 34 }, { type: "gargoyle", weight: 34 }],
+      bosses: []
     }
   },
   scenery: {
@@ -255,7 +325,10 @@
     types: {
       slime: { title: "Giant Slime", health: 5.2, damage: 1.45, speed: 0.72, size: 52, tint: "#7aff8a" },
       goblin: { title: "Goblin Brute", health: 4.3, damage: 1.7, speed: 0.86, size: 54, tint: "#d1b05b" },
-      wolf: { title: "Alpha Wolf", health: 3.6, damage: 1.5, speed: 1.08, size: 50, tint: "#e6e0c8" }
+      wolf: { title: "Alpha Wolf", health: 3.6, damage: 1.5, speed: 1.08, size: 50, tint: "#e6e0c8" },
+      skeleton: { title: "Skeleton Captain", health: 4.1, damage: 1.55, speed: 0.9, size: 54, tint: "#e9dfbf" },
+      skeletonArcher: { title: "Bone Marksman", health: 3.6, damage: 1.45, speed: 0.88, size: 52, tint: "#d6c8a2" },
+      gargoyle: { title: "Stone Gargoyle", health: 3.8, damage: 1.45, speed: 1.08, size: 54, tint: "#aeb7b5" }
     }
   },
   monsterVariants: {
@@ -406,6 +479,43 @@
       attackCooldown: 0.7,
       score: 2,
       loot: [["Wolf Pelt", 0.72], ["Monster Fang", 0.22]]
+    },
+    skeleton: {
+      name: "Skeleton",
+      color: "#d8d0b7",
+      size: 28,
+      speed: 84,
+      health: 58,
+      damage: 15,
+      gold: 11,
+      attackCooldown: 0.82,
+      score: 3,
+      loot: [["Monster Fang", 0.28], ["Rusty Dagger", 0.24]]
+    },
+    skeletonArcher: {
+      name: "Skeleton Archer",
+      color: "#cec2a2",
+      size: 28,
+      speed: 72,
+      health: 46,
+      damage: 13,
+      gold: 12,
+      attackCooldown: 1.55,
+      score: 3,
+      ranged: { range: 430, projectileSpeed: 260, projectileSize: 9 },
+      loot: [["Monster Fang", 0.3], ["Rusty Dagger", 0.22]]
+    },
+    gargoyle: {
+      name: "Gargoyle",
+      color: "#8e9898",
+      size: 26,
+      speed: 136,
+      health: 48,
+      damage: 14,
+      gold: 13,
+      attackCooldown: 0.68,
+      score: 3,
+      loot: [["Monster Fang", 0.38]]
     }
   }
 };
