@@ -41,6 +41,7 @@
     this.castleBossActive = false;
     this.castleBossRewardPending = false;
     this.stageTransitionTimer = 0;
+    this.wasPlayerInTavern = true;
     this.day = 1;
     this.lastContractId = null;
     this.contract = this.createContract();
@@ -94,6 +95,11 @@
     mouse.worldY = mouse.y + this.camera.y;
 
     this.player.update(dt, this);
+    const playerIsInTavern = this.playerInTavern();
+    if (!this.wasPlayerInTavern && playerIsInTavern) {
+      this.handlePlayerEnteredTavern();
+    }
+    this.wasPlayerInTavern = playerIsInTavern;
     if (mouse.down) this.player.attack(this);
     for (const monster of this.monsters) monster.update(dt, this);
     for (const projectile of this.projectiles) projectile.update(dt, this);
@@ -621,6 +627,35 @@
     return this.fieldBossRewardPending || this.castleBossRewardPending || this.stageTransitionTimer > 0;
   }
 
+  handlePlayerEnteredTavern() {
+    const majorBosses = this.monsters.filter((monster) => monster.isFieldBoss || monster.isCastleBoss);
+    if (!majorBosses.length) return;
+    for (const boss of majorBosses) {
+      this.retreatBossToField(boss);
+    }
+    this.necroSpells = [];
+    this.questNotice = "Boss retreated back into the field.";
+    this.questNoticeTime = 2.5;
+  }
+
+  retreatBossToField(boss) {
+    const field = CONFIG.field;
+    boss.x = clamp(field.x + field.width * 0.55, field.x + boss.size / 2, field.x + field.width - boss.size / 2);
+    boss.y = clamp(field.y + field.height * 0.5, field.y + boss.size / 2, field.y + field.height - boss.size / 2);
+    boss.lastMoveX = -1;
+    boss.lastMoveY = 0;
+    boss.attackLeft = Math.max(boss.attackLeft || 0, 0.8);
+    if (boss.isFieldBoss && typeof boss.setState === "function") {
+      boss.setState("chase");
+      boss.chargeDistanceLeft = 0;
+      boss.chargeCooldown = Math.max(boss.chargeCooldown || 0, 1.2);
+      boss.hasHitThisCharge = false;
+    }
+    if (boss.isCastleBoss) {
+      boss.spellCooldown = Math.max(boss.spellCooldown || 0, 1.5);
+    }
+  }
+
   tryDropGeneratedItem(source, x, y, context = {}) {
     if (!ItemSystem.rollItemDropChance(source, { ...context, itemFind: this.player.itemFind })) return null;
     const item = ItemSystem.generateItem({
@@ -803,7 +838,7 @@
     this.questNotice = `${completedLabel} complete: +${contract.rewardGold} gold and ${rewardItem.name}.`;
     this.questNoticeTime = 4;
     this.player.health = Math.min(this.player.maxHealth, this.player.health + 35);
-    this.monsters = this.monsters.filter((monster) => distance(monster, this.player) > 420);
+    this.monsters = this.monsters.filter((monster) => monster.isFieldBoss || monster.isCastleBoss || distance(monster, this.player) > 420);
     this.audio.play("day");
     this.addDangerProgress(CONFIG.dangerProgress.questComplete, "stage progress");
     if (this.inventoryOpen) this.ui.renderInventory();
